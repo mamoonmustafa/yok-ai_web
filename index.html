@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yok-AI | Coming Soon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #0071e3;
+            --dark: #000000;
+            --light: #f5f5f7;
+            --accent: #86cffa;
+            --text: #1d1d1f;
+            --text-secondary: #86868b;
+            --gradient: linear-gradient(135deg, #42a0fe, #0071e3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #0a0a12 0%, #000000 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(66, 160, 254, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 45, 85, 0.1) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .logo-dot {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #42a0fe, #0071e3);
+            border-radius: 50%;
+            left: -15px;
+            top: -5px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(8px);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.3); opacity: 0.15; }
+            100% { transform: scale(1); opacity: 0.3; }
+        }
+
+        .coming-soon {
+            font-size: 72px;
+            font-weight: 700;
+            margin: 20px 0;
+            background: linear-gradient(90deg, #fff, #f5f5f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+
+        .coming-soon span {
+            position: relative;
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s forwards;
+        }
+
+        .coming-soon span:nth-child(1) { animation-delay: 0.1s; }
+        .coming-soon span:nth-child(2) { animation-delay: 0.2s; }
+        .coming-soon span:nth-child(3) { animation-delay: 0.3s; }
+        .coming-soon span:nth-child(4) { animation-delay: 0.4s; }
+        .coming-soon span:nth-child(5) { animation-delay: 0.5s; }
+        .coming-soon span:nth-child(6) { animation-delay: 0.6s; }
+        .coming-soon span:nth-child(7) { animation-delay: 0.7s; }
+        .coming-soon span:nth-child(8) { animation-delay: 0.8s; }
+        .coming-soon span:nth-child(9) { animation-delay: 0.9s; }
+        .coming-soon span:nth-child(10) { animation-delay: 1.0s; }
+        .coming-soon span:nth-child(11) { animation-delay: 1.1s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tagline {
+            font-size: 21px;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+            opacity: 0;
+            animation: fadeIn 1s forwards 1.2s;
+        }
+
+        .tagline::before {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(0,0,0,0), var(--primary), rgba(0,0,0,0));
+            bottom: -10px;
+            left: -10%;
+        }
+
+        .description {
+            font-size: 20px;
+            color: #86868b;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeIn 1s forwards 1.4s;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            margin: 50px 0;
+            gap: 20px;
+            opacity: 0;
+            animation: fadeIn 1s forwards 1.6s;
+        }
+
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .countdown-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .countdown-label {
+            font-size: 14px;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .email-form {
+            margin-top: 40px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0;
+            animation: fadeIn 1s forwards 1.8s;
+        }
+
+        .form-heading {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .input-group {
+            display: flex;
+            border-radius: 980px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .email-input {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .email-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .email-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0 30px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #4aa5ff, #0077ed);
+            transform: translateY(-2px);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 50px;
+            opacity: 0;
+            animation: fadeIn 1s forwards 2s;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .social-link:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .holographic {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .holographic::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.05) 30%,
+                rgba(255, 255, 255, 0.1) 40%,
+                transparent 50%
+            );
+            transform: rotate(30deg);
+            animation: hologram 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes hologram {
+            0% {
+                transform: rotate(30deg) translateX(-100%);
+            }
+            100% {
+                transform: rotate(30deg) translateX(100%);
+            }
+        }
+
+        .illustration {
+            margin: 40px auto;
+            width: 300px;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            position: relative;
+            opacity: 0;
+            animation: fadeIn 1s forwards 1.5s;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--gradient);
+            opacity: 0.15;
+            filter: blur(20px);
+        }
+
+        .circle-1 {
+            width: 200px;
+            height: 200px;
+            top: 50px;
+            left: 50px;
+            animation: pulse1 4s infinite alternate;
+        }
+
+        .circle-2 {
+            width: 100px;
+            height: 100px;
+            top: 100px;
+            left: 100px;
+            animation: pulse2 5s infinite alternate;
+            background: linear-gradient(135deg, #ff375f, #ff2d55);
+        }
+
+        .circle-3 {
+            width: 60px;
+            height: 60px;
+            top: 120px;
+            left: 120px;
+            animation: pulse3 3s infinite alternate;
+        }
+
+        @keyframes pulse1 {
+            0% { transform: scale(1); opacity: 0.15; }
+            100% { transform: scale(1.2); opacity: 0.1; }
+        }
+
+        @keyframes pulse2 {
+            0% { transform: scale(1); opacity: 0.1; }
+            100% { transform: scale(1.5); opacity: 0.15; }
+        }
+
+        @keyframes pulse3 {
+            0% { transform: scale(1); opacity: 0.2; }
+            100% { transform: scale(1.8); opacity: 0.1; }
+        }
+
+        @media screen and (max-width: 768px) {
+            .coming-soon {
+                font-size: 48px;
+            }
+            
+            .description {
+                font-size: 18px;
+            }
+            
+            .countdown {
+                flex-wrap: wrap;
+            }
+            
+            .countdown-item {
+                min-width: 80px;
+                padding: 15px;
+            }
+            
+            .countdown-number {
+                font-size: 28px;
+            }
+            
+            .countdown-label {
+                font-size: 12px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .coming-soon {
+                font-size: 36px;
+            }
+            
+            .tagline {
+                font-size: 18px;
+            }
+            
+            .description {
+                font-size: 16px;
+            }
+            
+            .countdown-item {
+                min-width: 70px;
+                padding: 10px;
+            }
+            
+            .countdown-number {
+                font-size: 24px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                border-radius: 12px;
+            }
+            
+            .email-input {
+                border-radius: 12px 12px 0 0;
+                padding: 15px;
+            }
+            
+            .submit-btn {
+                width: 100%;
+                padding: 15px;
+                border-radius: 0 0 12px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">Yok<span class="logo-dot">-AI</span></div>
+        
+        <h1 class="coming-soon">
+            <span>C</span><span>o</span><span>m</span><span>i</span><span>n</span><span>g</span>
+            <span> </span>
+            <span>S</span><span>o</span><span>o</span><span>n</span>
+        </h1>
+        
+        <p class="tagline">The Private AI Assistant</p>
+        
+        <p class="description">The invisible intelligence that enhances your professional performance while maintaining complete privacy. We're putting the finishing touches on something extraordinary.</p>
+        
+        <div class="illustration floating holographic">
+            <div class="circle circle-1"></div>
+            <div class="circle circle-2"></div>
+            <div class="circle circle-3"></div>
+        </div>
+        
+        <div class="countdown">
+            <div class="countdown-item">
+                <div class="countdown-number" id="days">28</div>
+                <div class="countdown-label">Days</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="hours">14</div>
+                <div class="countdown-label">Hours</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="minutes">36</div>
+                <div class="countdown-label">Minutes</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="seconds">42</div>
+                <div class="countdown-label">Seconds</div>
+            </div>
+        </div>
+        
+        <div class="email-form">
+            <p class="form-heading">Be the first to know when we launch</p>
+            <div class="input-group">
+                <input type="email" class="email-input" placeholder="Enter your email address">
+                <button class="submit-btn">Notify Me</button>
+            </div>
+        </div>
+        
+        <div class="social-links">
+            <a href="#" class="social-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+                </svg>
+            </a>
+            <a href="#" class="social-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                    <rect x="2" y="9" width="4" height="12"></rect>
+                    <circle cx="4" cy="4" r="2"></circle>
+                </svg>
+            </a>
+            <a href="#" class="social-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg>
+            </a>
+            <a href="#" class="social-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Countdown to a date 30 days from now
+        const launchDate = new Date();
+        launchDate.setDate(launchDate.getDate() + 30);
+        
+        function updateCountdown() {
+            const now = new Date();
+            const difference = launchDate - now;
+            
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').innerText = days < 10 ? `0${days}` : days;
+            document.getElementById('hours').innerText = hours < 10 ? `0${hours}` : hours;
+            document.getElementById('minutes').innerText = minutes < 10 ? `0${minutes}` : minutes;
+            document.getElementById('seconds').innerText = seconds < 10 ? `0${seconds}` : seconds;
+        }
+        
+        // Initialize countdown
+        updateCountdown();
+        
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        
+        // Form submission (just prevent default for now)
+        document.querySelector('.submit-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            const email = document.querySelector('.email-input').value;
+            if (email) {
+                alert('Thank you! We\'ll notify you when we launch.');
+                document.querySelector('.email-input').value = '';
+            } else {
+                alert('Please enter a valid email address.');
+            }
+        });
+    </script>
+</body>
+</html>
