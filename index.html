@@ -27,12 +27,15 @@
         body {
             background: radial-gradient(circle at center, #0a0a12 0%, #000000 100%);
             color: white;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow-x: hidden;
             position: relative;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body::before {
@@ -54,6 +57,8 @@
             position: relative;
             z-index: 1;
             text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
         }
 
         .logo {
@@ -330,9 +335,9 @@
         }
 
         .illustration {
-            margin: 40px auto;
-            width: 300px;
-            height: 300px;
+            margin: 30px auto;
+            width: 220px;
+            height: 220px;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 50%;
             position: relative;
@@ -391,14 +396,17 @@
         @media screen and (max-width: 768px) {
             .coming-soon {
                 font-size: 48px;
+                margin: 15px 0;
             }
             
             .description {
                 font-size: 18px;
+                margin-bottom: 20px;
             }
             
             .countdown {
                 flex-wrap: wrap;
+                margin: 30px 0;
             }
             
             .countdown-item {
@@ -412,6 +420,42 @@
             
             .countdown-label {
                 font-size: 12px;
+            }
+            
+            .illustration {
+                margin: 20px auto;
+                width: 180px;
+                height: 180px;
+            }
+        }
+        
+        @media screen and (max-height: 800px) {
+            .coming-soon {
+                font-size: 48px;
+                margin: 15px 0;
+            }
+            
+            .description {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+            
+            .illustration {
+                margin: 15px auto;
+                width: 150px;
+                height: 150px;
+            }
+            
+            .countdown {
+                margin: 20px 0;
+            }
+            
+            .email-form {
+                margin-top: 20px;
+            }
+            
+            .social-links {
+                margin-top: 20px;
             }
         }
 
@@ -453,6 +497,54 @@
                 border-radius: 0 0 12px 12px;
             }
         }
+        
+        /* Compact view for short screens */
+        .compact-view .coming-soon {
+            font-size: 42px;
+            margin: 10px 0;
+        }
+        
+        .compact-view .tagline {
+            margin-bottom: 15px;
+        }
+        
+        .compact-view .description {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .compact-view .illustration {
+            margin: 10px auto;
+            width: 120px;
+            height: 120px;
+        }
+        
+        .compact-view .countdown {
+            margin: 15px 0;
+        }
+        
+        .compact-view .countdown-item {
+            padding: 8px;
+            min-width: 60px;
+        }
+        
+        .compact-view .email-form {
+            margin-top: 15px;
+        }
+        
+        .compact-view .form-heading {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .compact-view .social-links {
+            margin-top: 15px;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -477,7 +569,7 @@
         
         <div class="countdown">
             <div class="countdown-item">
-                <div class="countdown-number" id="days">5</div>
+                <div class="countdown-number" id="days">28</div>
                 <div class="countdown-label">Days</div>
             </div>
             <div class="countdown-item">
@@ -567,6 +659,22 @@
                 alert('Please enter a valid email address.');
             }
         });
+        
+        // Check viewport height and adjust content if needed
+        function adjustForViewport() {
+            const vh = window.innerHeight;
+            const container = document.querySelector('.container');
+            
+            if (vh < 700) {
+                document.body.classList.add('compact-view');
+            } else {
+                document.body.classList.remove('compact-view');
+            }
+        }
+        
+        // Run on load and resize
+        window.addEventListener('load', adjustForViewport);
+        window.addEventListener('resize', adjustForViewport);
     </script>
 </body>
 </html>
