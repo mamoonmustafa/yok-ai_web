@@ -1547,93 +1547,163 @@
     });
 </script>
 
-// Add this before the closing </body> tag
 <script>
-    // Configuration for Yok-AI plans
-    const VENDOR_ID = 30514; // Your actual vendor ID
-    
-    // Your price IDs from Paddle dashboard
-    const PRICE_IDS = {
-        stealth: 'pri_01jsvjevqap65b29x7sa5tyfzy',    // Stealth Assistant
-        shadow: 'pri_01jsvjh4k61x67aq76tb2gj8rq',     // Shadow Executive
-        phantom: 'pri_01jsvjemqjqh5gsvwhdkf3w7p'      // Phantom Intelligence
-    };
+// Configuration
+// Replace with your actual client token from Paddle dashboard
+const CONFIG = {
+  clientToken: "test_164332024f472fd8e2fe8c44d48", //  Replace with your actual client token
+  prices: {
+    stealth: {
+      month: "pri_01jsvjevqap65b29x7sa5tyfzy"  // Stealth Assistant
+    },
+    shadow: {
+      month: "pri_01jsvjh4k61x67aq76tb2gj8rq"  // Shadow Executive
+    },
+    phantom: {
+      month: "pri_01jsvjemqjqh5gsvwhdkf3w7p"   // Phantom Intelligence
+    }
+  }
+};
 
-    // Initialize Paddle
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Paddle
-        Paddle.Setup({ 
-            vendor: VENDOR_ID,
-            eventCallback: function(data) {
-                console.log('Paddle event:', data);
-                
-                // Handle checkout completion
-                if (data.event === 'Checkout.Complete') {
-                    // Redirect to dashboard or thank-you page
-                    window.location.href = '/dashboard.html';
-                }
-            }
-        });
+// State
+let paddleInitialized = false;
+
+// Initialize Paddle
+function initializePaddle() {
+  try {
+    // For sandbox testing
+    Paddle.Environment.set("sandbox");
+    
+    // Initialize with client token
+    Paddle.Initialize({
+      token: CONFIG.clientToken,
+      eventCallback: function(event) {
+        console.log("Paddle event:", event);
         
-        console.log('Paddle initialized successfully');
+        // Handle checkout complete event
+        if (event.name === "checkout.completed") {
+          console.log("Checkout completed:", event);
+          // Redirect to dashboard
+          window.location.href = '/dashboard.html';
+        }
+      }
     });
     
-    // Stealth Assistant checkout
-    function openStealthCheckout(event) {
-        event.preventDefault();
-        console.log('Opening Stealth Assistant checkout...');
-        
-        Paddle.Checkout.open({
-            product: PRICE_IDS.stealth,
-            title: 'Stealth Assistant',
-            message: 'Invisible support for your critical moments with 500 monthly credits.',
-            successCallback: function(data) {
-                console.log('Checkout successful:', data);
-                window.location.href = '/dashboard.html';
-            },
-            closeCallback: function() {
-                console.log('Checkout closed without completion');
-            }
-        });
-    }
-    
-    // Shadow Executive checkout
-    function openShadowCheckout(event) {
-        event.preventDefault();
-        console.log('Opening Shadow Executive checkout...');
-        
-        Paddle.Checkout.open({
-            product: PRICE_IDS.shadow,
-            title: 'Shadow Executive',
-            message: 'Continuous intelligence that adapts to your workflow with 1,000 monthly credits.',
-            successCallback: function(data) {
-                console.log('Checkout successful:', data);
-                window.location.href = '/dashboard.html';
-            },
-            closeCallback: function() {
-                console.log('Checkout closed without completion');
-            }
-        });
-    }
-    
-    // Phantom Intelligence checkout
-    function openPhantomCheckout(event) {
-        event.preventDefault();
-        console.log('Opening Phantom Intelligence checkout...');
-        
-        Paddle.Checkout.open({
-            product: PRICE_IDS.phantom,
-            title: 'Phantom Intelligence',
-            message: 'Strategic advantage without constraints. 2,500 credits valid for an entire year.',
-            successCallback: function(data) {
-                console.log('Checkout successful:', data);
-                window.location.href = '/dashboard.html';
-            },
-            closeCallback: function() {
-                console.log('Checkout closed without completion');
-            }
-        });
-    }
+    paddleInitialized = true;
+    console.log("Paddle initialized successfully");
+  } catch (error) {
+    console.error("Paddle initialization error:", error);
+  }
+}
+
+// Open checkout for Stealth Assistant plan
+function openStealthCheckout(event) {
+  event.preventDefault();
+  
+  if (!paddleInitialized) {
+    console.error("Paddle not initialized yet");
+    return;
+  }
+  
+  try {
+    console.log("Opening Stealth Assistant checkout...");
+    Paddle.Checkout.open({
+      items: [
+        {
+          priceId: CONFIG.prices.stealth.month,
+          quantity: 1
+        }
+      ],
+      settings: {
+        displayMode: "overlay",
+        theme: "light",
+        locale: "en",
+        successUrl: window.location.origin + "/dashboard.html"
+      },
+      customer: {
+        email: getUserEmail() // Optional: function to get user email if logged in
+      }
+    });
+  } catch (error) {
+    console.error("Checkout error:", error.message);
+  }
+}
+
+// Open checkout for Shadow Executive plan
+function openShadowCheckout(event) {
+  event.preventDefault();
+  
+  if (!paddleInitialized) {
+    console.error("Paddle not initialized yet");
+    return;
+  }
+  
+  try {
+    console.log("Opening Shadow Executive checkout...");
+    Paddle.Checkout.open({
+      items: [
+        {
+          priceId: CONFIG.prices.shadow.month,
+          quantity: 1
+        }
+      ],
+      settings: {
+        displayMode: "overlay",
+        theme: "light",
+        locale: "en",
+        successUrl: window.location.origin + "/dashboard.html"
+      },
+      customer: {
+        email: getUserEmail() // Optional: function to get user email if logged in
+      }
+    });
+  } catch (error) {
+    console.error("Checkout error:", error.message);
+  }
+}
+
+// Open checkout for Phantom Intelligence plan
+function openPhantomCheckout(event) {
+  event.preventDefault();
+  
+  if (!paddleInitialized) {
+    console.error("Paddle not initialized yet");
+    return;
+  }
+  
+  try {
+    console.log("Opening Phantom Intelligence checkout...");
+    Paddle.Checkout.open({
+      items: [
+        {
+          priceId: CONFIG.prices.phantom.month,
+          quantity: 1
+        }
+      ],
+      settings: {
+        displayMode: "overlay",
+        theme: "light",
+        locale: "en",
+        successUrl: window.location.origin + "/dashboard.html"
+      },
+      customer: {
+        email: getUserEmail() // Optional: function to get user email if logged in
+      }
+    });
+  } catch (error) {
+    console.error("Checkout error:", error.message);
+  }
+}
+
+// Helper function to get user email if available
+function getUserEmail() {
+  // Replace with actual code to get user email if they're logged in
+  // Return null if the user is not logged in
+  return null;
+}
+
+// Initialize Paddle when the page loads
+document.addEventListener("DOMContentLoaded", initializePaddle);
 </script>
 </body>
 </html>
