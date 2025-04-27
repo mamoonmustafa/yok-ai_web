@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing - Yok-AI | The Private AI Assistant</title>
-    <!-- Add this in the <head> section of your HTML -->
-    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
-    <script type="text/javascript">
+    <!-- For sandbox testing with Paddle Classic -->
+    <script src="https://cdn.sandbox.paddle.com/paddle/paddle.js"></script>
+    <script>
         Paddle.Setup({ 
-            vendor: 30514,  // Replace with your actual Paddle Seller ID
-            environment: 'sandbox'
+            vendor: 30514  // Your sandbox vendor ID
         });
     </script>
     <style>
@@ -1561,11 +1560,10 @@
     function openStealthCheckout(event) {
         event.preventDefault();
         Paddle.Checkout.open({
-            product: STEALTH_PRODUCT_ID,
-            email: getEmailIfLoggedIn(),
+            pproduct: 'pri_01jsvjevqap65b29x7sa5tyfzy',  // Your sandbox Price ID
             successCallback: function(data) {
-                // Redirect to dashboard after successful purchase
-                window.location.href = '/dashboard.html';
+            console.log('Checkout complete!', data);
+            window.location.href = '/dashboard.html';
             }
         });
     }
@@ -1574,11 +1572,10 @@
     function openShadowCheckout(event) {
         event.preventDefault();
         Paddle.Checkout.open({
-            product: SHADOW_PRODUCT_ID,
-            email: getEmailIfLoggedIn(),
+            product: 'pri_01jsvjh4k61x67ag76tb2gj8rg',  // Your sandbox Price ID
             successCallback: function(data) {
-                // Redirect to dashboard after successful purchase
-                window.location.href = '/dashboard.html';
+            console.log('Checkout complete!', data);
+            window.location.href = '/dashboard.html';
             }
         });
     }
@@ -1587,11 +1584,10 @@
     function openPhantomCheckout(event) {
         event.preventDefault();
         Paddle.Checkout.open({
-            product: PHANTOM_PRODUCT_ID,
-            email: getEmailIfLoggedIn(),
+            product: 'pri_01jsvjjemgjqh5gsvwhdkf3w7p',  // Your sandbox Price ID
             successCallback: function(data) {
-                // Redirect to dashboard after successful purchase
-                window.location.href = '/dashboard.html';
+            console.log('Checkout complete!', data);
+            window.location.href = '/dashboard.html';
             }
         });
     }
