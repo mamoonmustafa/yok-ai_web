@@ -5,12 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing - Yok-AI | The Private AI Assistant</title>
     <!-- For sandbox testing with Paddle Classic -->
-    <script src="https://cdn.sandbox.paddle.com/paddle/paddle.js"></script>
     <script>
-        Paddle.Setup({ 
-            vendor: 30514  // Your sandbox vendor ID
-        });
-    </script>
+        function loadPaddle() {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.paddle.com/paddle/paddle.js';
+          script.onload = function() {
+            // Initialize Paddle after script loads
+            Paddle.Setup({ 
+              vendor: 30514
+            });
+            console.log("Paddle loaded successfully");
+          };
+          script.onerror = function() {
+            console.error("Failed to load Paddle.js");
+          };
+          document.head.appendChild(script);
+        }
+        
+        // Load Paddle when the document is ready
+        document.addEventListener('DOMContentLoaded', loadPaddle);
+      </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -1560,7 +1574,7 @@
     function openStealthCheckout(event) {
         event.preventDefault();
         Paddle.Checkout.open({
-            pproduct: 'pri_01jsvjevqap65b29x7sa5tyfzy',  // Your sandbox Price ID
+            product: 'pri_01jsvjevqap65b29x7sa5tyfzy',  // Your sandbox Price ID
             successCallback: function(data) {
             console.log('Checkout complete!', data);
             window.location.href = '/dashboard.html';
