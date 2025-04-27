@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Yok-AI | The Private AI Assistant</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #0071e3;
+            --dark: #000000;
+            --light: #f5f5f7;
+            --accent: #86cffa;
+            --accent2: #ff2d55;
+            --text: #1d1d1f;
+            --text-secondary: #86868b;
+            --gradient: linear-gradient(135deg, #42a0fe, #0071e3);
+            --gradient-accent: linear-gradient(135deg, #ff375f, #ff2d55);
+            --blur-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: 48px;
+            letter-spacing: -0.025em;
+        }
+
+        h2 {
+            font-size: 40px;
+            letter-spacing: -0.025em;
+        }
+
+        h3 {
+            font-size: 24px;
+            letter-spacing: -0.022em;
+        }
+
+        p {
+            font-size: 17px;
+            line-height: 1.47059;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary);
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 22px;
+        }
+
+        .container-wide {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 22px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 980px;
+            font-weight: 400;
+            font-size: 17px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0077ED;
+            box-shadow: 0 0 10px rgba(0, 113, 227, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-left: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-large {
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* Modern Navigation Bar */
+        .globalnav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .globalnav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 22px;
+            height: 48px;
+        }
+
+        .globalnav-item-yok-ai {
+            flex: 0 0 auto;
+        }
+
+        .globalnav-link-yok-ai {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            letter-spacing: -0.5px;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .globalnav-link-yok-ai::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #42a0fe, #0071e3);
+            border-radius: 50%;
+            left: -15px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(8px);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.3); opacity: 0.15; }
+            100% { transform: scale(1); opacity: 0.3; }
+        }
+
+        .logo-dot {
+            background: linear-gradient(135deg, #42a0fe, #0071e3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .globalnav-list {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+
+        .globalnav-item {
+            margin: 0 4px;
+            position: relative;
+        }
+
+        .globalnav-link {
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 400;
+            text-decoration: none;
+            padding: 0 8px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            transition: color 0.2s ease;
+        }
+
+        .globalnav-link:hover {
+            color: var(--primary);
+        }
+
+        .globalnav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 10px;
+            right: 10px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .globalnav-link:hover::after {
+            width: calc(100% - 20px);
+        }
+
+        .get-started-btn {
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 980px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-left: 16px;
+        }
+
+        .get-started-btn:hover {
+            background-color: #0077ED;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 113, 227, 0.2);
+        }
+
+        /* Pricing Page Hero */
+        .pricing-hero {
+            padding: 120px 0 80px 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            text-align: center;
+            position: relative;
+        }
+
+        .pricing-hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(66, 160, 254, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(255, 45, 85, 0.1) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .pricing-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .pricing-hero-title {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #1d1d1f, #4a4a4a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pricing-hero-description {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        /* Pricing Tabs & Toggle */
+        .pricing-toggle-container {
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .pricing-toggle {
+            display: inline-flex;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 30px;
+            padding: 4px;
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .pricing-toggle-option {
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s ease;
+            min-width: 120px;
+            font-weight: 500;
+        }
+
+        .pricing-toggle-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            height: calc(100% - 8px);
+            width: 120px;
+            background: var(--gradient);
+            border-radius: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .pricing-toggle.annual .pricing-toggle-slider {
+            transform: translateX(120px);
+        }
+
+        .pricing-toggle-monthly {
+            color: var(--dark);
+        }
+
+        .pricing-toggle-annual {
+            color: var(--text-secondary);
+        }
+
+        .pricing-toggle.annual .pricing-toggle-monthly {
+            color: var(--text-secondary);
+        }
+
+        .pricing-toggle.annual .pricing-toggle-annual {
+            color: white;
+        }
+
+        .pricing-toggle-discount {
+            position: absolute;
+            top: -25px;
+            right: 10px;
+            background: var(--accent2);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Enhanced Pricing Cards */
+        .pricing-plans-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transform: translateZ(0) rotateY(0);
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px) translateZ(30px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .pricing-card.featured {
+            transform: translateZ(60px) scale(1.05);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(0, 113, 227, 0.3);
+            background: linear-gradient(145deg, #fff, #f8f8fa);
+            z-index: 2;
+        }
+
+        .pricing-card.featured:hover {
+            transform: translateY(-10px) translateZ(60px) scale(1.05);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transition: transform 0.5s ease;
+            transform-origin: left;
+        }
+
+        .pricing-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .pricing-card.featured::before {
+            transform: scaleX(1);
+            height: 7px;
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: 24px;
+            right: 0;
+            background: var(--gradient);
+            color: white;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 15% 100%);
+            width: 140px;
+            z-index: 10;
+        }
+
+        .pricing-card-header {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .pricing-title {
+            font-size: 22px;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .pricing-price {
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            line-height: 1;
+            position: relative;
+            display: inline-block;
+        }
+
+        .pricing-annual-price {
+            display: none;
+        }
+
+        .annual .pricing-monthly-price {
+            display: none;
+        }
+
+        .annual .pricing-annual-price {
+            display: inline-block;
+        }
+
+        .pricing-period {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .pricing-annual-savings {
+            font-size: 14px;
+            color: var(--accent2);
+            font-weight: 600;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .annual .pricing-annual-savings {
+            display: block;
+        }
+
+        .pricing-description {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .pricing-features {
+            margin: 32px 0;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            margin-bottom: 16px;
+            position: relative;
+            padding-left: 28px;
+            color: var(--text-secondary);
+            font-size: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .pricing-card:hover .pricing-features li {
+            transform: translateX(3px);
+        }
+
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--primary);
+            position: absolute;
+            left: 0;
+            font-weight: 600;
+        }
+
+        .pricing-features li.disabled {
+            opacity: 0.6;
+        }
+
+        .pricing-features li.disabled::before {
+            color: var(--text-secondary);
+            content: '×';
+        }
+
+        .mode-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-right: 5px;
+            color: white;
+        }
+
+        .mode-badge.ghost {
+            background: linear-gradient(135deg, #4a4a4a, #2a2a2a);
+        }
+
+        .mode-badge.insight {
+            background: linear-gradient(135deg, #42a0fe, #0071e3);
+        }
+
+        .mode-badge.advantage {
+            background: linear-gradient(135deg, #ff375f, #ff2d55);
+        }
+
+        .btn-wrapper {
+            margin-top: auto;
+            padding-top: 20px;
+        }
+
+        .pricing-btn {
+            width: 100%;
+            padding: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card:hover .pricing-btn {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 113, 227, 0.2);
+        }
+
+        .pricing-card.featured .pricing-btn {
+            background: var(--gradient);
+        }
+
+        /* Compare Features Section */
+        .compare-features {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .compare-features-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .features-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+
+        .features-table th, .features-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            width: 25%;
+        }
+
+        .features-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .features-table th:first-child {
+            width: 25%;
+        }
+
+        .features-table td:not(:first-child) {
+            text-align: center;
+        }
+
+        .features-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .features-table tr:hover {
+            background-color: rgba(242, 242, 247, 0.5);
+        }
+
+        .feature-check {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .feature-x {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+
+        /* Credit System */
+        .credit-system {
+            background-color: var(--light);
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .credit-system-title {
+            margin-bottom: 40px;
+        }
+
+        .credit-pills {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .credit-pill {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 70px;
+            padding: 15px 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            min-width: 220px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .credit-pill:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .pill-icon {
+            font-size: 28px;
+            margin-right: 20px;
+            line-height: 1;
+        }
+
+        .pill-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pill-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        .pill-cost {
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .credit-description {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .faq-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .faq-question {
+            padding: 20px;
+            background-color: #f8f9fa;
+            font-weight: 600;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 24px;
+            color: var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-question::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 20px;
+            max-height: 500px;
+        }
+
+        /* CTA Section */
+        .pricing-cta {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-cta::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(66, 160, 254, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(255, 45, 85, 0.1) 0%, transparent 30%);
+            z-index: 0;
+        }
+
+        .pricing-cta-content {
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pricing-cta-title {
+            color: white;
+            font-size: 36px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .pricing-cta-title::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 3px;
+            background: var(--gradient);
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .pricing-cta-description {
+            color: #86868b;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            font-size: 17px;
+        }
+
+        .pricing-cta-btn {
+            background: white;
+            color: var(--dark);
+            font-size: 16px;
+            padding: 16px 40px;
+            border-radius: 980px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin-top: 16px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .pricing-cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+
+        .pricing-cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(66, 160, 254, 0.3);
+            color: white;
+        }
+
+        .pricing-cta-btn:hover::before {
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--light);
+            padding: 60px 0 30px;
+            position: relative;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer-logo {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-description {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            max-width: 400px;
+            font-size: 14px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 16px;
+        }
+
+        .footer-social a {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .footer-social a:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 113, 227, 0.2);
+        }
+
+        .footer-social a svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .footer-heading {
+            font-size: 16px;
+            margin-bottom: 24px;
+            color: var(--text);
+            position: relative;
+            padding-bottom: 16px;
+        }
+
+        .footer-heading::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background: var(--primary);
+            bottom: 0;
+            left: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-links a::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            background: var(--primary);
+            bottom: -3px;
+            left: 0;
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-links a:hover::before {
+            width: 100%;
+        }
+
+        .footer-divider {
+            height: 1px;
+            background: rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .footer-bottom a {
+            color: var(--text);
+            margin-left: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom a:hover {
+            color: var(--primary);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 1200px) {
+            .pricing-plans-container {
+                padding: 0 20px;
+            }
+        }
+
+        @media screen and (max-width: 992px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .features-table {
+                font-size: 14px;
+            }
+            
+            .features-table th, .features-table td {
+                padding: 12px 8px;
+            }
+            
+            .globalnav-list {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 48px;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.98);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+            }
+            
+            .globalnav-list.show {
+                display: flex;
+            }
+            
+            .globalnav-item {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .globalnav-link {
+                padding: 12px 8px;
+                width: 100%;
+                height: auto;
+                justify-content: flex-start;
+            }
+            
+            .globalnav-menutrigger {
+                display: block;
+                margin-left: auto;
+            }
+            
+            .get-started-btn {
+                margin: 16px 0;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .pricing-hero-title {
+                font-size: 42px;
+            }
+            
+            .pricing-hero-description {
+                font-size: 18px;
+            }
+            
+            .pricing-card {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .features-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+            
+            .footer-bottom a {
+                margin: 0 8px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .pricing-toggle-option {
+                padding: 10px 15px;
+                min-width: 100px;
+                font-size: 14px;
+            }
+            
+            .pricing-toggle-slider {
+                width: 100px;
+            }
+            
+            .pricing-toggle.annual .pricing-toggle-slider {
+                transform: translateX(100px);
+            }
+            
+            .credit-pill {
+                padding: 12px 15px;
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="globalnav">
+    <div class="globalnav-content">
+        <div class="globalnav-item globalnav-item-yok-ai">
+            <a href="/" class="globalnav-link-yok-ai">Yok<span class="logo-dot">AI</span></a>
+        </div>
+        
+        <ul id="globalnavList" class="globalnav-list">
+            <li class="globalnav-item">
+                <a href="/#features" class="globalnav-link">Features</a>
+            </li>
+            <li class="globalnav-item">
+                <a href="/#use-cases" class="globalnav-link">Use Cases</a>
+            </li>
+            <li class="globalnav-item">
+                <a href="/pricing.html" class="globalnav-link">Pricing</a>
+            </li>
+            <li class="globalnav-item">
+                <a href="/#about" class="globalnav-link">About</a>
+            </li>
+            <li class="globalnav-item">
+                <a href="mailto:info@yok-ai.com" class="globalnav-link">Contact</a>
+            </li>
+            <li class="globalnav-item">
+                <a href="/pricing.html#plans" class="get-started-btn">Get Started</a>
+            </li>
+        </ul>
+        
+        <div class="globalnav-menutrigger">
+            <button id="menuTrigger" class="globalnav-menutrigger-button" aria-label="Menu">
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                    <polyline fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" points="2 5, 16 5" class="menu-bread menu-bread-top"></polyline>
+                    <polyline fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" points="2 12, 16 12" class="menu-bread menu-bread-bottom"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="pricing-hero">
+    <div class="pricing-hero-background"></div>
+    <div class="container pricing-hero-content">
+        <h1 class="pricing-hero-title">Choose Your Strategic Edge</h1>
+        <p class="pricing-hero-description">Select the perfect plan to enhance your professional capabilities with invisible intelligence that adapts to your workflow.</p>
+    </div>
+</section>
+
+<!-- Pricing Plans -->
+<section id="plans" class="pricing-plans">
+    <div class="container">
+        <!-- Pricing Cards - NO TOGGLE -->
+        <div class="pricing-plans-container" id="pricingPlans">
+            <!-- Plan 1 -->
+            <div class="pricing-card">
+                <div class="pricing-card-header">
+                    <h3 class="pricing-title">Stealth Assistant</h3>
+                    <div class="pricing-price">$49.99<span class="pricing-period">/mo</span></div>
+                </div>
+                <p class="pricing-description">Invisible support for your critical moments with 500 monthly credits.</p>
+                <ul class="pricing-features">
+                    <li>Discreet notification system</li>
+                    <li>Unlimited screen captures</li>
+                    <li>Basic keystroke protection</li>
+                    <li><span class="mode-badge ghost">Ghost Mode</span> Maximum privacy, minimal footprint</li>
+                    <li>Standard support (24-hour response)</li>
+                </ul>
+                <div class="btn-wrapper">
+                    <a href="#" class="btn btn-primary pricing-btn">Get Started</a>
+                </div>
+            </div>
+            
+            <!-- Plan 2 (Featured) -->
+            <div class="pricing-card featured">
+                <div class="pricing-badge">Most Popular</div>
+                <div class="pricing-card-header">
+                    <h3 class="pricing-title">Shadow Executive</h3>
+                    <div class="pricing-price">$89.99<span class="pricing-period">/mo</span></div>
+                </div>
+                <p class="pricing-description">Continuous intelligence that adapts to your workflow with 1,000 monthly credits.</p>
+                <ul class="pricing-features">
+                    <li>Up to 200 credits roll over monthly</li>
+                    <li>Advanced anti-detection system</li>
+                    <li><span class="mode-badge ghost">Ghost Mode</span> <span class="mode-badge insight">Insight Mode</span> Balanced performance</li>
+                    <li>Priority support (8-hour response)</li>
+                    <li>Enhanced capture capabilities</li>
+                </ul>
+                <div class="btn-wrapper">
+                    <a href="#" class="btn btn-primary pricing-btn">Get Started</a>
+                </div>
+            </div>
+            
+            <!-- Plan 3 -->
+            <div class="pricing-card">
+                <div class="pricing-badge" style="background: linear-gradient(135deg, #ff375f, #ff2d55);">Ultimate Freedom</div>
+                <div class="pricing-card-header">
+                    <h3 class="pricing-title">Phantom Intelligence</h3>
+                    <div class="pricing-price">$199.99<span class="pricing-period">/mo</span></div>
+                </div>
+                <p class="pricing-description">Strategic advantage without constraints. 2,500 credits valid for an entire year.</p>
+                <ul class="pricing-features">
+                    <li>Annual credit validity (use anytime)</li>
+                    <li><span class="mode-badge ghost">Ghost Mode</span> <span class="mode-badge insight">Insight Mode</span> <span class="mode-badge advantage">Advantage Mode</span></li>
+                    <li>VIP emergency support (4-hour response)</li>
+                    <li>Priority processing during peak hours</li>
+                    <li>Dedicated account success manager</li>
+                </ul>
+                <div class="btn-wrapper">
+                    <a href="#" class="btn btn-primary pricing-btn">Experience Freedom</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Credit System Explanation -->
+<section class="credit-system">
+    <div class="container">
+        <h2 class="credit-system-title">Flexible Credit System</h2>
+        <div class="credit-pills">
+            <div class="credit-pill">
+                <div class="pill-icon">🖼️</div>
+                <div class="pill-info">
+                    <span class="pill-name">Image Analysis</span>
+                    <span class="pill-cost">10 credits</span>
+                </div>
+            </div>
+            <div class="credit-pill">
+                <div class="pill-icon">🔊</div>
+                <div class="pill-info">
+                    <span class="pill-name">Audio Transcription</span>
+                    <span class="pill-cost">5 credits/min</span>
+                </div>
+            </div>
+            <div class="credit-pill">
+                <div class="pill-icon">💬</div>
+                <div class="pill-info">
+                    <span class="pill-name">Text Message</span>
+                    <span class="pill-cost">1 credit</span>
+                </div>
+            </div>
+            <div class="credit-pill">
+                <div class="pill-icon">📊</div>
+                <div class="pill-info">
+                    <span class="pill-name">Chart Analysis</span>
+                    <span class="pill-cost">15 credits</span>
+                </div>
+            </div>
+        </div>
+        <p class="credit-description">Our flexible credit system allows you to use Yok-AI however you need it most. Credits are deducted based on the type of analysis performed, giving you complete control over your usage. Unused credits on the Shadow Executive and Phantom Intelligence plans roll over to the next billing period (up to specified limits).</p>
+    </div>
+</section>
+
+<!-- Compare Features Table -->
+<section class="compare-features">
+    <div class="container">
+        <h2 class="compare-features-title">Compare All Features</h2>
+        <div class="table-responsive">
+            <table class="features-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Stealth Assistant</th>
+                        <th>Shadow Executive</th>
+                        <th>Phantom Intelligence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monthly Credits</td>
+                        <td>500</td>
+                        <td>1,000</td>
+                        <td>2,500</td>
+                    </tr>
+                    <tr>
+                        <td>Credit Rollover</td>
+                        <td><span class="feature-x">×</span></td>
+                        <td>Up to 200</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>Screen Capture</td>
+                        <td><span class="feature-check">✓</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Audio Transcription</td>
+                        <td><span class="feature-check">✓</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Anti-Detection</td>
+                        <td>Basic</td>
+                        <td>Advanced</td>
+                        <td>Enterprise-grade</td>
+                    </tr>
+                    <tr>
+                        <td>Rendering Protection</td>
+                        <td><span class="feature-check">✓</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ghost Mode</td>
+                        <td><span class="feature-check">✓</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Insight Mode</td>
+                        <td><span class="feature-x">×</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Advantage Mode</td>
+                        <td><span class="feature-x">×</span></td>
+                        <td><span class="feature-x">×</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Customer Support</td>
+                        <td>24 hours</td>
+                        <td>8 hours</td>
+                        <td>4 hours</td>
+                    </tr>
+                    <tr>
+                        <td>Success Manager</td>
+                        <td><span class="feature-x">×</span></td>
+                        <td><span class="feature-x">×</span></td>
+                        <td><span class="feature-check">✓</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+    <div class="container">
+        <h2 class="faq-title">Frequently Asked Questions</h2>
+        <div class="faq-list">
+            <div class="faq-item active">
+                <div class="faq-question">How does the credit system work?</div>
+                <div class="faq-answer">
+                    <p>Our credit system is designed to give you flexibility in how you use Yok-AI. Different actions cost a specific number of credits: text interactions cost 1 credit, image analysis costs 10 credits, audio transcription costs 5 credits per minute, and chart analysis costs 15 credits. Your monthly subscription includes a set number of credits that reset each billing cycle. Higher-tier plans allow unused credits to roll over to the next month.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can I change my plan later?</div>
+                <div class="faq-answer">
+                    <p>Yes, you can upgrade or downgrade your plan at any time. When upgrading, the change takes effect immediately, and you'll be charged the prorated difference. When downgrading, the change will take effect at the start of your next billing cycle. No credits are lost when upgrading, but unused credits may be forfeited when downgrading, depending on the rollover limits of your new plan.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">What happens if I run out of credits?</div>
+                <div class="faq-answer">
+                    <p>If you run out of credits before your billing cycle renews, you have two options: wait until your next billing cycle when your credits refresh, or purchase additional credit packs. Credit packs start at 100 credits for $15 and are available in your account dashboard. These additional credits never expire and can be used at any time.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How secure is Yok-AI?</div>
+                <div class="faq-answer">
+                    <p>Yok-AI is built with security and privacy as core principles. All data is end-to-end encrypted, and we implement advanced anti-detection systems to ensure your assistant remains completely invisible during screen sharing and recordings. Your data is never stored or logged on our servers beyond the active session, and we maintain a strict no-log policy for all text, image, and audio inputs. Our stealth technology includes rendering protection, keystroke masking, and process obfuscation to maintain complete confidentiality.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">What is the difference between the operating modes?</div>
+                <div class="faq-answer">
+                    <p>Yok-AI offers three distinct operating modes:<br><br>
+                    <strong>Ghost Mode:</strong> Available on all plans, this mode focuses on maximum privacy and minimal system footprint. It's optimized for basic intelligence needs while maintaining complete invisibility.<br><br>
+                    <strong>Insight Mode:</strong> Available on Shadow Executive and Phantom Intelligence plans, this mode provides enhanced analytical capabilities while maintaining strong privacy protections. It's ideal for deeper analysis and more complex queries.<br><br>
+                    <strong>Advantage Mode:</strong> Exclusive to the Phantom Intelligence plan, this is our most powerful mode with advanced processing capabilities, predictive insights, and competitive intelligence features.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Is there a refund policy?</div>
+                <div class="faq-answer">
+                    <p>Per our <a href="https://www.yok-ai.com/refundpolicy">Refund Policy</a>, all purchases are final and non-refundable except in limited circumstances. These exceptions include legal requirements, fraudulent transactions, and complete failure to deliver the service. Subscription plans can be canceled at any time to prevent future billing, but cancellation does not entitle you to a refund for the current billing period.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="pricing-cta">
+    <div class="container">
+        <div class="pricing-cta-content">
+            <h2 class="pricing-cta-title">Ready for your strategic advantage?</h2>
+            <p class="pricing-cta-description">Join thousands of professionals using Yok-AI to enhance their performance with invisible intelligence.</p>
+            <a href="#plans" class="pricing-cta-btn">Choose Your Plan</a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <div class="footer-logo">Yok<span class="logo-dot">AI</span></div>
+                <p class="footer-description">The next generation of AI assistants, designed specifically for professionals who need powerful AI capabilities without compromising privacy.</p>
+                <div class="footer-social">
+                    <!-- Twitter/X Icon -->
+                    <a href="#" aria-label="Twitter/X">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                    
+                    <!-- LinkedIn Icon -->
+                    <a href="#" aria-label="LinkedIn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.454C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/>
+                        </svg>
+                    </a>
+                    
+                    <!-- Facebook Icon -->
+                    <a href="#" aria-label="Facebook">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                    </a>
+                    
+                    <!-- Instagram Icon -->
+                    <a href="#" aria-label="Instagram">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div>
+                <h4 class="footer-heading">Company</h4>
+                <ul class="footer-links">
+                    <li><a href="/#about">About Us</a></li>
+                    <li><a href="mailto:info@yok-ai.com">Contact</a></li>
+                    <li><a href="/pricing.html">Pricing</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Support</h4>
+                <ul class="footer-links">
+                    <li><a href="https://www.yok-ai.com/help">Help Center</a></li>
+                    <li><a href="https://www.yok-ai.com/docs">Documentation</a></li>
+                    <li><a href="https://www.yok-ai.com/contact">Contact Support</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Legal</h4>
+                <ul class="footer-links">
+                    <li><a href="https://www.yok-ai.com/termsofservice">Terms of Service</a></li>
+                    <li><a href="https://www.yok-ai.com/privacypolicy">Privacy Policy</a></li>
+                    <li><a href="https://www.yok-ai.com/refundpolicy">Refund Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-divider"></div>
+        
+        <div class="footer-bottom">
+            <p>© 2025 Yok-AI. All rights reserved.</p>
+            <div>
+                <a href="https://www.yok-ai.com/termsofservice">Terms</a>
+                <a href="https://www.yok-ai.com/privacypolicy">Privacy</a>
+                <a href="https://www.yok-ai.com/cookies">Cookies</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Mobile Menu Toggle
+        const menuTrigger = document.getElementById('menuTrigger');
+        const globalnavList = document.getElementById('globalnavList');
+        
+        if (menuTrigger && globalnavList) {
+            menuTrigger.addEventListener('click', () => {
+                globalnavList.classList.toggle('show');
+            });
+        }
+        
+        // FAQ Accordion
+        const faqItems = document.querySelectorAll('.faq-item');
+        
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            
+            question.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                
+                // Close all items
+                faqItems.forEach(faq => {
+                    faq.classList.remove('active');
+                });
+                
+                // If the clicked item wasn't active, make it active
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+        
+        // Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#' || !targetId) return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // Close mobile menu if open
+                    if (globalnavList && globalnavList.classList.contains('show')) {
+                        globalnavList.classList.remove('show');
+                    }
+                    
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Header styles on scroll
+        const globalnav = document.querySelector('.globalnav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 10) {
+                globalnav.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
+                globalnav.style.boxShadow = '0 1px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                globalnav.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                globalnav.style.boxShadow = 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>

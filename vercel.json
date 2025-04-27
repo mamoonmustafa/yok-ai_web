@@ -2,6 +2,7 @@
     "routes": [
       { "src": "/privacypolicy", "dest": "/api/privacypolicy.js" },
       { "src": "/refundpolicy", "dest": "/api/refundpolicy.js" },
-      { "src": "/termsofservice", "dest": "/api/termsofservice.js" }
+      { "src": "/termsofservice", "dest": "/api/termsofservice.js" },
+      { "src": "/price", "dest": "pricing.html" }
     ]
   }
