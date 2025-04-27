@@ -4,27 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing - Yok-AI | The Private AI Assistant</title>
-    <!-- For sandbox testing with Paddle Classic -->
-    <script>
-        function loadPaddle() {
-          const script = document.createElement('script');
-          script.src = 'https://cdn.paddle.com/paddle/paddle.js';
-          script.onload = function() {
-            // Initialize Paddle after script loads
-            Paddle.Setup({ 
-              vendor: 30514
-            });
-            console.log("Paddle loaded successfully");
-          };
-          script.onerror = function() {
-            console.error("Failed to load Paddle.js");
-          };
-          document.head.appendChild(script);
-        }
-        
-        // Load Paddle when the document is ready
-        document.addEventListener('DOMContentLoaded', loadPaddle);
-      </script>
+    <!-- Add this in the <head> section of your HTML -->
+<!-- <script src="https://cdn.paddle.com/paddle/paddle.js"></script> -->
+<!-- For test mode, use: -->
+<script src="https://cdn.sandbox.paddle.com/paddle/paddle.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -1564,47 +1547,92 @@
     });
 </script>
 
+// Add this before the closing </body> tag
 <script>
-    // Replace these with your actual Paddle product IDs
-    const STEALTH_PRODUCT_ID = 'pri_01jsvjevqap65b29x7sa5tyfzy';   // Replace with actual Stealth product ID
-    const SHADOW_PRODUCT_ID = 'pri_01jsvjh4k61x67ag76tb2gj8rg';    // Replace with actual Shadow product ID
-    const PHANTOM_PRODUCT_ID = 'pri_01jsvjjemgjqh5gsvwhdkf3w7p';   // Replace with actual Phantom product ID
+    // Configuration for Yok-AI plans
+    const VENDOR_ID = 30514; // Your actual vendor ID
+    
+    // Your price IDs from Paddle dashboard
+    const PRICE_IDS = {
+        stealth: 'pri_01jsvjevqap65b29x7sa5tyfzy',    // Stealth Assistant
+        shadow: 'pri_01jsvjh4k61x67aq76tb2gj8rq',     // Shadow Executive
+        phantom: 'pri_01jsvjemqjqh5gsvwhdkf3w7p'      // Phantom Intelligence
+    };
 
+    // Initialize Paddle
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Paddle
+        Paddle.Setup({ 
+            vendor: VENDOR_ID,
+            eventCallback: function(data) {
+                console.log('Paddle event:', data);
+                
+                // Handle checkout completion
+                if (data.event === 'Checkout.Complete') {
+                    // Redirect to dashboard or thank-you page
+                    window.location.href = '/dashboard.html';
+                }
+            }
+        });
+        
+        console.log('Paddle initialized successfully');
+    });
+    
+    // Stealth Assistant checkout
     function openStealthCheckout(event) {
-    event.preventDefault();
-    Paddle.Checkout.open({
-        product: 'pri_01jsvjevqap65b29x7sa5tyfzy',  // Stealth Assistant
-        successCallback: function(data) {
-            window.location.href = '/dashboard.html';
-        }
-    });
-}
-
-function openShadowCheckout(event) {
-    event.preventDefault();
-    Paddle.Checkout.open({
-        product: 'pri_01jsvjh4k61x67aq76tb2gj8rq',  // Shadow Executive
-        successCallback: function(data) {
-            window.location.href = '/dashboard.html';
-        }
-    });
-}
-
-function openPhantomCheckout(event) {
-    event.preventDefault();
-    Paddle.Checkout.open({
-        product: 'pri_01jsvjemqjqh5gsvwhdkf3w7p',  // Phantom Intelligence
-        successCallback: function(data) {
-            window.location.href = '/dashboard.html';
-        }
-    });
-}
-
-    // Function to get user's email if they're logged in
-    function getEmailIfLoggedIn() {
-        // If you have a login system, return the user's email here
-        // Otherwise return null and Paddle will ask for it during checkout
-        return null;
+        event.preventDefault();
+        console.log('Opening Stealth Assistant checkout...');
+        
+        Paddle.Checkout.open({
+            product: PRICE_IDS.stealth,
+            title: 'Stealth Assistant',
+            message: 'Invisible support for your critical moments with 500 monthly credits.',
+            successCallback: function(data) {
+                console.log('Checkout successful:', data);
+                window.location.href = '/dashboard.html';
+            },
+            closeCallback: function() {
+                console.log('Checkout closed without completion');
+            }
+        });
+    }
+    
+    // Shadow Executive checkout
+    function openShadowCheckout(event) {
+        event.preventDefault();
+        console.log('Opening Shadow Executive checkout...');
+        
+        Paddle.Checkout.open({
+            product: PRICE_IDS.shadow,
+            title: 'Shadow Executive',
+            message: 'Continuous intelligence that adapts to your workflow with 1,000 monthly credits.',
+            successCallback: function(data) {
+                console.log('Checkout successful:', data);
+                window.location.href = '/dashboard.html';
+            },
+            closeCallback: function() {
+                console.log('Checkout closed without completion');
+            }
+        });
+    }
+    
+    // Phantom Intelligence checkout
+    function openPhantomCheckout(event) {
+        event.preventDefault();
+        console.log('Opening Phantom Intelligence checkout...');
+        
+        Paddle.Checkout.open({
+            product: PRICE_IDS.phantom,
+            title: 'Phantom Intelligence',
+            message: 'Strategic advantage without constraints. 2,500 credits valid for an entire year.',
+            successCallback: function(data) {
+                console.log('Checkout successful:', data);
+                window.location.href = '/dashboard.html';
+            },
+            closeCallback: function() {
+                console.log('Checkout closed without completion');
+            }
+        });
     }
 </script>
 </body>

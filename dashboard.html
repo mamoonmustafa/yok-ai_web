@@ -4,13 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Dashboard - Yok-AI</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Use your existing CSS -->
-    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
-    <script type="text/javascript">
-        Paddle.Setup({ 
-            vendor: 12345  // Replace with your actual Paddle Seller ID
-        });
-    </script>
+    <!-- Use your existing CSS -->
+    <link rel="stylesheet" href="pricing.html" type="text/css">
     <style>
         /* Additional styles for the dashboard */
         .dashboard-container {
@@ -52,14 +47,14 @@
         
         .credit-label {
             font-size: 14px;
-            color: var(--text-secondary);
+            color: #86868b;
             margin-bottom: 8px;
         }
         
         .credit-value {
             font-size: 32px;
             font-weight: 700;
-            color: var(--text);
+            color: #1d1d1f;
         }
         
         .credit-progress {
@@ -72,7 +67,7 @@
         
         .credit-progress-bar {
             height: 100%;
-            background: var(--gradient);
+            background: linear-gradient(135deg, #42a0fe, #0071e3);
             width: 75%; /* Will be set dynamically */
         }
         
@@ -102,14 +97,14 @@
         
         .subscription-label {
             font-size: 14px;
-            color: var(--text-secondary);
+            color: #86868b;
             margin-bottom: 5px;
         }
         
         .subscription-value {
             font-size: 16px;
             font-weight: 500;
-            color: var(--text);
+            color: #1d1d1f;
         }
         
         .action-buttons {
@@ -128,14 +123,14 @@
         }
         
         .btn-outline {
-            border: 1px solid var(--text-secondary);
+            border: 1px solid #86868b;
             background: transparent;
-            color: var(--text);
+            color: #1d1d1f;
         }
         
         .btn-outline:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            border-color: #0071e3;
+            color: #0071e3;
             transform: translateY(-2px);
         }
         
@@ -162,12 +157,12 @@
         
         .usage-table th {
             font-weight: 600;
-            color: var(--text);
+            color: #1d1d1f;
             background-color: #f8f9fa;
         }
         
         .usage-date {
-            color: var(--text-secondary);
+            color: #86868b;
             font-size: 14px;
         }
     </style>
@@ -207,19 +202,19 @@
     <div class="dashboard-container">
         <div class="dashboard-header">
             <h1 class="dashboard-title">Your Dashboard</h1>
-            <div id="user-email">john.doe@example.com</div>
+            <div id="user-email">Loading...</div>
         </div>
         
         <!-- Credits Information -->
         <div class="credit-info">
             <div class="credit-card">
                 <div class="credit-label">Monthly Credits</div>
-                <div class="credit-value" id="total-credits">1,000</div>
+                <div class="credit-value" id="total-credits">--</div>
             </div>
             
             <div class="credit-card">
                 <div class="credit-label">Credits Used</div>
-                <div class="credit-value" id="used-credits">250</div>
+                <div class="credit-value" id="used-credits">--</div>
                 <div class="credit-progress">
                     <div class="credit-progress-bar" id="credit-progress-bar"></div>
                 </div>
@@ -227,7 +222,7 @@
             
             <div class="credit-card">
                 <div class="credit-label">Credits Remaining</div>
-                <div class="credit-value" id="remaining-credits">750</div>
+                <div class="credit-value" id="remaining-credits">--</div>
             </div>
         </div>
         
@@ -237,22 +232,22 @@
             <div class="subscription-grid">
                 <div class="subscription-item">
                     <div class="subscription-label">Current Plan</div>
-                    <div class="subscription-value" id="current-plan">Shadow Executive</div>
+                    <div class="subscription-value" id="current-plan">Loading...</div>
                 </div>
                 
                 <div class="subscription-item">
                     <div class="subscription-label">Status</div>
-                    <div class="subscription-value" id="subscription-status">Active</div>
+                    <div class="subscription-value" id="subscription-status">Loading...</div>
                 </div>
                 
                 <div class="subscription-item">
                     <div class="subscription-label">Next Billing Date</div>
-                    <div class="subscription-value" id="next-billing-date">May 27, 2025</div>
+                    <div class="subscription-value" id="next-billing-date">Loading...</div>
                 </div>
                 
                 <div class="subscription-item">
                     <div class="subscription-label">Monthly Payment</div>
-                    <div class="subscription-value" id="monthly-payment">$89.99</div>
+                    <div class="subscription-value" id="monthly-payment">Loading...</div>
                 </div>
             </div>
             
@@ -274,82 +269,97 @@
                     </tr>
                 </thead>
                 <tbody id="usage-data">
-                    <!-- This will be populated by JavaScript -->
+                    <!-- Will be populated by JavaScript -->
+                    <tr>
+                        <td colspan="3">Loading usage data...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <!-- Footer (copy from your existing page) -->
-    <!-- Add your existing footer here -->
+    <!-- Add your footer here -->
 
+    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
     <script>
         // This would normally get data from your backend
         // For now, we'll simulate it with sample data
         document.addEventListener('DOMContentLoaded', function() {
-            // Sample data - in a real implementation, you would fetch this from your server
-            const userData = {
-                email: 'john.doe@example.com',
-                subscription: {
-                    plan: 'Shadow Executive',
-                    status: 'Active',
-                    nextBillingDate: 'May 27, 2025',
-                    monthlyPayment: '$89.99',
-                    totalCredits: 1000,
-                    usedCredits: 250,
-                    remainingCredits: 750
-                },
-                recentUsage: [
-                    { date: 'Apr 25, 2025', activity: 'Image Analysis', credits: 10 },
-                    { date: 'Apr 24, 2025', activity: 'Text Message', credits: 1 },
-                    { date: 'Apr 24, 2025', activity: 'Chart Analysis', credits: 15 },
-                    { date: 'Apr 23, 2025', activity: 'Audio Transcription', credits: 25 },
-                    { date: 'Apr 22, 2025', activity: 'Text Message', credits: 1 }
-                ]
-            };
-            
-            // Populate user data
-            document.getElementById('user-email').textContent = userData.email;
-            document.getElementById('total-credits').textContent = userData.subscription.totalCredits.toLocaleString();
-            document.getElementById('used-credits').textContent = userData.subscription.usedCredits.toLocaleString();
-            document.getElementById('remaining-credits').textContent = userData.subscription.remainingCredits.toLocaleString();
-            document.getElementById('current-plan').textContent = userData.subscription.plan;
-            document.getElementById('subscription-status').textContent = userData.subscription.status;
-            document.getElementById('next-billing-date').textContent = userData.subscription.nextBillingDate;
-            document.getElementById('monthly-payment').textContent = userData.subscription.monthlyPayment;
-            
-            // Set progress bar
-            const percentUsed = (userData.subscription.usedCredits / userData.subscription.totalCredits) * 100;
-            document.getElementById('credit-progress-bar').style.width = percentUsed + '%';
-            
-            // Populate usage table
-            const usageTableBody = document.getElementById('usage-data');
-            userData.recentUsage.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="usage-date">${item.date}</td>
-                    <td>${item.activity}</td>
-                    <td>${item.credits}</td>
-                `;
-                usageTableBody.appendChild(row);
+            // Initialize Paddle
+            Paddle.Setup({ 
+                vendor: 30514  // Your vendor ID
             });
             
-            // Setup button handlers
-            document.getElementById('update-payment').addEventListener('click', function() {
-                // This would open Paddle's update payment UI
-                alert('In a real implementation, this would open Paddle\'s payment update UI');
-                // Paddle.Checkout.open({
-                //     override: 'your-update-url-from-paddle',
-                // });
-            });
-            
-            document.getElementById('cancel-subscription').addEventListener('click', function() {
-                if (confirm('Are you sure you want to cancel your subscription? Your service will continue until the end of your current billing period.')) {
-                    // In a real implementation, this would call your backend
-                    // which would then call Paddle's API to cancel the subscription
-                    alert('In a real implementation, this would cancel your subscription via Paddle API');
-                }
-            });
+            // Simulate loading user data
+            setTimeout(function() {
+                // Sample data - in a real implementation, you would fetch this from your server
+                const userData = {
+                    email: 'user@example.com',
+                    subscription: {
+                        plan: 'Shadow Executive',
+                        status: 'Active',
+                        nextBillingDate: 'May 27, 2025',
+                        monthlyPayment: '$89.99',
+                        totalCredits: 1000,
+                        usedCredits: 250,
+                        remainingCredits: 750,
+                        customerUrl: '' // Would be populated with Paddle customer portal URL
+                    },
+                    recentUsage: [
+                        { date: 'Apr 25, 2025', activity: 'Image Analysis', credits: 10 },
+                        { date: 'Apr 24, 2025', activity: 'Text Message', credits: 1 },
+                        { date: 'Apr 24, 2025', activity: 'Chart Analysis', credits: 15 },
+                        { date: 'Apr 23, 2025', activity: 'Audio Transcription', credits: 25 },
+                        { date: 'Apr 22, 2025', activity: 'Text Message', credits: 1 }
+                    ]
+                };
+                
+                // Populate user data
+                document.getElementById('user-email').textContent = userData.email;
+                document.getElementById('total-credits').textContent = userData.subscription.totalCredits.toLocaleString();
+                document.getElementById('used-credits').textContent = userData.subscription.usedCredits.toLocaleString();
+                document.getElementById('remaining-credits').textContent = userData.subscription.remainingCredits.toLocaleString();
+                document.getElementById('current-plan').textContent = userData.subscription.plan;
+                document.getElementById('subscription-status').textContent = userData.subscription.status;
+                document.getElementById('next-billing-date').textContent = userData.subscription.nextBillingDate;
+                document.getElementById('monthly-payment').textContent = userData.subscription.monthlyPayment;
+                
+                // Set progress bar
+                const percentUsed = (userData.subscription.usedCredits / userData.subscription.totalCredits) * 100;
+                document.getElementById('credit-progress-bar').style.width = percentUsed + '%';
+                
+                // Populate usage table
+                const usageTableBody = document.getElementById('usage-data');
+                usageTableBody.innerHTML = ''; // Clear loading message
+                
+                userData.recentUsage.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="usage-date">${item.date}</td>
+                        <td>${item.activity}</td>
+                        <td>${item.credits}</td>
+                    `;
+                    usageTableBody.appendChild(row);
+                });
+                
+                // Setup button handlers
+                document.getElementById('update-payment').addEventListener('click', function() {
+                    // In a real implementation, this would open Paddle's payment update UI
+                    if (userData.subscription.customerUrl) {
+                        window.open(userData.subscription.customerUrl, '_blank');
+                    } else {
+                        alert('Payment update feature not available in this demo');
+                    }
+                });
+                
+                document.getElementById('cancel-subscription').addEventListener('click', function() {
+                    if (confirm('Are you sure you want to cancel your subscription? Your service will continue until the end of your current billing period.')) {
+                        // In a real implementation, this would call your backend
+                        alert('In a real implementation, this would cancel your subscription via Paddle API');
+                    }
+                });
+            }, 1000); // Simulate a 1-second load time
         });
     </script>
 </body>
