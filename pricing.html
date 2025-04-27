@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing - Yok-AI | The Private AI Assistant</title>
     <!-- Add this in the <head> section of your HTML -->
-<script src="https://cdn.paddle.com/paddle/paddle.js"></script>
+        <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <!-- For test mode, use: -->
 <!-- <script src="https://cdn.sandbox.paddle.com/paddle/paddle.js"></script> -->
     <style>
@@ -1547,11 +1547,11 @@
     });
 </script>
 
-<script>
-// Configuration
+    <script>
+    // Configuration
 // Replace with your actual client token from Paddle dashboard
 const CONFIG = {
-  clientToken: "test_164332024f472fd8e2fe8c44d48", //  Replace with your actual client token
+  clientToken: "test_164332024f472fd8e2fe8c44d48", // Replace with your actual client token
   prices: {
     stealth: {
       month: "pri_01jsvjevqap65b29x7sa5tyfzy"  // Stealth Assistant
@@ -1572,17 +1572,18 @@ let paddleInitialized = false;
 function initializePaddle() {
   try {
     // For sandbox testing
-    Paddle.Environment.set("sandbox");
+    // Note: Using the updated Paddle API
+    Paddle.Environment = 'sandbox';
     
-    // Initialize with client token
-    Paddle.Initialize({
-      token: CONFIG.clientToken,
-      eventCallback: function(event) {
-        console.log("Paddle event:", event);
+    // Setup Paddle
+    Paddle.setup({
+      vendor: CONFIG.clientToken,
+      eventCallback: function(data) {
+        console.log("Paddle event:", data);
         
         // Handle checkout complete event
-        if (event.name === "checkout.completed") {
-          console.log("Checkout completed:", event);
+        if (data.event === "checkout.complete") {
+          console.log("Checkout completed:", data);
           // Redirect to dashboard
           window.location.href = '/dashboard.html';
         }
@@ -1601,27 +1602,18 @@ function openStealthCheckout(event) {
   event.preventDefault();
   
   if (!paddleInitialized) {
-    console.error("Paddle not initialized yet");
-    return;
+    console.log("Attempting to initialize Paddle before checkout");
+    initializePaddle();
   }
   
   try {
     console.log("Opening Stealth Assistant checkout...");
     Paddle.Checkout.open({
-      items: [
-        {
-          priceId: CONFIG.prices.stealth.month,
-          quantity: 1
-        }
-      ],
-      settings: {
-        displayMode: "overlay",
-        theme: "light",
-        locale: "en",
-        successUrl: window.location.origin + "/dashboard.html"
-      },
-      customer: {
-        email: getUserEmail() // Optional: function to get user email if logged in
+      product: CONFIG.prices.stealth.month,
+      email: getUserEmail(), // Optional: function to get user email if logged in
+      successCallback: function(data) {
+        console.log("Checkout success:", data);
+        window.location.href = '/dashboard.html';
       }
     });
   } catch (error) {
@@ -1634,27 +1626,18 @@ function openShadowCheckout(event) {
   event.preventDefault();
   
   if (!paddleInitialized) {
-    console.error("Paddle not initialized yet");
-    return;
+    console.log("Attempting to initialize Paddle before checkout");
+    initializePaddle();
   }
   
   try {
     console.log("Opening Shadow Executive checkout...");
     Paddle.Checkout.open({
-      items: [
-        {
-          priceId: CONFIG.prices.shadow.month,
-          quantity: 1
-        }
-      ],
-      settings: {
-        displayMode: "overlay",
-        theme: "light",
-        locale: "en",
-        successUrl: window.location.origin + "/dashboard.html"
-      },
-      customer: {
-        email: getUserEmail() // Optional: function to get user email if logged in
+      product: CONFIG.prices.shadow.month,
+      email: getUserEmail(), // Optional: function to get user email if logged in
+      successCallback: function(data) {
+        console.log("Checkout success:", data);
+        window.location.href = '/dashboard.html';
       }
     });
   } catch (error) {
@@ -1667,27 +1650,18 @@ function openPhantomCheckout(event) {
   event.preventDefault();
   
   if (!paddleInitialized) {
-    console.error("Paddle not initialized yet");
-    return;
+    console.log("Attempting to initialize Paddle before checkout");
+    initializePaddle();
   }
   
   try {
     console.log("Opening Phantom Intelligence checkout...");
     Paddle.Checkout.open({
-      items: [
-        {
-          priceId: CONFIG.prices.phantom.month,
-          quantity: 1
-        }
-      ],
-      settings: {
-        displayMode: "overlay",
-        theme: "light",
-        locale: "en",
-        successUrl: window.location.origin + "/dashboard.html"
-      },
-      customer: {
-        email: getUserEmail() // Optional: function to get user email if logged in
+      product: CONFIG.prices.phantom.month,
+      email: getUserEmail(), // Optional: function to get user email if logged in
+      successCallback: function(data) {
+        console.log("Checkout success:", data);
+        window.location.href = '/dashboard.html';
       }
     });
   } catch (error) {
@@ -1704,6 +1678,6 @@ function getUserEmail() {
 
 // Initialize Paddle when the page loads
 document.addEventListener("DOMContentLoaded", initializePaddle);
-</script>
+    </script>
 </body>
 </html>
