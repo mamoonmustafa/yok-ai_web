@@ -1570,41 +1570,35 @@
     const SHADOW_PRODUCT_ID = 'pri_01jsvjh4k61x67ag76tb2gj8rg';    // Replace with actual Shadow product ID
     const PHANTOM_PRODUCT_ID = 'pri_01jsvjjemgjqh5gsvwhdkf3w7p';   // Replace with actual Phantom product ID
 
-    // Function to open checkout for Stealth Assistant
     function openStealthCheckout(event) {
-        event.preventDefault();
-        Paddle.Checkout.open({
-            product: 'pri_01jsvjevqap65b29x7sa5tyfzy',  // Your sandbox Price ID
-            successCallback: function(data) {
-            console.log('Checkout complete!', data);
+    event.preventDefault();
+    Paddle.Checkout.open({
+        product: 'pri_01jsvjevqap65b29x7sa5tyfzy',  // Stealth Assistant
+        successCallback: function(data) {
             window.location.href = '/dashboard.html';
-            }
-        });
-    }
+        }
+    });
+}
 
-    // Function to open checkout for Shadow Executive
-    function openShadowCheckout(event) {
-        event.preventDefault();
-        Paddle.Checkout.open({
-            product: 'pri_01jsvjh4k61x67ag76tb2gj8rg',  // Your sandbox Price ID
-            successCallback: function(data) {
-            console.log('Checkout complete!', data);
+function openShadowCheckout(event) {
+    event.preventDefault();
+    Paddle.Checkout.open({
+        product: 'pri_01jsvjh4k61x67aq76tb2gj8rq',  // Shadow Executive
+        successCallback: function(data) {
             window.location.href = '/dashboard.html';
-            }
-        });
-    }
+        }
+    });
+}
 
-    // Function to open checkout for Phantom Intelligence
-    function openPhantomCheckout(event) {
-        event.preventDefault();
-        Paddle.Checkout.open({
-            product: 'pri_01jsvjjemgjqh5gsvwhdkf3w7p',  // Your sandbox Price ID
-            successCallback: function(data) {
-            console.log('Checkout complete!', data);
+function openPhantomCheckout(event) {
+    event.preventDefault();
+    Paddle.Checkout.open({
+        product: 'pri_01jsvjemqjqh5gsvwhdkf3w7p',  // Phantom Intelligence
+        successCallback: function(data) {
             window.location.href = '/dashboard.html';
-            }
-        });
-    }
+        }
+    });
+}
 
     // Function to get user's email if they're logged in
     function getEmailIfLoggedIn() {
