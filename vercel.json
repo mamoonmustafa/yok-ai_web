@@ -1,0 +1,7 @@
+{
+    "routes": [
+      { "src": "/privacypolicy", "dest": "/api/privacypolicy.js" },
+      { "src": "/returnpolicy", "dest": "/api/returnpolicy.js" },
+      { "src": "/termsofuse", "dest": "/api/termsofuse.js" }
+    ]
+  }
