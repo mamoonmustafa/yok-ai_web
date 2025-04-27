@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing - Yok-AI | The Private AI Assistant</title>
+    <!-- Add this in the <head> section of your HTML -->
+    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
+    <script type="text/javascript">
+        Paddle.Setup({ 
+            vendor: 30514  // Replace with your actual Paddle Seller ID
+        });
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -1165,7 +1172,7 @@
                     <li>Standard support (24-hour response)</li>
                 </ul>
                 <div class="btn-wrapper">
-                    <a href="#" class="btn btn-primary pricing-btn">Get Started</a>
+                    <a href="#" class="btn btn-primary pricing-btn" onclick="openStealthCheckout(event)">Get Started</a>
                 </div>
             </div>
             
@@ -1185,7 +1192,7 @@
                     <li>Enhanced capture capabilities</li>
                 </ul>
                 <div class="btn-wrapper">
-                    <a href="#" class="btn btn-primary pricing-btn">Get Started</a>
+                    <a href="#" class="btn btn-primary pricing-btn" onclick="openShadowCheckout(event)">Get Started</a>
                 </div>
             </div>
             
@@ -1205,7 +1212,7 @@
                     <li>Dedicated account success manager</li>
                 </ul>
                 <div class="btn-wrapper">
-                    <a href="#" class="btn btn-primary pricing-btn">Experience Freedom</a>
+                    <a href="#" class="btn btn-primary pricing-btn" onclick="openPhantomCheckout(event)">Experience Freedom</a>
                 </div>
             </div>
         </div>
@@ -1541,6 +1548,59 @@
             }
         });
     });
+</script>
+
+<script>
+    // Replace these with your actual Paddle product IDs
+    const STEALTH_PRODUCT_ID = 'pri_01jsvjevqap65b29x7sa5tyfzy';   // Replace with actual Stealth product ID
+    const SHADOW_PRODUCT_ID = 'pri_01jsvjh4k61x67ag76tb2gj8rg';    // Replace with actual Shadow product ID
+    const PHANTOM_PRODUCT_ID = 'pri_01jsvjjemgjqh5gsvwhdkf3w7p';   // Replace with actual Phantom product ID
+
+    // Function to open checkout for Stealth Assistant
+    function openStealthCheckout(event) {
+        event.preventDefault();
+        Paddle.Checkout.open({
+            product: STEALTH_PRODUCT_ID,
+            email: getEmailIfLoggedIn(),
+            successCallback: function(data) {
+                // Redirect to dashboard after successful purchase
+                window.location.href = '/dashboard.html';
+            }
+        });
+    }
+
+    // Function to open checkout for Shadow Executive
+    function openShadowCheckout(event) {
+        event.preventDefault();
+        Paddle.Checkout.open({
+            product: SHADOW_PRODUCT_ID,
+            email: getEmailIfLoggedIn(),
+            successCallback: function(data) {
+                // Redirect to dashboard after successful purchase
+                window.location.href = '/dashboard.html';
+            }
+        });
+    }
+
+    // Function to open checkout for Phantom Intelligence
+    function openPhantomCheckout(event) {
+        event.preventDefault();
+        Paddle.Checkout.open({
+            product: PHANTOM_PRODUCT_ID,
+            email: getEmailIfLoggedIn(),
+            successCallback: function(data) {
+                // Redirect to dashboard after successful purchase
+                window.location.href = '/dashboard.html';
+            }
+        });
+    }
+
+    // Function to get user's email if they're logged in
+    function getEmailIfLoggedIn() {
+        // If you have a login system, return the user's email here
+        // Otherwise return null and Paddle will ask for it during checkout
+        return null;
+    }
 </script>
 </body>
 </html>
