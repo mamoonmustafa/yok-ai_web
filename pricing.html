@@ -1606,6 +1606,10 @@
         
         try {
             console.log("Opening Stealth Assistant checkout...");
+            
+            // Get user email or use a placeholder if not available - Paddle v2 requires an email
+            const userEmail = getUserEmail() || "customer@example.com";
+            
             Paddle.Checkout.open({
             items: [
                 {
@@ -1619,7 +1623,7 @@
                 variant: "one-page"
             },
             customer: {
-                email: getUserEmail() // Optional: function to get user email if logged in
+                email: userEmail // Email is REQUIRED in Paddle v2
             }
             });
         } catch (error) {
@@ -1693,8 +1697,17 @@
 
         // Helper function to get user email if available
         function getUserEmail() {
-        // Replace with actual code to get user email if they're logged in
-        // Return null if the user is not logged in
+        // Try to find an email from the user's session/authentication
+        // This is a placeholder - implement your actual user email retrieval here
+        
+        // For example, if you have a user object in localStorage:
+        // const user = JSON.parse(localStorage.getItem('user'));
+        // if (user && user.email) return user.email;
+        
+        // Or if you have a global user object:
+        // if (window.currentUser && window.currentUser.email) return window.currentUser.email;
+        
+        // Return null if no email is found - we'll use a placeholder in the checkout functions
         return null;
         }
 
