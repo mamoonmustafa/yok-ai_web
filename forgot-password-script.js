@@ -20,6 +20,13 @@ const resetFormContainer = document.getElementById('reset-form-container');
 const resetSuccess = document.getElementById('reset-success');
 
 // Reset password
+// 1. First, make sure your Firebase project is properly configured
+// You need to add your domain to the authorized domains in Firebase Console:
+// Authentication → Settings → Authorized Domains
+
+// 2. Check that the actionCodeSettings is formatted correctly and has ABSOLUTE URL
+// Replace this in your forgot-password-script.js:
+
 resetForm.addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -44,55 +51,75 @@ resetForm.addEventListener('submit', function(e) {
     submitButton.disabled = true;
     submitButton.textContent = 'Sending...';
     
-    // Send password reset email
-// Create actionCodeSettings for custom reset page
-const actionCodeSettings = {
-    // URL you want to redirect to after password reset
-    url: window.location.origin + '/newpwd.html',
-    // This must be true for custom handling
-    handleCodeInApp: true
-};
-
-// Send password reset email with custom settings
-firebase.auth().sendPasswordResetEmail(email, actionCodeSettings)
-    .then(() => {
-        // Show success message
-        resetFormContainer.style.display = 'none';
-        resetSuccess.style.display = 'block';
-        
-        // Log analytics event (if you have analytics set up)
-        if (firebase.analytics) {
-            firebase.analytics().logEvent('password_reset_email_sent', {
-                email_domain: email.split('@')[1]
-            });
-        }
-    })
-    .catch((error) => {
-        // Handle errors
-        const errorCode = error.code;
-        let errorMessage = '';
-        
-        switch (errorCode) {
-            case 'auth/invalid-email':
-                errorMessage = 'Invalid email address format.';
-                break;
-            case 'auth/user-not-found':
-                errorMessage = 'No account found with this email. Please check your email or sign up.';
-                break;
-            case 'auth/too-many-requests':
-                errorMessage = 'Too many attempts. Please try again later.';
-                break;
-            default:
-                errorMessage = 'An error occurred. Please try again.';
-        }
-        
-        showAlert(errorMessage, 'error');
-        console.error(error);
-        
-        // Reset button state
-        submitButton.disabled = false;
-        submitButton.textContent = originalButtonText;
-    });
+    // IMPORTANT: Define actionCodeSettings with ABSOLUTE URL (not relative)
+    const actionCodeSettings = {
+        // Full absolute URL is required (not just a relative path)
+        url: window.location.origin + '/newpwd.html',
+        // This MUST be true
+        handleCodeInApp: true,
+        // Also recommended to add these for iOS and Android:
+        iOS: {
+            bundleId: 'com.yourdomain.app'
+        },
+        android: {
+            packageName: 'com.yourdomain.app',
+            installApp: false,
+            minimumVersion: '12'
+        },
+        // Avoid localization issues
+        dynamicLinkDomain: undefined
+    };
+    
+    console.log("Sending reset email with settings:", actionCodeSettings);
+    
+    // Send password reset email with custom settings
+    firebase.auth().sendPasswordResetEmail(email, actionCodeSettings)
+        .then(() => {
+            console.log("Reset email sent successfully with custom URL");
+            // Show success message
+            resetFormContainer.style.display = 'none';
+            resetSuccess.style.display = 'block';
+            
+            // Log analytics event (if you have analytics set up)
+            if (firebase.analytics) {
+                firebase.analytics().logEvent('password_reset_email_sent', {
+                    email_domain: email.split('@')[1]
+                });
+            }
+        })
+        .catch((error) => {
+            console.error("Error sending reset email:", error);
+            // Handle errors
+            const errorCode = error.code;
+            let errorMessage = '';
+            
+            switch (errorCode) {
+                case 'auth/invalid-email':
+                    errorMessage = 'Invalid email address format.';
+                    break;
+                case 'auth/user-not-found':
+                    errorMessage = 'No account found with this email. Please check your email or sign up.';
+                    break;
+                case 'auth/too-many-requests':
+                    errorMessage = 'Too many attempts. Please try again later.';
+                    break;
+                case 'auth/invalid-continue-uri':
+                    errorMessage = 'The continue URL provided in the request is invalid.';
+                    break;
+                case 'auth/unauthorized-continue-uri':
+                    errorMessage = 'The domain of the continue URL is not whitelisted.';
+                    break;
+                default:
+                    errorMessage = 'An error occurred. Please try again.';
+            }
+            
+            showAlert(errorMessage, 'error');
+            console.error(error);
+            
+            // Reset button state
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        });
 });
 
 // Show alert message
