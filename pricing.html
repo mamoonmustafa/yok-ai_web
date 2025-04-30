@@ -1169,7 +1169,7 @@
                     <li>Standard support (24-hour response)</li>
                 </ul>
                 <div class="btn-wrapper">
-                    <a href="#" class="btn btn-primary pricing-btn" onclick="openStealthCheckout(event)">Get Started</a>
+                    <a href="#" class="btn btn-primary pricing-btn" onclick="openCheckout('starter')">Get Started</a>
                 </div>
             </div>
             
@@ -1189,7 +1189,7 @@
                     <li>Enhanced capture capabilities</li>
                 </ul>
                 <div class="btn-wrapper">
-                    <a href="#" class="btn btn-primary pricing-btn" onclick="openShadowCheckout(event)">Get Started</a>
+                    <a href="#" class="btn btn-primary pricing-btn" onclick="openCheckout('pro')">Get Started</a>
                 </div>
             </div>
             
@@ -1209,7 +1209,7 @@
                     <li>Dedicated account success manager</li>
                 </ul>
                 <div class="btn-wrapper">
-                    <a href="#" class="btn btn-primary pricing-btn" onclick="openPhantomCheckout(event)">Experience Freedom</a>
+                    <a href="#" class="btn btn-primary pricing-btn" onclick="openCheckout('enterprise')">Experience Freedom</a>
                 </div>
             </div>
         </div>
@@ -1546,173 +1546,8 @@
         });
     });
 </script>
-
-    <script>
-        // Configuration
-        const CONFIG = {
-        clientToken: "test_164332024f472fd8e2fe8c44d48", // Replace with your actual client token
-        prices: {
-            stealth: {
-            month: "pri_01jsvjevqap65b29x7sa5tyfzy"  // Stealth Assistant
-            },
-            shadow: {
-            month: "pri_01jsvjh4k61x67aq76tb2gj8rq"  // Shadow Executive
-            },
-            phantom: {
-            month: "pri_01jsvjemqjqh5gsvwhdkf3w7p"   // Phantom Intelligence
-            }
-        }
-        };
-
-        // State
-        let paddleInitialized = false;
-
-        // Initialize Paddle
-        function initializePaddle() {
-        try {
-            // For sandbox testing
-            Paddle.Environment.set("sandbox");
-            
-            // Initialize Paddle with your client token
-            Paddle.Initialize({
-            token: CONFIG.clientToken,
-            eventCallback: function(event) {
-                console.log("Paddle event:", event);
-                
-                // Handle checkout complete event
-                if (event.name === "checkout.completed") {
-                console.log("Checkout completed:", event);
-                // Redirect to dashboard
-                window.location.href = '/dashboard.html';
-                }
-            }
-            });
-            
-            paddleInitialized = true;
-            console.log("Paddle initialized successfully");
-        } catch (error) {
-            console.error("Paddle initialization error:", error);
-        }
-        }
-
-        // Open checkout for Stealth Assistant plan
-        function openStealthCheckout(event) {
-        event.preventDefault();
-        
-        if (!paddleInitialized) {
-            console.log("Attempting to initialize Paddle before checkout");
-            initializePaddle();
-        }
-        
-        try {
-            console.log("Opening Stealth Assistant checkout...");
-            
-            // Get user email or use a placeholder if not available - Paddle v2 requires an email
-            const userEmail = getUserEmail() || "customer@example.com";
-            
-            Paddle.Checkout.open({
-            items: [
-                {
-                priceId: CONFIG.prices.stealth.month,
-                quantity: 1
-                }
-            ],
-            settings: {
-                theme: "light",
-                displayMode: "overlay",
-                variant: "one-page"
-            },
-            customer: {
-                email: userEmail // Email is REQUIRED in Paddle v2
-            }
-            });
-        } catch (error) {
-            console.error("Checkout error:", error.message);
-        }
-        }
-
-        // Open checkout for Shadow Executive plan
-        function openShadowCheckout(event) {
-        event.preventDefault();
-        
-        if (!paddleInitialized) {
-            console.log("Attempting to initialize Paddle before checkout");
-            initializePaddle();
-        }
-        
-        try {
-            console.log("Opening Shadow Executive checkout...");
-            Paddle.Checkout.open({
-            items: [
-                {
-                priceId: CONFIG.prices.shadow.month,
-                quantity: 1
-                }
-            ],
-            settings: {
-                theme: "light",
-                displayMode: "overlay",
-                variant: "one-page"
-            },
-            customer: {
-                email: getUserEmail() // Optional: function to get user email if logged in
-            }
-            });
-        } catch (error) {
-            console.error("Checkout error:", error.message);
-        }
-        }
-
-        // Open checkout for Phantom Intelligence plan
-        function openPhantomCheckout(event) {
-        event.preventDefault();
-        
-        if (!paddleInitialized) {
-            console.log("Attempting to initialize Paddle before checkout");
-            initializePaddle();
-        }
-        
-        try {
-            console.log("Opening Phantom Intelligence checkout...");
-            Paddle.Checkout.open({
-            items: [
-                {
-                priceId: CONFIG.prices.phantom.month,
-                quantity: 1
-                }
-            ],
-            settings: {
-                theme: "light",
-                displayMode: "overlay",
-                variant: "one-page"
-            },
-            customer: {
-                email: getUserEmail() // Optional: function to get user email if logged in
-            }
-            });
-        } catch (error) {
-            console.error("Checkout error:", error.message);
-        }
-        }
-
-        // Helper function to get user email if available
-        function getUserEmail() {
-        // Try to find an email from the user's session/authentication
-        // This is a placeholder - implement your actual user email retrieval here
-        
-        // For example, if you have a user object in localStorage:
-        // const user = JSON.parse(localStorage.getItem('user'));
-        // if (user && user.email) return user.email;
-        
-        // Or if you have a global user object:
-        // if (window.currentUser && window.currentUser.email) return window.currentUser.email;
-        
-        // Return null if no email is found - we'll use a placeholder in the checkout functions
-        return null;
-        }
-
-        // Initialize Paddle when the page loads
-        document.addEventListener("DOMContentLoaded", initializePaddle);
-    </script>
+<!-- Scripts -->
+<script src='https://cdn.paddle.com/paddle/v2/paddle.js'></script>
+<script src="./paddle.js"></script>
 </body>
 </html>
