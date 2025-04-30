@@ -54,7 +54,7 @@ resetForm.addEventListener('submit', function(e) {
     // IMPORTANT: Define actionCodeSettings with ABSOLUTE URL (not relative)
     const actionCodeSettings = {
         // Full absolute URL is required (not just a relative path)
-        url: window.location.origin + '/newpwd.html',
+        url: 'https://www.yok-ai.com/newpwd.html',
         // This MUST be true
         handleCodeInApp: true,
         // Also recommended to add these for iOS and Android:
