@@ -12,13 +12,13 @@ const firebaseConfig = {
     messagingSenderId: "506924545426",
     appId: "1:506924545426:web:1ce90c20895906ca1abd4b",
     measurementId: "G-ZDPR66VLKK"
-};
+  };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
 // Paddle configuration - Replace with your Paddle vendor ID
-const PADDLE_VENDOR_ID = 'YOUR_PADDLE_VENDOR_ID';
+const PADDLE_VENDOR_ID = 30514;
 
 // Subscription plans - Should match your Paddle subscription plans
 const SUBSCRIPTION_PLANS = {
