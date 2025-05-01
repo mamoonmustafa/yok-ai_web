@@ -240,7 +240,9 @@ updateDashboardView: function(status) {
     // Clear subscription container
     subscriptionContainer.innerHTML = '';
     
-    if (status && status.active) {
+    // if (status && status.active) {
+    if (true) {
+
         // User has active subscription
         
         // 1. Show subscription status
