@@ -207,7 +207,7 @@ const Dashboard = {
                 Dashboard.loadDashboardData();
             } else {
                 // User is not signed in, redirect to sign in page
-                window.location.href = '/signin.html';
+                window.location.href = '/signin';
             }
         });
         
@@ -665,7 +665,7 @@ updateDashboardView: function(status) {
         firebase.auth().signOut()
             .then(() => {
                 // Redirect to sign in page
-                window.location.href = '/signin.html';
+                window.location.href = '/signin';
             })
             .catch(error => {
                 console.error("Error signing out:", error);

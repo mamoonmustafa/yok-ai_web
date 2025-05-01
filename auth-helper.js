@@ -36,7 +36,7 @@ function initializeFirebase() {
  * @param {function} onUnauthenticated - Callback when user is not authenticated
  * @param {string} redirectUrl - URL to redirect to if user is not authenticated
  */
-function checkAuth(onAuthenticated, onUnauthenticated, redirectUrl = '/signin.html') {
+function checkAuth(onAuthenticated, onUnauthenticated, redirectUrl = '/signin') {
     const { auth } = initializeFirebase();
     
     auth.onAuthStateChanged((user) => {
@@ -60,7 +60,7 @@ function checkAuth(onAuthenticated, onUnauthenticated, redirectUrl = '/signin.ht
  * Sign out the current user
  * @param {string} redirectUrl - URL to redirect to after sign out
  */
-function signOut(redirectUrl = '/signin.html') {
+function signOut(redirectUrl = '/signin') {
     const { auth } = initializeFirebase();
     
     auth.signOut()

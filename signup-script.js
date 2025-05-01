@@ -145,7 +145,7 @@ if (signupForm) {
                     return new Promise(resolve => {
                         setTimeout(() => {
                             user.sendEmailVerification({
-                                url: window.location.origin + '/signin.html'
+                                url: window.location.origin + '/signin'
                             })
                             .then(() => {
                                 console.log("Verification email sent successfully");
@@ -166,7 +166,7 @@ if (signupForm) {
                 
                 // Redirect to dashboard after short delay
                 setTimeout(() => {
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/dashboard';
                 }, 3000); // Increased delay to give user time to read the message
             })
             .catch((error) => {
@@ -232,7 +232,7 @@ function signUpWithGoogle() {
             
             // Redirect to dashboard after short delay
             setTimeout(() => {
-                window.location.href = '/dashboard.html';
+                window.location.href = '/dashboard';
             }, 1500);
         })
         .catch((error) => {
@@ -273,7 +273,7 @@ function signUpWithGithub() {
             
             // Redirect to dashboard after short delay
             setTimeout(() => {
-                window.location.href = '/dashboard.html';
+                window.location.href = '/dashboard';
             }, 1500);
         })
         .catch((error) => {
@@ -305,6 +305,6 @@ function showAlert(message, type) {
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         // User is signed in, redirect to dashboard
-        window.location.href = '/dashboard.html';
+        window.location.href = '/dashboard';
     }
 });

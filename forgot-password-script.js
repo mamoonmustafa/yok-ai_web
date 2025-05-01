@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (backToSignInBtn) {
         backToSignInBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.href = '/signin.html';
+            window.location.href = '/signin';
         });
     }
 });

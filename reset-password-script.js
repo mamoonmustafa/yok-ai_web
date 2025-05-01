@@ -51,14 +51,14 @@ const reqSpecial = document.getElementById('req-special');
 const urlParams = new URLSearchParams(window.location.search);
 const mode = urlParams.get('mode');
 const actionCode = urlParams.get('oobCode');
-const continueUrl = urlParams.get('continueUrl') || '/dashboard.html';
+const continueUrl = urlParams.get('continueUrl') || '/dashboard';
 let email = '';
 
 // Main function to handle different modes
 function handleAction() {
     // If no action code is provided, redirect to the sign-in page
     if (!actionCode) {
-        window.location.href = '/signin.html';
+        window.location.href = '/signin';
         return;
     }
 
@@ -126,7 +126,7 @@ function handleVerifyEmail() {
                     'Email Verified!',
                     'Your email has been successfully verified. Please sign in to access your account.',
                     'Sign In',
-                    '/signin.html'
+                    '/signin'
                 );
             }
         })
@@ -377,7 +377,7 @@ if (resetForm) {
                                 'Password Reset Successful!', 
                                 'Your password has been reset successfully. Please sign in with your new password.',
                                 'Go to Sign In',
-                                '/signin.html'
+                                '/signin'
                             );
                             return Promise.resolve();
                         });
@@ -386,7 +386,7 @@ if (resetForm) {
                         'Password Reset Successful!', 
                         'Your password has been reset successfully. Please sign in with your new password.',
                         'Go to Sign In',
-                        '/signin.html'
+                        '/signin'
                     );
                     return Promise.resolve();
                 }
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             e.preventDefault();
-            window.location.href = successButton.getAttribute('href') || '/signin.html';
+            window.location.href = successButton.getAttribute('href') || '/signin';
         });
     }
     
@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             e.preventDefault();
-            window.location.href = errorButton.getAttribute('href') || '/signin.html';
+            window.location.href = errorButton.getAttribute('href') || '/signin';
         });
     }
 });

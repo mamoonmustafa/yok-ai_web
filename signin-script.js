@@ -61,7 +61,7 @@ signinForm.addEventListener('submit', function(e) {
             
             // Redirect to dashboard after short delay
             setTimeout(() => {
-                window.location.href = '/dashboard.html';
+                window.location.href = '/dashboard';
             }, 1500);
         })
         .catch((error) => {
@@ -100,7 +100,7 @@ function signInWithGoogle() {
             
             // Redirect to dashboard after short delay
             setTimeout(() => {
-                window.location.href = '/dashboard.html';
+                window.location.href = '/dashboard';
             }, 1500);
         })
         .catch((error) => {
@@ -121,7 +121,7 @@ function signInWithGithub() {
             
             // Redirect to dashboard after short delay
             setTimeout(() => {
-                window.location.href = '/dashboard.html';
+                window.location.href = '/dashboard';
             }, 1500);
         })
         .catch((error) => {
@@ -149,6 +149,6 @@ function showAlert(message, type) {
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         // User is signed in, redirect to dashboard
-        window.location.href = '/dashboard.html';
+        window.location.href = '/dashboard';
     }
 });
