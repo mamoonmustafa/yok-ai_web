@@ -1,19 +1,30 @@
 {
-    "routes": [
-      { "src": "/privacypolicy", "dest": "/api/privacypolicy.js" },
-      { "src": "/refundpolicy", "dest": "/api/refundpolicy.js" },
-      { "src": "/termsofservice", "dest": "/api/termsofservice.js" },
-      { "src": "/docs", "dest": "/api/docs.js" },
-      { "src": "/price", "dest": "pricing.html" },
-      { "src": "/signin", "dest": "signin.html" },
-      { "src": "/signup", "dest": "signup.html" },
-      { "src": "/dashboard", "dest": "dashboard.html" },
-      { "src": "/oops", "dest": "forgot-password.html" },
-      { "src": "/account", "dest": "newpwd.html" },
-      { "src": "/about", "dest": "about.html" },
-      { "src": "/contact", "dest": "contact.html" },
-      { "src": "/faq", "dest": "faq.html" },
-      { "src": "/cookies", "dest": "/api/cookies.js" }
+  "routes": [
+    { "src": "/privacypolicy", "dest": "/api/privacypolicy.js" },
+    { "src": "/refundpolicy", "dest": "/api/refundpolicy.js" },
+    { "src": "/termsofservice", "dest": "/api/termsofservice.js" },
+    { "src": "/docs", "dest": "/api/docs.js" },
+    { "src": "/price", "dest": "pricing.html" },
+    { "src": "/signin", "dest": "signin.html" },
+    { "src": "/signup", "dest": "signup.html" },
+    { "src": "/dashboard", "dest": "dashboard.html" },
+    { "src": "/oops", "dest": "forgot-password.html" },
+    { "src": "/account", "dest": "newpwd.html" },
+    { "src": "/about", "dest": "about.html" },
+    { "src": "/contact", "dest": "contact.html" },
+    { "src": "/faq", "dest": "faq.html" },
+    { "src": "/cookies", "dest": "/api/cookies.js" },
+    
 
-    ]
-  }
+    { "src": "/pricing.html", "status": 308, "headers": { "Location": "/price" } },
+    { "src": "/signin.html", "status": 308, "headers": { "Location": "/signin" } },
+    { "src": "/signup.html", "status": 308, "headers": { "Location": "/signup" } },
+    { "src": "/dashboard.html", "status": 308, "headers": { "Location": "/dashboard" } },
+    { "src": "/forgot-password.html", "status": 308, "headers": { "Location": "/oops" } },
+    { "src": "/newpwd.html", "status": 308, "headers": { "Location": "/account" } },
+    { "src": "/about.html", "status": 308, "headers": { "Location": "/about" } },
+    { "src": "/contact.html", "status": 308, "headers": { "Location": "/contact" } },
+    { "src": "/faq.html", "status": 308, "headers": { "Location": "/faq" } }
+  ],
+  "cleanUrls": true
+}
