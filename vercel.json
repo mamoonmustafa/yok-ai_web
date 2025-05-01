@@ -3,6 +3,11 @@
       { "src": "/privacypolicy", "dest": "/api/privacypolicy.js" },
       { "src": "/refundpolicy", "dest": "/api/refundpolicy.js" },
       { "src": "/termsofservice", "dest": "/api/termsofservice.js" },
-      { "src": "/price", "dest": "pricing.html" }
+      { "src": "/price", "dest": "pricing.html" },
+      { "src": "/signin", "dest": "signin.html" },
+      { "src": "/signup", "dest": "signup.html" },
+      { "src": "/dashboard", "dest": "dashboard.html" },
+      { "src": "/oops", "dest": "forgot-password.html" },
+      { "src": "/account", "dest": "newpwd.html" }
     ]
   }

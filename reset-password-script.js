@@ -51,7 +51,7 @@ const reqSpecial = document.getElementById('req-special');
 const urlParams = new URLSearchParams(window.location.search);
 const mode = urlParams.get('mode');
 const actionCode = urlParams.get('oobCode');
-const continueUrl = urlParams.get('continueUrl') || '/dashboard';
+const continueUrl = urlParams.get('continueUrl') || '/dashboard.html';
 let email = '';
 
 // Main function to handle different modes
