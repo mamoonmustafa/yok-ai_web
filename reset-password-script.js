@@ -7,24 +7,39 @@ const firebaseConfig = {
     messagingSenderId: "506924545426",
     appId: "1:506924545426:web:1ce90c20895906ca1abd4b",
     measurementId: "G-ZDPR66VLKK"
-  };
+};
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
 // Get elements
+const loadingContainer = document.getElementById('loading-container');
+const resetFormContainer = document.getElementById('reset-form-container');
+const verifyEmailContainer = document.getElementById('verify-email-container');
+const resultSuccess = document.getElementById('result-success');
+const errorContainer = document.getElementById('error-container');
+
 const resetForm = document.getElementById('reset-form');
 const passwordInput = document.getElementById('password');
 const confirmPasswordInput = document.getElementById('confirm-password');
 const togglePasswordBtn = document.getElementById('toggle-password');
 const alertDiv = document.getElementById('alert');
-const resetFormContainer = document.getElementById('reset-form-container');
-const resetSuccess = document.getElementById('reset-success');
+const verifyAlertDiv = document.getElementById('verify-alert');
 const passwordStrength = document.getElementById('password-strength');
 const strengthValue = document.getElementById('strength-value');
 const strengthBar = document.getElementById('strength-meter-bar');
 const passwordMismatch = document.getElementById('password-mismatch');
 const passwordMatch = document.getElementById('password-match');
+
+// Success elements
+const successTitle = document.getElementById('success-title');
+const successMessage = document.getElementById('success-message');
+const successButton = document.getElementById('success-button');
+
+// Error elements
+const errorTitle = document.getElementById('error-title');
+const errorMessage = document.getElementById('error-message');
+const errorButton = document.getElementById('error-button');
 
 // Password requirement elements
 const reqLength = document.getElementById('req-length');
@@ -32,15 +47,42 @@ const reqUppercase = document.getElementById('req-uppercase');
 const reqNumber = document.getElementById('req-number');
 const reqSpecial = document.getElementById('req-special');
 
-// Get the action code from the URL
+// Parse URL parameters
 const urlParams = new URLSearchParams(window.location.search);
+const mode = urlParams.get('mode');
 const actionCode = urlParams.get('oobCode');
+const continueUrl = urlParams.get('continueUrl') || '/dashboard';
 let email = '';
 
-// If no action code is provided, redirect to the sign-in page
-if (!actionCode) {
-    window.location.href = '/signin.html';
-} else {
+// Main function to handle different modes
+function handleAction() {
+    // If no action code is provided, redirect to the sign-in page
+    if (!actionCode) {
+        window.location.href = '/signin.html';
+        return;
+    }
+
+    // Handle different action modes
+    switch (mode) {
+        case 'resetPassword':
+            handleResetPassword();
+            break;
+        case 'verifyEmail':
+            handleVerifyEmail();
+            break;
+        default:
+            // Try to verify what type of action it is
+            handleUnknownMode();
+            break;
+    }
+}
+
+// Handle reset password mode
+function handleResetPassword() {
+    // Hide loading, show reset form
+    loadingContainer.style.display = 'none';
+    resetFormContainer.style.display = 'block';
+
     // Verify the action code is valid
     firebase.auth().verifyPasswordResetCode(actionCode)
         .then((userEmail) => {
@@ -49,34 +91,96 @@ if (!actionCode) {
         })
         .catch((error) => {
             // Handle invalid or expired action code
-            const errorCode = error.code;
-            let errorMessage = '';
+            handleError(error, 'Password Reset Link Error');
+        });
+}
+
+// Handle email verification mode
+function handleVerifyEmail() {
+    // Hide loading, show verify email container
+    loadingContainer.style.display = 'none';
+    verifyEmailContainer.style.display = 'block';
+
+    // Apply the verification code
+    firebase.auth().applyActionCode(actionCode)
+        .then(() => {
+            // Email verified successfully
+            verifyEmailContainer.style.display = 'none';
             
-            switch (errorCode) {
-                case 'auth/expired-action-code':
-                    errorMessage = 'The password reset link has expired. Please request a new one.';
-                    break;
-                case 'auth/invalid-action-code':
-                    errorMessage = 'The password reset link is invalid. Please request a new one.';
-                    break;
-                default:
-                    errorMessage = 'Invalid password reset link. Please request a new one.';
+            // Get current user (if already signed in)
+            const user = firebase.auth().currentUser;
+            
+            if (user) {
+                // Reload user to update email verification status
+                return user.reload().then(() => {
+                    showSuccess(
+                        'Email Verified!',
+                        'Your email has been successfully verified. You can now access all features of your account.',
+                        'Go to Dashboard',
+                        continueUrl
+                    );
+                });
+            } else {
+                // User is not signed in
+                showSuccess(
+                    'Email Verified!',
+                    'Your email has been successfully verified. Please sign in to access your account.',
+                    'Sign In',
+                    '/signin.html'
+                );
             }
-            
-            showAlert(errorMessage, 'error');
-            
-            // Provide a link back to the forgot password page
-            const resetFormContent = `
-                <div class="auth-header">
-                    <h1>Invalid Reset Link</h1>
-                    <p>${errorMessage}</p>
-                </div>
-                <a href="/forgot-password.html" class="btn btn-primary">Request New Link</a>
-            `;
-            
-            if (resetFormContainer) {
-                resetFormContainer.innerHTML = resetFormContent;
-            }
+        })
+        .catch((error) => {
+            // Handle verification errors
+            handleError(error, 'Email Verification Error');
+        });
+}
+
+// Handle unknown mode - try to detect what type of action
+function handleUnknownMode() {
+    // First try if it's a password reset
+    firebase.auth().verifyPasswordResetCode(actionCode)
+        .then((userEmail) => {
+            // It's a password reset
+            email = userEmail;
+            loadingContainer.style.display = 'none';
+            resetFormContainer.style.display = 'block';
+        })
+        .catch((error) => {
+            // Not a password reset, try email verification
+            firebase.auth().checkActionCode(actionCode)
+                .then((actionCodeInfo) => {
+                    if (actionCodeInfo.operation === 'VERIFY_EMAIL') {
+                        // It's an email verification
+                        loadingContainer.style.display = 'none';
+                        verifyEmailContainer.style.display = 'block';
+                        
+                        // Apply the verification code
+                        firebase.auth().applyActionCode(actionCode)
+                            .then(() => {
+                                verifyEmailContainer.style.display = 'none';
+                                showSuccess(
+                                    'Email Verified!',
+                                    'Your email has been successfully verified. You can now access all features of your account.',
+                                    'Go to Dashboard',
+                                    continueUrl
+                                );
+                            })
+                            .catch((error) => {
+                                handleError(error, 'Email Verification Error');
+                            });
+                    } else {
+                        // Unknown operation
+                        handleError({
+                            code: 'auth/invalid-action',
+                            message: 'The action code is invalid or expired.'
+                        }, 'Invalid Link');
+                    }
+                })
+                .catch((error) => {
+                    // Not a valid action code
+                    handleError(error, 'Invalid Link');
+                });
         });
 }
 
@@ -203,7 +307,7 @@ function checkPasswordsMatch() {
     }
 }
 
-// Handle password reset
+// Handle password reset form submission
 if (resetForm) {
     resetForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -247,25 +351,45 @@ if (resetForm) {
         const submitButton = resetForm.querySelector('button[type="submit"]');
         const originalButtonText = submitButton.textContent;
         submitButton.disabled = true;
-        submitButton.textContent = 'Processing...';
+        submitButton.innerHTML = '<div class="spinner"></div> Processing...';
         
         // Confirm the password reset with Firebase
         firebase.auth().confirmPasswordReset(actionCode, newPassword)
             .then(() => {
                 // Password reset successful
                 resetFormContainer.style.display = 'none';
-                resetSuccess.style.display = 'block';
                 
                 // Auto sign in the user after password reset
                 if (email) {
                     return firebase.auth().signInWithEmailAndPassword(email, newPassword)
+                        .then(() => {
+                            showSuccess(
+                                'Password Reset Successful!', 
+                                'Your password has been reset successfully. You are now signed in.',
+                                'Go to Dashboard',
+                                continueUrl
+                            );
+                        })
                         .catch(error => {
                             console.log('Auto sign-in failed, user will need to sign in manually');
                             console.error(error);
+                            showSuccess(
+                                'Password Reset Successful!', 
+                                'Your password has been reset successfully. Please sign in with your new password.',
+                                'Go to Sign In',
+                                '/signin.html'
+                            );
                             return Promise.resolve();
                         });
+                } else {
+                    showSuccess(
+                        'Password Reset Successful!', 
+                        'Your password has been reset successfully. Please sign in with your new password.',
+                        'Go to Sign In',
+                        '/signin.html'
+                    );
+                    return Promise.resolve();
                 }
-                return Promise.resolve();
             })
             .then(() => {
                 // Log analytics event (if you have analytics set up)
@@ -274,66 +398,118 @@ if (resetForm) {
                 }
             })
             .catch((error) => {
-                // Handle errors
-                const errorCode = error.code;
-                let errorMessage = '';
-                
-                switch (errorCode) {
-                    case 'auth/expired-action-code':
-                        errorMessage = 'The password reset link has expired. Please request a new one.';
-                        break;
-                    case 'auth/invalid-action-code':
-                        errorMessage = 'The password reset link is invalid. Please request a new one.';
-                        break;
-                    case 'auth/user-disabled':
-                        errorMessage = 'This account has been disabled.';
-                        break;
-                    case 'auth/user-not-found':
-                        errorMessage = 'User not found.';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'Password is too weak. Please use a stronger password.';
-                        break;
-                    default:
-                        errorMessage = 'An error occurred. Please try again.';
-                }
-                
-                showAlert(errorMessage, 'error');
-                console.error(error);
-                
                 // Reset button state
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
+                
+                // Handle errors
+                handleError(error, 'Password Reset Error');
             });
     });
 }
 
 // Show alert message
-function showAlert(message, type) {
-    if (alertDiv) {
-        alertDiv.textContent = message;
-        alertDiv.className = `alert alert-${type}`;
-        alertDiv.style.display = 'block';
+function showAlert(message, type, alertElement = alertDiv) {
+    if (alertElement) {
+        alertElement.textContent = message;
+        alertElement.className = `alert alert-${type}`;
+        alertElement.style.display = 'block';
         
         // Auto-hide success alerts after 3 seconds
         if (type === 'success') {
             setTimeout(() => {
-                alertDiv.style.display = 'none';
+                alertElement.style.display = 'none';
             }, 3000);
         }
         
         // Ensure the alert is visible
-        alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        alertElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
-// Add event listener for the "Go to Sign In" button
+// Show success screen
+function showSuccess(title, message, buttonText, buttonHref) {
+    // Hide all other containers
+    loadingContainer.style.display = 'none';
+    resetFormContainer.style.display = 'none';
+    verifyEmailContainer.style.display = 'none';
+    errorContainer.style.display = 'none';
+    
+    // Set success content
+    successTitle.textContent = title;
+    successMessage.textContent = message;
+    successButton.textContent = buttonText;
+    successButton.href = buttonHref;
+    
+    // Show success container
+    resultSuccess.style.display = 'block';
+}
+
+// Handle errors
+function handleError(error, errorType) {
+    // Hide all other containers
+    loadingContainer.style.display = 'none';
+    resetFormContainer.style.display = 'none';
+    verifyEmailContainer.style.display = 'none';
+    resultSuccess.style.display = 'none';
+    
+    // Get error details
+    const errorCode = error.code;
+    let errorMsg = '';
+    
+    switch (errorCode) {
+        case 'auth/expired-action-code':
+            errorMsg = 'The link has expired. Please request a new one.';
+            break;
+        case 'auth/invalid-action-code':
+            errorMsg = 'The link is invalid. Please request a new one.';
+            break;
+        case 'auth/user-disabled':
+            errorMsg = 'This account has been disabled.';
+            break;
+        case 'auth/user-not-found':
+            errorMsg = 'User not found.';
+            break;
+        case 'auth/weak-password':
+            errorMsg = 'Password is too weak. Please use a stronger password.';
+            break;
+        default:
+            errorMsg = error.message || 'An error occurred. Please try again.';
+    }
+    
+    // Set error content
+    errorTitle.textContent = errorType;
+    errorMessage.textContent = errorMsg;
+    
+    // Show error container
+    errorContainer.style.display = 'block';
+}
+
+// Add event listeners for buttons
 document.addEventListener('DOMContentLoaded', () => {
-    const signInButton = document.querySelector('#reset-success .btn-primary');
-    if (signInButton) {
-        signInButton.addEventListener('click', (e) => {
+    // Success button
+    if (successButton) {
+        successButton.addEventListener('click', (e) => {
+            // If the href is not # or javascript:void(0), let it navigate normally
+            if (successButton.href !== '#' && !successButton.href.startsWith('javascript:')) {
+                return;
+            }
             e.preventDefault();
-            window.location.href = '/signin.html';
+            window.location.href = successButton.getAttribute('href') || '/signin.html';
+        });
+    }
+    
+    // Error button
+    if (errorButton) {
+        errorButton.addEventListener('click', (e) => {
+            if (errorButton.href !== '#' && !errorButton.href.startsWith('javascript:')) {
+                return;
+            }
+            e.preventDefault();
+            window.location.href = errorButton.getAttribute('href') || '/signin.html';
         });
     }
 });
+
+// Initialize the page
+handleAction();

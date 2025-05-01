@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yok-AI | Reset Password</title>
+    <title>Yok-AI | Account Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -237,24 +237,24 @@
             text-decoration: underline;
         }
 
-        .reset-success {
+        .result-success {
             text-align: center;
             display: none;
         }
 
-        .reset-success-icon {
+        .result-success-icon {
             font-size: 64px;
             color: var(--success);
             margin-bottom: 16px;
         }
 
-        .reset-success h2 {
+        .result-success h2 {
             font-size: 24px;
             margin-bottom: 8px;
             font-weight: 600;
         }
 
-        .reset-success p {
+        .result-success p {
             color: var(--text-secondary);
             margin-bottom: 24px;
         }
@@ -312,6 +312,20 @@
             color: var(--success) !important;
         }
 
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Responsive adjustments */
         @media (max-width: 480px) {
             .auth-container {
@@ -326,7 +340,14 @@
             <a href="/">Yok<span class="logo-dot">AI</span></a>
         </div>
         
-        <div id="reset-form-container">
+        <!-- Loading state -->
+        <div id="loading-container" style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px;">
+            <div class="spinner" style="width: 40px; height: 40px; margin-bottom: 20px;"></div>
+            <p>Processing your request...</p>
+        </div>
+        
+        <!-- Reset Password Form -->
+        <div id="reset-form-container" style="display: none;">
             <div class="auth-header">
                 <h1>Create new password</h1>
                 <p>Your new password must be different from previous passwords</p>
@@ -378,13 +399,39 @@
             </form>
         </div>
         
-        <div id="reset-success" class="reset-success">
-            <div class="reset-success-icon">
+        <!-- Email Verification Container -->
+        <div id="verify-email-container" style="display: none;">
+            <div class="auth-header">
+                <h1>Email Verification</h1>
+                <p>We're verifying your email address</p>
+            </div>
+            
+            <div id="verify-alert" class="alert"></div>
+            
+            <div style="text-align: center;">
+                <div class="spinner" style="width: 40px; height: 40px; margin: 20px auto;"></div>
+                <p>Please wait while we verify your email...</p>
+            </div>
+        </div>
+        
+        <!-- Success Container -->
+        <div id="result-success" class="result-success">
+            <div class="result-success-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
-            <h2>Password reset successful!</h2>
-            <p>Your password has been reset successfully. You can now sign in with your new password.</p>
-            <a href="/signin.html" class="btn btn-primary">Go to Sign In</a>
+            <h2 id="success-title">Success!</h2>
+            <p id="success-message">Operation completed successfully.</p>
+            <a id="success-button" href="/signin.html" class="btn btn-primary">Go to Sign In</a>
+        </div>
+        
+        <!-- Error Container -->
+        <div id="error-container" style="display: none; text-align: center;">
+            <div style="font-size: 64px; color: var(--error); margin-bottom: 16px;">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h2 id="error-title">Something went wrong</h2>
+            <p id="error-message">An error occurred while processing your request.</p>
+            <a id="error-button" href="/signin.html" class="btn btn-primary">Go to Sign In</a>
         </div>
     </div>
     
@@ -393,6 +440,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-<!-- Your signup script -->
-<script src="reset-password-script.js"></script></body>
+<!-- Your script -->
+<script src="reset-password-script.js"></script>
+</body>
 </html>
