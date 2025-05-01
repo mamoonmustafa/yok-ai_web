@@ -1,4 +1,6 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "routes": [
     { "src": "/privacypolicy", "dest": "/api/privacypolicy.js" },
     { "src": "/refundpolicy", "dest": "/api/refundpolicy.js" },
@@ -25,6 +27,5 @@
     { "src": "/about.html", "status": 308, "headers": { "Location": "/about" } },
     { "src": "/contact.html", "status": 308, "headers": { "Location": "/contact" } },
     { "src": "/faq.html", "status": 308, "headers": { "Location": "/faq" } }
-  ],
-  "cleanUrls": true
+  ]
 }
