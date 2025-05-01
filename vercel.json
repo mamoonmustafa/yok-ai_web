@@ -13,7 +13,7 @@
       { "src": "/about", "dest": "about.html" },
       { "src": "/contact", "dest": "contact.html" },
       { "src": "/faq", "dest": "faq.html" },
-      { "src": "/cookies", "dest": "cookies.js" }
+      { "src": "/cookies", "dest": "/api/cookies.js" }
 
     ]
   }
