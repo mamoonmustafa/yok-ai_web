@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       
       // Set appropriate headers
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'inline; filename="privacy-policy.pdf"');
+      res.setHeader('Content-Disposition', 'inline; filename="terms_of_service.pdf"');
       
       // Send the PDF data
       res.status(200).send(Buffer.from(pdfData));

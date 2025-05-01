@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yok-AI | Contact Us</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #0071e3;
+    --dark: #000000;
+    --light: #f5f5f7;
+    --accent: #86cffa;
+    --accent2: #ff2d55;
+    --text: #1d1d1f;
+    --text-secondary: #86868b;
+    --gradient: linear-gradient(135deg, #42a0fe, #0071e3);
+    --gradient-accent: linear-gradient(135deg, #ff375f, #ff2d55);
+    --blur-bg: rgba(255, 255, 255, 0.8);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body {
+    background-color: var(--light);
+    color: var(--text);
+    line-height: 1.47059;
+    font-weight: 400;
+    letter-spacing: -0.022em;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+h1 {
+    font-size: 48px;
+    letter-spacing: -0.025em;
+}
+
+h2 {
+    font-size: 40px;
+    letter-spacing: -0.025em;
+}
+
+h3 {
+    font-size: 24px;
+    letter-spacing: -0.022em;
+}
+
+p {
+    font-size: 17px;
+    line-height: 1.47059;
+    margin-bottom: 20px;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary);
+}
+
+ul {
+    list-style-type: none;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 22px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 22px;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 17px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0077ED;
+    box-shadow: 0 0 10px rgba(0, 113, 227, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-left: 1rem;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Modern Navigation Bar */
+.globalnav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.globalnav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 22px;
+    height: 48px;
+}
+
+.globalnav-item-yok-ai {
+    flex: 0 0 auto;
+}
+
+.globalnav-link-yok-ai {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.5px;
+    position: relative;
+    text-decoration: none;
+}
+
+.globalnav-link-yok-ai::before {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #42a0fe, #0071e3);
+    border-radius: 50%;
+    left: -15px;
+    z-index: -1;
+    opacity: 0.3;
+    filter: blur(8px);
+    animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.3); opacity: 0.15; }
+    100% { transform: scale(1); opacity: 0.3; }
+}
+
+.logo-dot {
+    background: linear-gradient(135deg, #42a0fe, #0071e3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.globalnav-list {
+    display: flex;
+    list-style: none;
+    align-items: center;
+}
+
+.globalnav-item {
+    margin: 0 4px;
+    position: relative;
+}
+
+.globalnav-link {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 400;
+    text-decoration: none;
+    padding: 0 8px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.globalnav-link:hover {
+    color: var(--primary);
+}
+
+.globalnav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    background: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.globalnav-link:hover::after {
+    width: calc(100% - 20px);
+}
+
+.globalnav-link.active::after {
+    width: calc(100% - 20px);
+}
+
+.get-started-btn {
+    background: var(--primary);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    margin-left: 16px;
+}
+
+.get-started-btn:hover {
+    background-color: #0077ED;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 113, 227, 0.2);
+}
+
+/* Contact Hero Section */
+.contact-hero {
+    padding: 120px 0 80px 0;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #0a0a12 0%, #000000 100%);
+    color: white;
+    text-align: center;
+}
+
+.contact-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/api/placeholder/1400/800') center/cover no-repeat;
+    opacity: 0.05;
+    z-index: 0;
+}
+
+.contact-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.contact-hero-title {
+    font-size: 56px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #fff, #f5f5f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+}
+
+.contact-hero-description {
+    font-size: 20px;
+    color: #86868b;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Contact Section Styles */
+.contact-section {
+    padding: 80px 0;
+    background-color: white;
+    position: relative;
+}
+
+.contact-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    margin-top: 40px;
+}
+
+.contact-info {
+    flex: 1;
+    min-width: 300px;
+}
+
+.contact-form {
+    flex: 2;
+    min-width: 300px;
+}
+
+.contact-card {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    height: 100%;
+}
+
+.contact-card h3 {
+    margin-bottom: 25px;
+    color: var(--text);
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.contact-card h3::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 3px;
+    background: var(--gradient);
+    bottom: 0;
+    left: 0;
+}
+
+.contact-info-list {
+    list-style: none;
+    margin-top: 30px;
+}
+
+.contact-info-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 25px;
+}
+
+.contact-info-icon {
+    flex-shrink: 0;
+    margin-right: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 18px;
+}
+
+.contact-info-content {
+    flex-grow: 1;
+}
+
+.contact-info-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text);
+}
+
+.contact-info-subtitle {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: var(--light);
+    color: var(--text);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
+}
+
+textarea.form-control {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.office-hours {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.office-hours h4 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: var(--text);
+}
+
+.hours-list {
+    list-style: none;
+}
+
+.hours-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.day {
+    font-weight: 500;
+    color: var(--text);
+}
+
+.hours {
+    color: var(--text-secondary);
+}
+
+.social-networks {
+    margin-top: 25px;
+}
+
+.social-networks h4 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: var(--text);
+}
+
+.social-list {
+    display: flex;
+    gap: 12px;
+}
+
+.social-item a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light);
+    color: var(--text);
+    transition: all 0.3s ease;
+}
+
+.social-item a:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 113, 227, 0.2);
+}
+
+/* Map Section */
+.map-section {
+    padding: 80px 0;
+    background-color: var(--light);
+}
+
+.map-container {
+    height: 400px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.map-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 18px;
+}
+
+/* Section titles */
+.section-title {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.section-title h2 {
+    font-size: 40px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 20px;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title h2::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 3px;
+    background: var(--gradient);
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.section-title p {
+    color: var(--text-secondary);
+    font-size: 18px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Support cards */
+.support-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 60px;
+}
+
+.support-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.support-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.support-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: var(--primary);
+    font-size: 24px;
+}
+
+.support-card:hover .support-icon {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.support-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--text);
+}
+
+.support-description {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin-bottom: 20px;
+}
+
+.support-link {
+    color: var(--primary);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.support-link:hover {
+    transform: translateX(5px);
+}
+
+.support-link::after {
+    content: '→';
+    margin-left: 5px;
+    transition: transform 0.3s ease;
+}
+
+.support-link:hover::after {
+    transform: translateX(3px);
+}
+
+/* Footer */
+footer {
+    background-color: var(--light);
+    padding: 60px 0 30px;
+    position: relative;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.footer-logo {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.footer-description {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    max-width: 400px;
+    font-size: 14px;
+}
+
+.footer-social {
+    display: flex;
+    gap: 16px;
+}
+
+.footer-social a {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    transition: all 0.3s ease;
+}
+
+.footer-social a:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 113, 227, 0.2);
+}
+
+.footer-social a svg {
+    width: 18px;
+    height: 18px;
+}
+
+.footer-heading {
+    font-size: 16px;
+    margin-bottom: 24px;
+    color: var(--text);
+    position: relative;
+    padding-bottom: 16px;
+}
+
+.footer-heading::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 2px;
+    background: var(--primary);
+    bottom: 0;
+    left: 0;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    font-size: 14px;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-links a::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    background: var(--primary);
+    bottom: -3px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--primary);
+}
+
+.footer-links a:hover::before {
+    width: 100%;
+}
+
+.footer-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.footer-bottom a {
+    color: var(--text);
+    margin-left: 16px;
+    transition: color 0.3s ease;
+}
+
+.footer-bottom a:hover {
+    color: var(--primary);
+}
+
+/* Loading Screen */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loading-logo {
+    font-size: 32px;
+    font-weight: 700;
+    position: relative;
+    animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+.loading-logo::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gradient);
+    animation: loadingBar 2s infinite;
+}
+
+@keyframes loadingBar {
+    0% { width: 0; }
+    50% { width: 100%; }
+    100% { width: 0; }
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+    h1 {
+        font-size: 42px;
+    }
+    
+    h2 {
+        font-size: 36px;
+    }
+    
+    .contact-hero-title {
+        font-size: 48px;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .globalnav-list {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 48px;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        z-index: 9999;
+    }
+    
+    .globalnav-list.show {
+        display: flex;
+    }
+    
+    .globalnav-item {
+        width: 100%;
+        margin: 0;
+    }
+    
+    .globalnav-link {
+        padding: 12px 8px;
+        width: 100%;
+        height: auto;
+        justify-content: flex-start;
+    }
+    
+    .globalnav-menutrigger {
+        display: block;
+        margin-left: auto;
+    }
+    
+    .get-started-btn {
+        margin: 16px 0;
+    }
+    
+    .contact-wrapper {
+        flex-direction: column;
+    }
+    
+    .support-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    h1 {
+        font-size: 36px;
+    }
+    
+    h2 {
+        font-size: 28px;
+    }
+    
+    .contact-hero-title {
+        font-size: 36px;
+    }
+    
+    .contact-hero-description {
+        font-size: 17px;
+    }
+    
+    .contact-section {
+        padding: 60px 0;
+    }
+    
+    .contact-card {
+        padding: 30px 20px;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+    
+    .footer-bottom a {
+        margin: 0 8px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .contact-hero-title {
+        font-size: 32px;
+    }
+    
+    .contact-hero-description {
+        font-size: 16px;
+    }
+    
+    .btn-large {
+        width: 100%;
+    }
+}
+</style>
+</head>
+<body>
+    <script>
+        // Simple and direct approach to force-remove loading screen
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            var loadingScreen = document.querySelector('.loading-screen');
+            if (loadingScreen) {
+              loadingScreen.style.display = 'none';
+            }
+          }, 2000);
+        });
+    </script>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="loading-logo">Yok<span style="color: var(--primary);">AI</span></div>
+    </div>
+
+    <!-- Modern Navigation Bar -->
+    <nav class="globalnav">
+        <div class="globalnav-content">
+            <div class="globalnav-item globalnav-item-yok-ai">
+                <a href="/" class="globalnav-link-yok-ai">Yok<span class="logo-dot">AI</span></a>
+            </div>
+            
+            <ul id="globalnavList" class="globalnav-list">
+                <li class="globalnav-item">
+                    <a href="/#features" class="globalnav-link">Features</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="/#use-cases" class="globalnav-link">Use Cases</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="/#pricing" class="globalnav-link">Pricing</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="./about" class="globalnav-link">About</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="./contact" class="globalnav-link active">Contact</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="./signin" class="get-started-btn" style="background: transparent; color: var(--primary); border: 1px solid var(--primary); margin-left: 0; margin-right: 0;">Sign In</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="./signup" class="get-started-btn">Get Started</a>
+                </li>
+            </ul>
+            
+            <div class="globalnav-menutrigger">
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contact Hero Section -->
+    <section class="contact-hero">
+        <div class="container contact-hero-content">
+            <h1 class="contact-hero-title">Get In Touch</h1>
+            <p class="contact-hero-description">Have questions about Yok-AI? Our team is here to help you.</p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contact Us</h2>
+                <p>Reach out for support, pricing information, or to schedule a demo.</p>
+            </div>
+            
+            <div class="contact-wrapper">
+                <div class="contact-info" style="max-width: 600px; margin: 0 auto;">
+                    <div class="contact-card">
+                        <h3>Contact Information</h3>
+                        <p>Our team is ready to assist you with any questions about our invisible AI assistant.</p>
+                        
+                        <ul class="contact-info-list">
+                            <li class="contact-info-item">
+                                <div class="contact-info-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="contact-info-content">
+                                    <h4 class="contact-info-title">Email</h4>
+                                    <p class="contact-info-subtitle">support@yok-ai.com</p>
+                                </div>
+                            </li>
+                        </ul>
+                        
+                        <div class="office-hours">
+                            <h4>Response Times</h4>
+                            <ul class="hours-list">
+                                <li class="hours-item">
+                                    <span class="day">Email Support</span>
+                                    <span class="hours">Within 24 hours</span>
+                                </li>
+                                <li class="hours-item">
+                                    <span class="day">Priority Support</span>
+                                    <span class="hours">Within 8 hours (for paid plans)</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="social-networks">
+                            <h4>Connect With Us</h4>
+                            <ul class="social-list">
+                                <li class="social-item">
+                                    <a href="#" aria-label="Twitter/X">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="social-item">
+                                    <a href="#" aria-label="LinkedIn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.454C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="social-item">
+                                    <a href="#" aria-label="Facebook">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="social-item">
+                                    <a href="#" aria-label="Instagram">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                                        </svg>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Options -->
+    <section class="map-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Additional Support Options</h2>
+                <p>Choose the support option that works best for you</p>
+            </div>
+            
+            <div class="support-cards" style="grid-template-columns: repeat(2, 1fr); max-width: 800px; margin: 40px auto 0;">
+                <div class="support-card">
+                    <div class="support-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h3 class="support-title">Help Center</h3>
+                    <p class="support-description">Browse through our comprehensive help guides and tutorials to find answers to common questions.</p>
+                    <a href="./faq" class="support-link">Visit Help Center</a>
+                </div>
+                
+                <div class="support-card">
+                    <div class="support-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="support-title">Documentation</h3>
+                    <p class="support-description">Explore our detailed documentation with guides, API references, and best practices.</p>
+                    <a href="./docs" class="support-link">Read Documentation</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Map Section removed -->
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">Yok<span class="logo-dot">AI</span></div>
+                    <p class="footer-description">The next generation of AI assistants, designed specifically for professionals who need powerful AI capabilities without compromising privacy.</p>
+                    <div class="footer-social">
+                        <!-- Twitter/X Icon -->
+                        <a href="#" aria-label="Twitter/X">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                        </a>
+                        
+                        <!-- LinkedIn Icon -->
+                        <a href="#" aria-label="LinkedIn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.454C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/>
+                            </svg>
+                        </a>
+                        
+                        <!-- Facebook Icon -->
+                        <a href="#" aria-label="Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        
+                        <!-- Instagram Icon -->
+                        <a href="#" aria-label="Instagram">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="./about">About Us</a></li>
+                        <li><a href="./contact">Contact</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="./faq">Help Center</a></li>
+                        <li><a href="./docs">Documentation</a></li>
+                        <li><a href="./contact">Contact Support</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="./termsofservice">Terms of Service</a></li>
+                        <li><a href="./privacypolicy">Privacy Policy</a></li>
+                        <li><a href="./refundpolicy">Refund Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-divider"></div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 Yok-AI. All rights reserved.</p>
+                <div>
+                    <a href="./termsofservice">Terms</a>
+                    <a href="./privacypolicy">Privacy</a>
+                    <a href="./cookies">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Remove loading screen
+            setTimeout(() => {
+                const loadingScreen = document.querySelector('.loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hidden');
+                }
+            }, 1500);
+            
+            // Header styles on scroll
+            const globalnav = document.querySelector('.globalnav');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    globalnav.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
+                    globalnav.style.boxShadow = '0 1px 20px rgba(0, 0, 0, 0.1)';
+                } else {
+                    globalnav.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                    globalnav.style.boxShadow = 'none';
+                }
+            });
+
+            // Mobile menu toggle
+            document.getElementById('menuTrigger').addEventListener('click', function() {
+                document.getElementById('globalnavList').classList.toggle('show');
+            });
+            
+            // Contact form handling
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // Normally would submit to server, but for demo just show confirmation
+                    alert('Thank you for your message! We will respond as soon as possible.');
+                    contactForm.reset();
+                });
+            }
+        });
+        
+        // Error handling to ensure loading screen is removed
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.log('Error: ' + message + ' at line ' + lineno + ' in ' + source);
+            document.querySelector('.loading-screen').style.display = 'none';
+            return true;
+        };
+    </script>
+</body>
+</html>

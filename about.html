@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yok-AI | About Us</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #0071e3;
+    --dark: #000000;
+    --light: #f5f5f7;
+    --accent: #86cffa;
+    --accent2: #ff2d55;
+    --text: #1d1d1f;
+    --text-secondary: #86868b;
+    --gradient: linear-gradient(135deg, #42a0fe, #0071e3);
+    --gradient-accent: linear-gradient(135deg, #ff375f, #ff2d55);
+    --blur-bg: rgba(255, 255, 255, 0.8);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body {
+    background-color: var(--light);
+    color: var(--text);
+    line-height: 1.47059;
+    font-weight: 400;
+    letter-spacing: -0.022em;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+h1 {
+    font-size: 48px;
+    letter-spacing: -0.025em;
+}
+
+h2 {
+    font-size: 40px;
+    letter-spacing: -0.025em;
+}
+
+h3 {
+    font-size: 24px;
+    letter-spacing: -0.022em;
+}
+
+p {
+    font-size: 17px;
+    line-height: 1.47059;
+    margin-bottom: 20px;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary);
+}
+
+ul {
+    list-style-type: none;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 22px;
+}
+
+.container-wide {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 22px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 22px;
+    border-radius: 980px;
+    font-weight: 400;
+    font-size: 17px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0077ED;
+    box-shadow: 0 0 10px rgba(0, 113, 227, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-left: 1rem;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Modern Navigation Bar */
+.globalnav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.globalnav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 22px;
+    height: 48px;
+}
+
+.globalnav-item-yok-ai {
+    flex: 0 0 auto;
+}
+
+.globalnav-link-yok-ai {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.5px;
+    position: relative;
+    text-decoration: none;
+}
+
+.globalnav-link-yok-ai::before {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #42a0fe, #0071e3);
+    border-radius: 50%;
+    left: -15px;
+    z-index: -1;
+    opacity: 0.3;
+    filter: blur(8px);
+    animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.3); opacity: 0.15; }
+    100% { transform: scale(1); opacity: 0.3; }
+}
+
+.logo-dot {
+    background: linear-gradient(135deg, #42a0fe, #0071e3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.globalnav-list {
+    display: flex;
+    list-style: none;
+    align-items: center;
+}
+
+.globalnav-item {
+    margin: 0 4px;
+    position: relative;
+}
+
+.globalnav-link {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 400;
+    text-decoration: none;
+    padding: 0 8px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.globalnav-link:hover {
+    color: var(--primary);
+}
+
+.globalnav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    background: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.globalnav-link:hover::after {
+    width: calc(100% - 20px);
+}
+
+.globalnav-link.active::after {
+    width: calc(100% - 20px);
+}
+
+.get-started-btn {
+    background: var(--primary);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    margin-left: 16px;
+}
+
+.get-started-btn:hover {
+    background-color: #0077ED;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 113, 227, 0.2);
+}
+
+/* About Hero Section */
+.about-hero {
+    padding: 120px 0 80px 0;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #0a0a12 0%, #000000 100%);
+    color: white;
+    text-align: center;
+}
+
+.about-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/api/placeholder/1400/800') center/cover no-repeat;
+    opacity: 0.05;
+    z-index: 0;
+}
+
+.about-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.about-hero-title {
+    font-size: 56px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #fff, #f5f5f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+}
+
+.about-hero-description {
+    font-size: 20px;
+    color: #86868b;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* About Section Styles */
+.about-section {
+    padding: 100px 0;
+    background-color: white;
+    position: relative;
+}
+
+.about-section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.about-section-title {
+    font-size: 40px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text);
+    position: relative;
+    display: inline-block;
+}
+
+.about-section-title::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 3px;
+    background: var(--gradient);
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.about-section-subtitle {
+    color: var(--text-secondary);
+    font-size: 20px;
+    max-width: 700px;
+    margin: 0 auto 40px;
+}
+
+.about-story-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.about-story-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: var(--gradient);
+    border-radius: 3px 3px 0 0;
+}
+
+.about-story-content h3 {
+    margin-bottom: 20px;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.about-story-content p {
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.about-story-quote {
+    font-style: italic;
+    background: rgba(242, 242, 247, 0.7);
+    padding: 20px;
+    border-radius: 12px;
+    margin: 30px 0;
+    position: relative;
+}
+
+.about-story-quote::before {
+    content: '"';
+    font-size: 60px;
+    color: var(--primary);
+    opacity: 0.3;
+    position: absolute;
+    top: -15px;
+    left: 10px;
+}
+
+.story-image-container {
+    margin: 40px 0;
+    text-align: center;
+}
+
+.story-image {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.timeline {
+    margin: 60px 0;
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background: var(--gradient);
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.3;
+}
+
+.timeline-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--gradient);
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.timeline-content {
+    width: 45%;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-date {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.timeline-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.timeline-description {
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.timeline-item:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+/* Meet The Team Section */
+.team-section {
+    padding: 100px 0;
+    background-color: var(--light);
+    position: relative;
+}
+
+.team-section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.team-member {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.team-member:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.team-member-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.team-member-info {
+    padding: 20px;
+    text-align: center;
+}
+
+.team-member-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+.team-member-role {
+    color: var(--primary);
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.team-member-description {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.team-member-social {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-link {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    transition: all 0.3s ease;
+}
+
+.social-link:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-3px);
+}
+
+/* Values Section */
+.values-section {
+    padding: 100px 0;
+    background-color: white;
+    position: relative;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.value-card {
+    background: var(--light);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.value-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.value-card::before {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 40px;
+    background: var(--gradient);
+    left: 0;
+    top: 30px;
+    transition: height 0.3s ease;
+}
+
+.value-card:hover::before {
+    height: 60px;
+}
+
+.value-icon {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+.value-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--text);
+}
+
+.value-description {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Call to Action */
+.about-cta {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-cta::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(66, 160, 254, 0.1) 0%, transparent 30%),
+        radial-gradient(circle at 90% 80%, rgba(255, 45, 85, 0.1) 0%, transparent 30%);
+    z-index: 0;
+}
+
+.about-cta-content {
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.about-cta-title {
+    color: white;
+    font-size: 36px;
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.about-cta-title::after {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 3px;
+    background: var(--gradient);
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.about-cta-description {
+    color: #86868b;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    font-size: 17px;
+}
+
+.about-cta-btn {
+    background: white;
+    color: var(--dark);
+    font-size: 16px;
+    padding: 16px 40px;
+    border-radius: 980px;
+    display: inline-block;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    margin-top: 16px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.about-cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+}
+
+.about-cta-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(66, 160, 254, 0.3);
+    color: white;
+}
+
+.about-cta-btn:hover::before {
+    opacity: 1;
+}
+
+/* Footer */
+footer {
+    background-color: var(--light);
+    padding: 60px 0 30px;
+    position: relative;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.footer-logo {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.footer-description {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    max-width: 400px;
+    font-size: 14px;
+}
+
+.footer-social {
+    display: flex;
+    gap: 16px;
+}
+
+.footer-social a {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    transition: all 0.3s ease;
+    font-size: 18px;
+}
+
+.footer-social a:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-3px);
+}
+
+.footer-heading {
+    font-size: 16px;
+    margin-bottom: 24px;
+    color: var(--text);
+    position: relative;
+    padding-bottom: 16px;
+}
+
+.footer-heading::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 2px;
+    background: var(--primary);
+    bottom: 0;
+    left: 0;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    font-size: 14px;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-links a::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    background: var(--primary);
+    bottom: -3px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--primary);
+}
+
+.footer-links a:hover::before {
+    width: 100%;
+}
+
+.footer-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.footer-bottom a {
+    color: var(--text);
+    margin-left: 16px;
+    transition: color 0.3s ease;
+}
+
+.footer-bottom a:hover {
+    color: var(--primary);
+}
+
+/* Loading Screen */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loading-logo {
+    font-size: 32px;
+    font-weight: 700;
+    position: relative;
+    animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+.loading-logo::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gradient);
+    animation: loadingBar 2s infinite;
+}
+
+@keyframes loadingBar {
+    0% { width: 0; }
+    50% { width: 100%; }
+    100% { width: 0; }
+}
+
+/* Animations and Effects */
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+    h1 {
+        font-size: 42px;
+    }
+    
+    h2 {
+        font-size: 36px;
+    }
+    
+    .about-hero-title {
+        font-size: 48px;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .timeline-item {
+        flex-direction: column;
+        margin-left: 20px;
+    }
+    
+    .timeline-item:nth-child(even) {
+        flex-direction: column;
+    }
+    
+    .timeline::before {
+        left: 0;
+    }
+    
+    .timeline-item::before {
+        left: 0;
+    }
+    
+    .timeline-content {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .globalnav-list {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 48px;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+    
+    .globalnav-list.show {
+        display: flex;
+    }
+    
+    .globalnav-item {
+        width: 100%;
+        margin: 0;
+    }
+    
+    .globalnav-link {
+        padding: 12px 8px;
+        width: 100%;
+        height: auto;
+        justify-content: flex-start;
+    }
+    
+    .globalnav-menutrigger {
+        display: block;
+        margin-left: auto;
+    }
+    
+    .get-started-btn {
+        margin: 16px 0;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    h1 {
+        font-size: 36px;
+    }
+    
+    h2 {
+        font-size: 28px;
+    }
+    
+    .about-hero-title {
+        font-size: 36px;
+    }
+    
+    .about-hero-description {
+        font-size: 17px;
+    }
+    
+    .about-section {
+        padding: 60px 0;
+    }
+    
+    .about-story-container {
+        padding: 30px 20px;
+    }
+    
+    .team-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+    
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+    
+    .footer-bottom a {
+        margin: 0 8px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .about-hero-title {
+        font-size: 32px;
+    }
+    
+    .about-hero-description {
+        font-size: 16px;
+    }
+    
+    .about-cta-title {
+        font-size: 28px;
+    }
+    
+    .about-cta-btn {
+        width: 100%;
+    }
+}
+</style>
+<!-- Additional styles for social media icons -->
+<style>
+.footer-social {
+    display: flex;
+    gap: 16px;
+}
+
+.footer-social a {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    transition: all 0.3s ease;
+}
+
+.footer-social a:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 113, 227, 0.2);
+}
+
+.footer-social a svg {
+    width: 18px;
+    height: 18px;
+}
+</style>
+</head>
+<body>
+    <script>
+        // Simple and direct approach to force-remove loading screen
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            var loadingScreen = document.querySelector('.loading-screen');
+            if (loadingScreen) {
+              loadingScreen.style.display = 'none';
+            }
+          }, 2000);
+        });
+    </script>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="loading-logo">Yok<span style="color: var(--primary);">AI</span></div>
+    </div>
+
+    <!-- Modern Navigation Bar -->
+    <nav class="globalnav">
+        <div class="globalnav-content">
+            <div class="globalnav-item globalnav-item-yok-ai">
+                <a href="/" class="globalnav-link-yok-ai">Yok<span class="logo-dot">AI</span></a>
+            </div>
+            
+            <ul id="globalnavList" class="globalnav-list">
+                <li class="globalnav-item">
+                    <a href="/#features" class="globalnav-link">Features</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="/#use-cases" class="globalnav-link">Use Cases</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="/#pricing" class="globalnav-link">Pricing</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="./about" class="globalnav-link active">About</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="./contact" class="globalnav-link">Contact</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="./signin" class="get-started-btn" style="background: transparent; color: var(--primary); border: 1px solid var(--primary); margin-left: 0; margin-right: 0;">Sign In</a>
+                </li>
+                <li class="globalnav-item">
+                    <a href="./signup" class="get-started-btn">Get Started</a>
+                </li>
+            </ul>
+            
+            <div class="globalnav-menutrigger">
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- About Hero Section -->
+    <section class="about-hero">
+        <div class="container about-hero-content">
+            <h1 class="about-hero-title">Our Story</h1>
+            <p class="about-hero-description">How a chance meeting and a powerful vision led to the creation of Yok-AI, the intelligence solution that stays invisible while enhancing human potential.</p>
+        </div>
+    </section>
+
+    <!-- About Story Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="about-section-header">
+                <h2 class="about-section-title">The Yok-AI Journey</h2>
+                <p class="about-section-subtitle">From a revolutionary idea to the world's most discreet AI assistant</p>
+            </div>
+            
+            <div class="about-story-container">
+                <div class="about-story-content">
+                    <h3>The Moment of Inspiration</h3>
+                    <p>It all began in Early 2024 during a high stakes investor meeting in Saudi Arabia. Mamoon Mustafa, our founder and CEO, watched as a potential business partner struggled through a presentation filled with complex data and technical terms. The presenter was brilliant but visibly overwhelmed frequently pausing to check notes or search for specific information.</p>
+                    
+                    <p>After the meeting, Mamoon approached the presenter. "What if you had an invisible assistant that could analyze data in real time and provide insights without anyone knowing?" he asked. That simple question sparked a conversation that would ultimately lead to Yok-AI's creation.</p>
+                    
+                    <h3>The Problem We Saw</h3>
+                    <p>In today's fast paced professional world, experts are expected to have instant answers to complex questions. Meetings move quickly, decisions happen in real time, and there's enormous pressure to appear knowledgeable and prepared at all times.</p>
+                    
+                    <p>Traditional AI assistants were powerful but disruptive requiring users to step away from conversations to consult them, or revealing their presence to everyone in a meeting. This created a dilemma: use AI and appear unprepared, or rely solely on memory and risk missing critical insights.</p>
+                    
+                    <div class="about-story-quote">
+                        <p>"In a world where we've enhanced nearly every aspect of human capability from transportation to communication why haven't we found a way to privately augment our intelligence during crucial moments? The answer seemed obvious: we needed an AI assistant that could operate with complete discretion, providing insights without revealing its presence."</p>
+                        <p style="text-align: right; font-weight: 600;">— Mamoon Mustafa, Founder & CEO</p>
+                    </div>
+                    
+                    <h3>Building in Stealth</h3>
+                    <p>With this vision in mind, Mamoon assembled a team of elite engineers from leading tech companies, all united by a shared belief in enhancing human capabilities through invisible intelligence. For 13 months, our team worked in near complete secrecy, developing the core technology that would become Yok-AI.</p>
+                    
+                    <p>The name "Yok-AI" itself comes from the Japanese word "yokai" (妖怪), which refers to supernatural entities that can appear and disappear at will a perfect metaphor for our invisible assistant that appears only when needed and remains hidden from others.</p>
+                    
+                    <p>Our development focused on three core principles:</p>
+                    <ul style="list-style-type: disc; margin-left: 25px; margin-bottom: 20px;">
+                        <li><strong>Complete Privacy:</strong> Creating technology that could operate without being detected by screen recording, monitoring software, or other participants</li>
+                        <li><strong>Powerful Intelligence:</strong> Leveraging the most advanced AI models available to provide genuinely useful insights</li>
+                        <li><strong>Seamless Experience:</strong> Designing an interface that could be accessed and controlled effortlessly during high pressure situations</li>
+                    </ul>
+                    
+                    <h3>The Breakthrough</h3>
+                    <p>In early 2024, after countless iterations and refinements, we achieved our breakthrough moment. During a live test, our platform successfully provided real time analysis of complex financial data during a board meeting simulation, with none of the observers able to detect its presence. The test executive received insights through our stealth interface that helped him make crucial decisions all while maintaining the appearance of working entirely from memory.</p>
+                    
+                    <p>This moment verified what we had believed all along: AI could enhance human performance without compromising the authenticity of personal interactions or revealing its presence as an external tool.</p>
+                    
+                    <h3>Our Vision for the Future</h3>
+                    <p>As we look ahead, our mission remains clear: to enhance human intelligence and performance through invisible AI that respects privacy and preserves authentic human connection. We believe AI should empower people without replacing or revealing itself serving as a true extension of human capability rather than a visible crutch.</p>
+                    
+                    <p>We're continuously pushing the boundaries of what's possible with discreet AI assistance, developing new features and capabilities while maintaining our unwavering commitment to privacy and security.</p>
+                    
+                    <p>The future of AI isn't about replacing humans or creating obvious tools it's about invisibly enhancing what makes us uniquely human: our ability to connect, communicate, and make decisions in complex social environments.</p>
+                    
+                    <p>At Yok-AI, we're proud to be leading this revolution in invisible intelligence and we're just getting started.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="values-section">
+        <div class="container">
+            <div class="about-section-header">
+                <h2 class="about-section-title">Our Journey</h2>
+                <p class="about-section-subtitle">Key milestones in the evolution of Yok-AI</p>
+            </div>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">Early 2024</div>
+                        <h4 class="timeline-title">The Inspiration</h4>
+                        <p class="timeline-description">Mamoon Mustafa conceives the idea for Yok-AI after observing a high stakes business meeting where real time AI assistance could have made a critical difference.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">March 2024</div>
+                        <h4 class="timeline-title">Founding Team Assembled</h4>
+                        <p class="timeline-description">Mamoon brings together a team of AI engineers, UX designers, and security experts to begin developing the core technology.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">June 2024</div>
+                        <h4 class="timeline-title">First Prototype</h4>
+                        <p class="timeline-description">The team completes the first working prototype, capable of basic text analysis while remaining undetectable during screen sharing.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">November 2024</div>
+                        <h4 class="timeline-title">Beta Launch</h4>
+                        <p class="timeline-description">Yok-AI launches an invite-only beta program with 200 selected professionals across various industries.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">May 2025</div>
+                        <h4 class="timeline-title">Public Launch</h4>
+                        <p class="timeline-description">After extensive testing and refinement, Yok-AI officially launches to the public, gaining immediate attention for its revolutionary approach.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values-section" style="background-color: var(--light);">
+        <div class="container">
+            <div class="about-section-header">
+                <h2 class="about-section-title">Our Core Values</h2>
+                <p class="about-section-subtitle">The principles that guide everything we do at Yok-AI</p>
+            </div>
+            
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">🛡️</div>
+                    <h3 class="value-title">Privacy First</h3>
+                    <p class="value-description">We believe that AI assistance should enhance your work without compromising privacy. Every feature we develop is built with privacy and discretion as foundational requirements, not afterthoughts.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">🧠</div>
+                    <h3 class="value-title">Human Intelligence Augmentation</h3>
+                    <p class="value-description">We don't aim to replace human intelligence but to enhance it. Yok-AI is designed to complement your expertise, providing information and insights that support your natural abilities.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">🔍</div>
+                    <h3 class="value-title">Invisible Excellence</h3>
+                    <p class="value-description">The best technology often goes unnoticed. We strive to create tools that blend seamlessly into your workflow, providing powerful capabilities without drawing attention to themselves.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">🤝</div>
+                    <h3 class="value-title">Authentic Connections</h3>
+                    <p class="value-description">We believe technology should enhance human connection, not detract from it. Yok-AI is designed to support genuine person-to-person interaction without creating technological barriers.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">🔒</div>
+                    <h3 class="value-title">Uncompromising Security</h3>
+                    <p class="value-description">Your data and interactions deserve the highest level of protection. We implement industry-leading security measures to ensure that your information remains private and secure.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">🚀</div>
+                    <h3 class="value-title">Continuous Innovation</h3>
+                    <p class="value-description">We're committed to pushing the boundaries of what's possible with invisible AI assistance. Our team is constantly exploring new technologies and approaches to enhance the Yok-AI experience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="about-cta">
+        <div class="container">
+            <div class="about-cta-content">
+                <h2 class="about-cta-title">Join the Invisible Intelligence Revolution</h2>
+                <p class="about-cta-description">Experience the power of Yok-AI and transform how you work with AI assistance that enhances your performance while remaining completely private.</p>
+                <a href="./signup" class="about-cta-btn">Get Started Today</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">Yok<span class="logo-dot">AI</span></div>
+                    <p class="footer-description">The next generation of AI assistants, designed specifically for professionals who need powerful AI capabilities without compromising privacy.</p>
+                    <div class="footer-social">
+                        <!-- Twitter/X Icon -->
+                        <a href="#" aria-label="Twitter/X">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                        </a>
+                        
+                        <!-- LinkedIn Icon -->
+                        <a href="#" aria-label="LinkedIn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.454C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/>
+                            </svg>
+                        </a>
+                        
+                        <!-- Facebook Icon -->
+                        <a href="#" aria-label="Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        
+                        <!-- Instagram Icon -->
+                        <a href="#" aria-label="Instagram">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="./about">About Us</a></li>
+                        <li><a href="./contact">Contact</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="./faq">Help Center</a></li>
+                        <li><a href="./docs">Documentation</a></li>
+                        <li><a href="./contact">Contact Support</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="./termsofservice">Terms of Service</a></li>
+                        <li><a href="./privacypolicy">Privacy Policy</a></li>
+                        <li><a href="./refundpolicy">Refund Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-divider"></div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 Yok-AI. All rights reserved.</p>
+                <div>
+                    <a href="./termsofservice">Terms</a>
+                    <a href="./privacypolicy">Privacy</a>
+                    <a href="./cookies">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Remove loading screen
+            setTimeout(() => {
+                const loadingScreen = document.querySelector('.loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hidden');
+                }
+            }, 1500);
+            
+            // Header styles on scroll
+            const globalnav = document.querySelector('.globalnav');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    globalnav.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
+                    globalnav.style.boxShadow = '0 1px 20px rgba(0, 0, 0, 0.1)';
+                } else {
+                    globalnav.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                    globalnav.style.boxShadow = 'none';
+                }
+            });
+
+            // Mobile menu toggle
+            document.getElementById('menuTrigger').addEventListener('click', function() {
+                document.getElementById('globalnavList').classList.toggle('show');
+            });
+            
+            // Reveal elements on scroll with fade-in effect
+            const fadeElements = document.querySelectorAll('.fade-in');
+            const fadeInOnScroll = () => {
+                fadeElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    if (elementTop < windowHeight - 100) {
+                        element.classList.add('visible');
+                    }
+                });
+            };
+            
+            // Call once on page load
+            fadeInOnScroll();
+            window.addEventListener('scroll', fadeInOnScroll);
+        });
+        
+        // Error handling to ensure loading screen is removed
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.log('Error: ' + message + ' at line ' + lineno + ' in ' + source);
+            document.querySelector('.loading-screen').style.display = 'none';
+            return true;
+        };
+    </script>
+</body>
+</html>
