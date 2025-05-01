@@ -1031,6 +1031,24 @@ textarea.form-control {
     }
 }
 
+/* Dashboard combined view styles */
+#subscription-container {
+    margin-bottom: 24px;
+}
+
+#subscription-container .section-subheader {
+    margin-top: 0;
+}
+
+#dashboard-section .plans-grid {
+    margin-bottom: 0;
+}
+
+#license-key-card,
+#downloads-container {
+    margin-top: 24px;
+}
+
 /* Modals */
 .modal-container {
     position: fixed;

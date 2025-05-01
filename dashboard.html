@@ -27,8 +27,6 @@
             <div class="header-nav">
                 <nav class="main-nav">
                     <button class="nav-link active" data-section="dashboard-section">Dashboard</button>
-                    <button class="nav-link" data-section="subscription-section">Subscription</button>
-                    <button class="nav-link" data-section="downloads-section">Downloads</button>
                     <button class="nav-link" data-section="billing-section">Billing</button>
                     <button class="nav-link" data-section="profile-section">Profile</button>
                     <button class="nav-link" data-section="support-section">Support</button>
@@ -65,146 +63,73 @@
 
         <!-- Dashboard Content Sections -->
         <div class="content-sections">
-            <!-- Dashboard Section -->
-            <section id="dashboard-section" class="content-section active">
-                <div class="section-header">
-                    <h2>Dashboard Overview</h2>
-                </div>
-                
-                <div class="cards-grid">
-                    <!-- Subscription Status Card -->
-                    <div id="subscription-status-card" class="card">
-                        <div class="card-header">
-                            <h3>Subscription Status</h3>
-                        </div>
-                        <div class="card-body" id="subscription-status-body">
-                            <!-- Content will be dynamically filled based on subscription status -->
-                            <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading subscription data...</div>
-                        </div>
+<!-- Dashboard Section -->
+<section id="dashboard-section" class="content-section active">
+    <div class="section-header">
+        <h2>Dashboard Overview</h2>
+    </div>
+    
+    <!-- This div will show either subscription status or available plans -->
+    <div id="subscription-container">
+        <!-- This will be filled dynamically based on subscription status -->
+        <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading subscription data...</div>
+    </div>
+    
+    <!-- License Key Card - Only shown when subscribed -->
+    <div id="license-key-card" class="card" style="display: none;">
+        <div class="card-header">
+            <h3>License Key</h3>
+        </div>
+        <div class="card-body">
+            <div class="license-key-container">
+                <div class="license-key" id="license-key">••••••••-••••-••••-••••-••••••••••••</div>
+                <button id="copy-license" class="btn btn-icon">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <p class="license-note">Use this license key to activate your Yok-AI software</p>
+        </div>
+    </div>
+    
+    <!-- Downloads Section - Only shown when subscribed -->
+    <div id="downloads-container" style="display: none;">
+        <div class="section-subheader">
+            <h3>Downloads</h3>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>Yok-AI Software</h3>
+            </div>
+            <div class="card-body">
+                <div class="download-item">
+                    <div class="download-info">
+                        <h4>Yok-AI Desktop App</h4>
+                        <p>Latest version: <span id="software-version">1.0.0</span></p>
+                        <p>Release date: <span id="release-date">May 1, 2025</span></p>
                     </div>
-                    
-                    <!-- Credit Usage Card -->
-                    <div id="credit-usage-card" class="card">
-                        <div class="card-header">
-                            <h3>Credit Usage</h3>
-                        </div>
-                        <div class="card-body">
-                            <div id="credit-progress-container">
-                                <div class="credit-info">
-                                    <span id="credits-used">0</span>
-                                    <span> / </span>
-                                    <span id="credits-total">0</span>
-                                    <span> credits used</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div id="credit-progress" class="progress" style="width: 0%"></div>
-                                </div>
-                            </div>
-                            <div class="credit-actions">
-                                <button id="buy-more-credits" class="btn btn-outline">Buy More Credits</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Usage Analytics Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Usage Analytics</h3>
-                    </div>
-                    <div class="card-body">
-                        <div id="usage-chart" class="chart-container">
-                            <!-- Chart will be rendered here -->
-                            <div class="chart-placeholder">
-                                <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading analytics...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Subscription Section -->
-            <section id="subscription-section" class="content-section">
-                <div class="section-header">
-                    <h2>Subscription Management</h2>
-                </div>
-                
-                <!-- Current Plan Card -->
-                <div class="card" id="current-plan-card">
-                    <div class="card-header">
-                        <h3>Current Plan</h3>
-                    </div>
-                    <div class="card-body" id="current-plan-body">
-                        <!-- Will be populated dynamically -->
-                        <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading plan details...</div>
+                    <div class="download-actions">
+                        <button id="download-windows" class="btn btn-outline">
+                            <i class="fab fa-windows"></i> Windows
+                        </button>
+                        <button id="download-mac" class="btn btn-outline">
+                            <i class="fab fa-apple"></i> Mac
+                        </button>
+                        <button id="download-linux" class="btn btn-outline">
+                            <i class="fab fa-linux"></i> Linux
+                        </button>
                     </div>
                 </div>
-                
-                <!-- License Key Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>License Key</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="license-key-container">
-                            <div class="license-key" id="license-key">••••••••-••••-••••-••••-••••••••••••</div>
-                            <button id="copy-license" class="btn btn-icon">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
-                        <p class="license-note">Use this license key to activate your Yok-AI software</p>
-                    </div>
+                <div class="download-license">
+                    <p>Your License Key: <span id="download-license-key">XXXX-XXXX-XXXX-XXXX</span></p>
+                    <button id="copy-download-license" class="btn btn-sm">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
                 </div>
-                
-                <!-- Available Plans (shown if no active subscription or for upgrades) -->
-                <div id="available-plans-container" style="display: none;">
-                    <div class="section-subheader">
-                        <h3>Available Plans</h3>
-                    </div>
-                    <div class="plans-grid" id="available-plans">
-                        <!-- Plans will be dynamically populated -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- Downloads Section -->
-            <section id="downloads-section" class="content-section">
-                <div class="section-header">
-                    <h2>Downloads</h2>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Yok-AI Software</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="download-item">
-                            <div class="download-info">
-                                <h4>Yok-AI Desktop App</h4>
-                                <p>Latest version: <span id="software-version">1.0.0</span></p>
-                                <p>Release date: <span id="release-date">May 1, 2025</span></p>
-                            </div>
-                            <div class="download-actions">
-                                <button id="download-windows" class="btn btn-outline">
-                                    <i class="fab fa-windows"></i> Windows
-                                </button>
-                                <button id="download-mac" class="btn btn-outline">
-                                    <i class="fab fa-apple"></i> Mac
-                                </button>
-                                <button id="download-linux" class="btn btn-outline">
-                                    <i class="fab fa-linux"></i> Linux
-                                </button>
-                            </div>
-                        </div>
-                        <div class="download-license">
-                            <p>Your License Key: <span id="download-license-key">XXXX-XXXX-XXXX-XXXX</span></p>
-                            <button id="copy-download-license" class="btn btn-sm">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            </div>
+        </div>
+    </div>
+</section>
 
             <!-- Billing Section -->
             <section id="billing-section" class="content-section">

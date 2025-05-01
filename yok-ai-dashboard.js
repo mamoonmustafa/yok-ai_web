@@ -227,6 +227,124 @@ const Dashboard = {
         Dashboard.initCancelSubscriptionModal();
     },
     
+/**
+ * Update dashboard content based on subscription status
+ */
+updateDashboardView: function(status) {
+    const subscriptionContainer = document.getElementById('subscription-container');
+    const licenseKeyCard = document.getElementById('license-key-card');
+    const downloadsContainer = document.getElementById('downloads-container');
+    
+    if (!subscriptionContainer) return;
+    
+    // Clear subscription container
+    subscriptionContainer.innerHTML = '';
+    
+    if (status && status.active) {
+        // User has active subscription
+        
+        // 1. Show subscription status
+        const subscriptionCard = document.createElement('div');
+        subscriptionCard.className = 'card';
+        subscriptionCard.innerHTML = `
+            <div class="card-header">
+                <h3>Subscription Status</h3>
+            </div>
+            <div class="card-body">
+                ${Dashboard.generateActiveSubscriptionHTML(status)}
+            </div>
+        `;
+        subscriptionContainer.appendChild(subscriptionCard);
+        
+        // 2. Show credit usage
+        const creditCard = document.createElement('div');
+        creditCard.className = 'card';
+        creditCard.innerHTML = `
+            <div class="card-header">
+                <h3>Credit Usage</h3>
+            </div>
+            <div class="card-body">
+                <div id="credit-progress-container">
+                    <div class="credit-info">
+                        <span id="credits-used">0</span>
+                        <span> / </span>
+                        <span id="credits-total">0</span>
+                        <span> credits used</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="credit-progress" class="progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="credit-actions">
+                    <button id="buy-more-credits" class="btn btn-outline">Buy More Credits</button>
+                </div>
+            </div>
+        `;
+        subscriptionContainer.appendChild(creditCard);
+        
+        // 3. Show license key and downloads
+        if (licenseKeyCard) licenseKeyCard.style.display = 'block';
+        if (downloadsContainer) downloadsContainer.style.display = 'block';
+        
+        // 4. Update credit usage display
+        Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+        
+        // 5. Bind event handlers
+        const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
+        if (buyMoreCreditsBtn) {
+            buyMoreCreditsBtn.addEventListener('click', () => {
+                Dashboard.openModal('buy-credits-modal');
+            });
+        }
+        
+        const cancelBtn = document.getElementById('cancel-subscription-btn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                Dashboard.openModal('cancel-subscription-modal');
+            });
+        }
+        
+        const upgradeBtn = document.getElementById('upgrade-subscription-btn');
+        if (upgradeBtn) {
+            upgradeBtn.addEventListener('click', Dashboard.showAvailablePlans);
+        }
+    } else {
+        // User has no subscription, show pricing plans
+        const pricingTitle = document.createElement('div');
+        pricingTitle.className = 'section-subheader';
+        pricingTitle.innerHTML = '<h3>Choose a Plan</h3>';
+        subscriptionContainer.appendChild(pricingTitle);
+        
+        // Create pricing grid
+        const plansGrid = document.createElement('div');
+        plansGrid.className = 'plans-grid';
+        
+        // Add plans to grid
+        for (const planKey in SUBSCRIPTION_PLANS) {
+            const plan = SUBSCRIPTION_PLANS[planKey];
+            plansGrid.innerHTML += Dashboard.generatePlanHTML(plan);
+        }
+        
+        subscriptionContainer.appendChild(plansGrid);
+        
+        // Hide license key and downloads
+        if (licenseKeyCard) licenseKeyCard.style.display = 'none';
+        if (downloadsContainer) downloadsContainer.style.display = 'none';
+        
+        // Bind events to subscribe buttons
+        setTimeout(() => {
+            const subscribeButtons = document.querySelectorAll('.subscribe-btn');
+            subscribeButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const planId = e.target.getAttribute('data-plan-id');
+                    Dashboard.subscribeToPlan(planId);
+                });
+            });
+        }, 0);
+    }
+},
+
+
     /**
      * Setup event listeners
      */
@@ -832,6 +950,7 @@ loadSubscriptionStatus: function() {
                         
                         // Update UI with subscription data
                         Dashboard.updateSubscriptionUI(subscriptionStatus);
+                        Dashboard.updateDashboardView(subscriptionStatus); // Add this line
                         
                         // Update credit usage display
                         Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
@@ -844,9 +963,11 @@ loadSubscriptionStatus: function() {
                         // No subscription data, show available plans
                         subscriptionStatus = null;
                         Dashboard.updateSubscriptionUI(null);
+                        Dashboard.updateDashboardView(null); // Add this line
                         Dashboard.showAvailablePlans();
                         resolve(null);
                     }
+
                 } else {
                     // User document doesn't exist, create it
                     Dashboard.createUserDocument(currentUser)
@@ -1163,6 +1284,7 @@ subscribeToPlan: function(planId) {
             
             // Update UI
             Dashboard.updateSubscriptionUI(newSubscription);
+            Dashboard.updateDashboardView(newSubscription);
             
             // Update credit usage display
             Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
@@ -1223,6 +1345,7 @@ cancelSubscription: function() {
             
             // Update UI
             Dashboard.updateSubscriptionUI(subscriptionStatus);
+            Dashboard.updateDashboardView(subscriptionStatus);
             
             // Create transaction record
             Dashboard.createTransactionRecord({
