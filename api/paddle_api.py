@@ -1,0 +1,119 @@
+import os
+import requests
+from dotenv import load_dotenv
+
+# Load environment variables - Vercel will use environment variables from settings
+load_dotenv()
+
+# Paddle API configuration from environment variables (secure)
+API_KEY = os.getenv("PADDLE_API_KEY")
+API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
+
+# Headers for authentication
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+def get_customer_by_email(email):
+    """Retrieve customer information using email address"""
+    response = requests.get(
+        f'{API_BASE_URL}/customers',
+        headers=headers,
+        params={'email': email}
+    )
+    if response.status_code == 200:
+        data = response.json()
+        if data['data']:
+            return data['data'][0]  # Assuming the first match is the correct customer
+    return None
+
+def get_subscriptions(customer_id):
+    """Get all subscriptions for a customer"""
+    response = requests.get(
+        f'{API_BASE_URL}/subscriptions',
+        headers=headers,
+        params={'customer_id': customer_id}
+    )
+    if response.status_code == 200:
+        return response.json()['data']
+    return []
+
+def get_subscription_details(subscription_id):
+    """Get detailed information about a specific subscription"""
+    response = requests.get(
+        f'{API_BASE_URL}/subscriptions/{subscription_id}',
+        headers=headers
+    )
+    if response.status_code == 200:
+        return response.json()['data']
+    return None
+
+def get_license_keys(subscription_id):
+    """Get license keys for a subscription"""
+    response = requests.get(
+        f'{API_BASE_URL}/subscriptions/{subscription_id}/license-keys',
+        headers=headers
+    )
+    if response.status_code == 200:
+        return response.json()['data']
+    return []
+
+def create_subscription(customer_id, price_id):
+    """Create a subscription for the customer"""
+    payload = {
+        "customer_id": customer_id,
+        "items": [
+            {
+                "price_id": price_id,
+                "quantity": 1
+            }
+        ]
+    }
+    
+    response = requests.post(
+        f'{API_BASE_URL}/subscriptions',
+        headers=headers,
+        json=payload
+    )
+    
+    if response.status_code == 201:
+        return response.json()['data']
+    return None
+
+def cancel_subscription(subscription_id, immediate=False):
+    """Cancel a subscription"""
+    payload = {
+        "effective_from": "immediately" if immediate else "next_billing_period"
+    }
+    response = requests.post(
+        f'{API_BASE_URL}/subscriptions/{subscription_id}/cancel',
+        headers=headers,
+        json=payload
+    )
+    return response.status_code == 200
+
+def get_transactions(customer_id, limit=10):
+    """Get transaction history for a customer"""
+    response = requests.get(
+        f'{API_BASE_URL}/transactions',
+        headers=headers,
+        params={'customer_id': customer_id, 'per_page': limit}
+    )
+    if response.status_code == 200:
+        return response.json()['data']
+    return []
+
+def validate_license(license_key, device_id):
+    """Validate a license key against Paddle's records"""
+    # This is a simplified example - in a real implementation you would
+    # check the license key against your database or Paddle's API
+    
+    # For example, first look up subscriptions by license key
+    # Here we simulate a successful validation
+    return {
+        "valid": True,
+        "tier": "premium",
+        "features": ["feature1", "feature2", "feature3"],
+        "message": "License validated successfully"
+    }

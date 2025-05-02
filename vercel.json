@@ -1,7 +1,20 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "builds": [
+    { "src": "api/*.py", "use": "@vercel/python" },
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "*.css", "use": "@vercel/static" },
+    { "src": "*.js", "use": "@vercel/static" }
+  ],
   "routes": [
+    { "src": "/api/dashboard", "dest": "/api/dashboard.py" },
+    { "src": "/api/license", "dest": "/api/license.py" },
+    { "src": "/api/subscription", "dest": "/api/subscription.py" },
+    { "src": "/api/transactions", "dest": "/api/transactions.py" },
+    { "src": "/api/paddle-webhook", "dest": "/api/paddle_webhook.py" },
+    
     { "src": "/privacypolicy", "dest": "/api/privacypolicy.js" },
     { "src": "/refundpolicy", "dest": "/api/refundpolicy.js" },
     { "src": "/termsofservice", "dest": "/api/termsofservice.js" },
@@ -16,7 +29,6 @@
     { "src": "/contact", "dest": "contact.html" },
     { "src": "/faq", "dest": "faq.html" },
     { "src": "/cookies", "dest": "/api/cookies.js" },
-    
 
     { "src": "/pricing.html", "status": 308, "headers": { "Location": "/price" } },
     { "src": "/signin.html", "status": 308, "headers": { "Location": "/signin" } },

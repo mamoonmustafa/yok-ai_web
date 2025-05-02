@@ -733,14 +733,40 @@ loadSectionData: function(sectionId) {
  * Load dashboard data
  */
 loadDashboardData: function() {
-    // Update credit usage
-    Dashboard.updateCreditUsage();
+    // Update loading state
+    Dashboard.updateLoadingState(true);
     
-    // Load subscription status
-    Dashboard.loadSubscriptionStatus();
-    
-    // Load usage analytics
-    Dashboard.loadUsageAnalytics();
+    // Call the API
+    ApiService.getDashboardData()
+        .then(data => {
+            if (data && data.subscriptions) {
+                // Store data
+                subscriptionStatus = data.subscriptions.length > 0 ? data.subscriptions[0] : null;
+                creditUsage = data.credit_usage || { used: 0, total: 0 };
+                licenseKey = data.license_keys && data.license_keys.length > 0 ? 
+                    data.license_keys[0].key : null;
+                
+                // Update UI
+                Dashboard.updateSubscriptionUI(subscriptionStatus);
+                Dashboard.updateDashboardView(subscriptionStatus);
+                Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+                Dashboard.updateLicenseKeyDisplay();
+            } else {
+                // No subscription data, show available plans
+                subscriptionStatus = null;
+                Dashboard.updateSubscriptionUI(null);
+                Dashboard.updateDashboardView(null);
+                Dashboard.showAvailablePlans();
+            }
+            
+            // Update loading state
+            Dashboard.updateLoadingState(false);
+        })
+        .catch(error => {
+            console.error('Error loading dashboard data:', error);
+            Dashboard.updateLoadingState(false);
+            Dashboard.showToast('Failed to load dashboard data', 'error');
+        });
 },
 
 /**
@@ -1238,85 +1264,26 @@ subscribeToPlan: function(planId) {
     // Show loading
     Dashboard.showToast('Preparing subscription...', 'info');
     
-    // In a real implementation, you would integrate with Paddle
-    // For this example, we'll simulate a successful subscription
-    
-    // Simulate Paddle API call
-    setTimeout(() => {
-        // Create subscription data
-        const newSubscription = {
-            id: 'sub_' + Math.random().toString(36).substr(2, 9),
-            active: true,
-            plan: {
-                id: selectedPlan.id,
-                name: selectedPlan.name
-            },
-            amount: selectedPlan.price,
-            interval: selectedPlan.interval,
-            startDate: new Date().toISOString(),
-            nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // +30 days
-        };
-        
-        // Update credit usage
-        creditUsage = {
-            used: 0,
-            total: selectedPlan.credits || 0
-        };
-        
-        // Generate license key if not exists
-        if (!licenseKey) {
-            licenseKey = Utils.generateLicenseKey();
-        }
-        
-        // Update subscription status
-        subscriptionStatus = newSubscription;
-        
-        // Save to Firebase
-        const db = firebase.firestore();
-        db.collection('users').doc(currentUser.uid).update({
-            subscription: newSubscription,
-            creditUsage: creditUsage,
-            licenseKey: licenseKey,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
+    // Create subscription using API
+    ApiService.createSubscription(currentUser.uid, planId)
+        .then(subscription => {
             // Show success message
             Dashboard.showToast('Subscription activated successfully!', 'success');
             
-            // Update UI
-            Dashboard.updateSubscriptionUI(newSubscription);
-            Dashboard.updateDashboardView(newSubscription);
-            
-            // Update credit usage display
-            Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
-            
-            // Update license key display
-            Dashboard.updateLicenseKeyDisplay();
-            
-            // Hide available plans
-            if (domElements.availablePlansContainer) {
-                domElements.availablePlansContainer.style.display = 'none';
-            }
-            
-            // Create transaction record
-            Dashboard.createTransactionRecord({
-                type: 'subscription',
-                description: `${selectedPlan.name} Subscription`,
-                amount: selectedPlan.price,
-                date: new Date().toISOString(),
-                status: 'completed'
-            });
-        }).catch(error => {
-            console.error('Error saving subscription:', error);
-            Dashboard.showToast('Error activating subscription', 'error');
+            // Reload dashboard data to update UI
+            Dashboard.loadDashboardData();
+        })
+        .catch(error => {
+            console.error('Subscription error:', error);
+            Dashboard.showToast('Failed to activate subscription', 'error');
         });
-    }, 2000);
 },
 
 /**
  * Cancel subscription
  */
 cancelSubscription: function() {
-    if (!currentUser || !subscriptionStatus || !subscriptionStatus.active) {
+    if (!currentUser || !subscriptionStatus || !subscriptionStatus.id) {
         Dashboard.showToast('No active subscription to cancel', 'error');
         return;
     }
@@ -1324,42 +1291,18 @@ cancelSubscription: function() {
     // Show loading
     Dashboard.showToast('Processing cancellation...', 'info');
     
-    // In a real implementation, you would integrate with Paddle
-    // For this example, we'll simulate a successful cancellation
-    
-    // Simulate Paddle API call
-    setTimeout(() => {
-        // Update subscription data
-        subscriptionStatus.canceledAt = new Date().toISOString();
-        subscriptionStatus.active = false;
-        
-        // Save to Firebase
-        const db = firebase.firestore();
-        db.collection('users').doc(currentUser.uid).update({
-            'subscription.canceledAt': subscriptionStatus.canceledAt,
-            'subscription.active': false,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
+    ApiService.cancelSubscription(subscriptionStatus.id, false)
+        .then(result => {
             // Show success message
             Dashboard.showToast('Subscription canceled successfully. You can still use it until the end of the billing period.', 'success');
             
-            // Update UI
-            Dashboard.updateSubscriptionUI(subscriptionStatus);
-            Dashboard.updateDashboardView(subscriptionStatus);
-            
-            // Create transaction record
-            Dashboard.createTransactionRecord({
-                type: 'cancellation',
-                description: 'Subscription Cancellation',
-                amount: 0,
-                date: new Date().toISOString(),
-                status: 'completed'
-            });
-        }).catch(error => {
-            console.error('Error canceling subscription:', error);
-            Dashboard.showToast('Error canceling subscription', 'error');
+            // Reload dashboard data to update UI
+            Dashboard.loadDashboardData();
+        })
+        .catch(error => {
+            console.error('Cancellation error:', error);
+            Dashboard.showToast('Failed to cancel subscription', 'error');
         });
-    }, 2000);
 },
 
 /**
@@ -1372,7 +1315,7 @@ purchaseCredits: function(amount, price) {
     }
     
     // Check if user has active subscription
-    if (!subscriptionStatus || !subscriptionStatus.active) {
+    if (!subscriptionStatus || !subscriptionStatus.id) {
         Dashboard.showToast('You need an active subscription to purchase additional credits', 'error');
         return;
     }
@@ -1380,41 +1323,21 @@ purchaseCredits: function(amount, price) {
     // Show loading
     Dashboard.showToast('Processing credit purchase...', 'info');
     
-    // In a real implementation, you would integrate with Paddle
-    // For this example, we'll simulate a successful purchase
-    
-    // Simulate Paddle API call
-    setTimeout(() => {
-        // Update credit usage
-        creditUsage.total += parseInt(amount);
-        
-        // Save to Firebase
-        const db = firebase.firestore();
-        db.collection('users').doc(currentUser.uid).update({
-            'creditUsage.total': creditUsage.total,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
+    ApiService.purchaseCredits(currentUser.uid, parseInt(amount))
+        .then(result => {
             // Show success message
             Dashboard.showToast(`Successfully purchased ${amount} credits!`, 'success');
             
-            // Update credit usage display
-            Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+            // Reload dashboard data to update credit display
+            Dashboard.loadDashboardData();
             
-            // Create transaction record
-            Dashboard.createTransactionRecord({
-                type: 'credit',
-                description: `${amount} Credit Purchase`,
-                amount: parseFloat(price),
-                date: new Date().toISOString(),
-                status: 'completed'
-            });
-        }).catch(error => {
-            console.error('Error purchasing credits:', error);
-            Dashboard.showToast('Error purchasing credits', 'error');
+            // Create transaction record (now handled by the API)
+        })
+        .catch(error => {
+            console.error('Credit purchase error:', error);
+            Dashboard.showToast('Failed to purchase credits', 'error');
         });
-    }, 2000);
 },
-
 /**
  * Create a transaction record
  */
@@ -1449,59 +1372,39 @@ loadTransactionHistory: function() {
             </tr>
         `;
         
-        // Get transactions from Firestore
-        const db = firebase.firestore();
-        db.collection('users').doc(currentUser.uid).collection('transactions')
-            .orderBy('createdAt', 'desc')
-            .limit(20)
-            .get()
-            .then(snapshot => {
-                if (snapshot.empty) {
-                    // No transactions
-                    domElements.transactionsTable.innerHTML = `
-                        <tr>
-                            <td colspan="5" class="text-center">
-                                <div class="empty-state">
-                                    <div class="empty-state-icon">
-                                        <i class="fas fa-receipt"></i>
-                                    </div>
-                                    <div class="empty-state-title">No Transactions</div>
-                                    <div class="empty-state-text">You don't have any transactions yet.</div>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // Process transactions
-                transactionHistory = [];
-                snapshot.forEach(doc => {
-                    transactionHistory.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                // Render transactions
-                Dashboard.renderTransactionHistory();
-            })
-            .catch(error => {
-                console.error('Error loading transactions:', error);
-                domElements.transactionsTable.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center">
-                            <div class="alert alert-error">
-                                <i class="alert-icon fas fa-exclamation-circle"></i>
-                                <div class="alert-content">
-                                    <div class="alert-title">Error Loading Transactions</div>
-                                    <div class="alert-message">There was a problem loading your transaction history. Please try again later.</div>
-                                </div>
+        // Get filter values
+        const typeFilter = document.getElementById('transaction-type')?.value || 'all';
+        const periodFilter = document.getElementById('transaction-period')?.value || 'all';
+        
+        // Get transactions from API
+        ApiService.getTransactions(currentUser.uid, {
+            type: typeFilter !== 'all' ? typeFilter : undefined,
+            period: periodFilter !== 'all' ? periodFilter : undefined,
+            limit: 20
+        })
+        .then(data => {
+            // Process transactions
+            transactionHistory = data || [];
+            
+            // Render transactions
+            Dashboard.renderTransactionHistory();
+        })
+        .catch(error => {
+            console.error('Error loading transactions:', error);
+            domElements.transactionsTable.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <div class="alert alert-error">
+                            <i class="alert-icon fas fa-exclamation-circle"></i>
+                            <div class="alert-content">
+                                <div class="alert-title">Error Loading Transactions</div>
+                                <div class="alert-message">There was a problem loading your transaction history. Please try again later.</div>
                             </div>
-                        </td>
-                    </tr>
-                `;
-            });
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
     }
 },
 
