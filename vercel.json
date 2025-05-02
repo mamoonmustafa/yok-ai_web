@@ -1,4 +1,5 @@
 {
+  "version": 4,
   "cleanUrls": true,
   "trailingSlash": false,
   "builds": [
