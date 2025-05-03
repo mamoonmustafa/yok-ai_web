@@ -399,13 +399,7 @@
     <!-- Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Include Paddle.js -->
-    <script src="https://cdn.paddle.com/paddle.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Paddle.Environment.set('sandbox'); // Remove this line when going to production
-            // We'll get the token from the server and initialize Paddle later
-        });
-    </script>
+    <script src="https://cdn.paddle.com/paddle.js" async defer></script>
     <!-- Application Script -->
     <script src="./js/api-service.js"></script>
     <script src="./js/yok-ai-dashboard.js"></script>

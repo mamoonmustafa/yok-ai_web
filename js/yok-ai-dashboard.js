@@ -183,44 +183,66 @@ const domElements = {
 // Main Dashboard Object
 const Dashboard = {
     initializePaddle: function() {
-        if (!currentUser) return;
+        console.log("Setting up Paddle initialization check...");
         
-        // Show message
-        console.log("Initializing Paddle...");
-        
-        // Get token from Firebase
-        currentUser.getIdToken(true).then(token => {
-            // Call API to get Paddle client token
-            fetch('/api/paddle_token', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+        // Check if Paddle script is loaded
+        const checkPaddleLoaded = function() {
+            if (typeof Paddle === 'undefined') {
+                console.log("Paddle not loaded yet, checking again in 500ms...");
+                setTimeout(checkPaddleLoaded, 500);
+                return;
+            }
+            
+            console.log("Paddle script detected, initializing...");
+            
+            // Initialize Paddle once script is loaded
+            try {
+                Paddle.Environment.set('sandbox'); // Remove for production
+                
+                // Get token from Firebase if user is logged in
+                if (!currentUser) {
+                    console.log("No user logged in, can't get token yet");
+                    return;
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.clientToken) {
-                    // Initialize Paddle with token
-                    console.log("Got Paddle token, initializing...");
-                    Paddle.Environment.set('sandbox');
-                    Paddle.Initialize({ 
-                        token: data.clientToken,
-                        eventCallback: function(event) {
-                            console.log("Paddle event:", event);
+                
+                currentUser.getIdToken(true).then(token => {
+                    // Call API to get Paddle client token
+                    fetch('/api/paddle_token', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
                         }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.clientToken) {
+                            // Initialize Paddle with token
+                            console.log("Got Paddle token, initializing...");
+                            Paddle.Initialize({ 
+                                token: data.clientToken,
+                                eventCallback: function(event) {
+                                    console.log("Paddle event:", event);
+                                }
+                            });
+                            
+                            // Show success message
+                            console.log("Paddle initialized successfully!");
+                        } else {
+                            console.error("No client token received:", data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching Paddle token:', error);
                     });
-                    
-                    // Show success message
-                    console.log("Paddle initialized successfully!");
-                } else {
-                    console.error("No client token received");
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching Paddle token:', error);
-            });
-        }).catch(error => {
-            console.error('Error getting auth token:', error);
-        });
+                }).catch(error => {
+                    console.error('Error getting auth token:', error);
+                });
+            } catch(error) {
+                console.error("Paddle initialization error:", error);
+            }
+        };
+        
+        // Start checking for Paddle
+        checkPaddleLoaded();
     },
     /**
      * Initialize the dashboard
@@ -1327,10 +1349,26 @@ subscribeToPlan: function(planId) {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     }
     
+      // Check if Paddle is defined
+      if (typeof Paddle === 'undefined') {
+        console.error('Paddle is not defined. Script not loaded.');
+        Dashboard.showToast('Payment system not available. Please try again later.', 'error');
+        
+        // Reset button
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Subscribe Now';
+        }
+        return;
+    }
+    
     // Check if Paddle is initialized
     if (typeof Paddle.Checkout === 'undefined') {
         console.error('Paddle checkout not initialized');
         Dashboard.showToast('Payment system not ready. Please try again.', 'error');
+        
+        // Attempt to initialize
+        Dashboard.initializePaddle();
         
         // Reset button
         if (button) {
