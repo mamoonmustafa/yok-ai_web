@@ -400,6 +400,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Include Paddle.js -->
     <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
+    <script>// Initialize Paddle with your sandbox vendor ID
+        Paddle.Setup({ 
+            vendor: 30514,
+            environment: 'sandbox'  // Add this line to specify sandbox environment
+        });</script>
     <!-- Application Script -->
     <script src="./js/api-service.js"></script>
     <script src="./js/yok-ai-dashboard.js"></script>
