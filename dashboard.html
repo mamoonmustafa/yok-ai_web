@@ -399,11 +399,11 @@
     <!-- Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Include Paddle.js -->
-    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
-    <script>// Initialize Paddle with your sandbox vendor ID
-        Paddle.Environment.set('sandbox');
-        Paddle.Initialize({ 
-            token: "test_164332024f472fd8e2fe8c44d48"
+    <script src="https://cdn.paddle.com/paddle.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Paddle.Environment.set('sandbox'); // Remove this line when going to production
+            // We'll get the token from the server and initialize Paddle later
         });
     </script>
     <!-- Application Script -->

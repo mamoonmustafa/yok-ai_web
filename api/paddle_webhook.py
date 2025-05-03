@@ -21,15 +21,16 @@ headers = {
     "Content-Type": "application/json"
 }
 
-def verify_webhook_signature(data, signature):
+def verify_webhook_signature(data, signature, timestamp):
     """Verify the webhook signature to ensure it's from Paddle"""
-    computed_signature = hmac.new(
+    raw_payload = json.dumps(data).encode()
+    expected_sig = hmac.new(
         WEBHOOK_SECRET.encode(),
-        msg=json.dumps(data).encode(),
+        msg=f"{timestamp}.{raw_payload.decode()}".encode(),
         digestmod=hashlib.sha256
     ).hexdigest()
     
-    return hmac.compare_digest(computed_signature, signature)
+    return hmac.compare_digest(expected_sig, signature)
 
 def generate_license_key():
     """Generate a unique license key"""
@@ -68,9 +69,10 @@ class handler(BaseHTTPRequestHandler):
         
         # Get signature from headers
         signature = self.headers.get('Paddle-Signature', '')
-        
+        timestamp = self.headers.get('Paddle-Timestamp', '')
+
         # Verify signature (security check)
-        if not verify_webhook_signature(webhook_data, signature):
+        if not verify_webhook_signature(webhook_data, signature, timestamp):
             self.send_response(401)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()

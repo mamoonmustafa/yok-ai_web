@@ -182,6 +182,46 @@ const domElements = {
 
 // Main Dashboard Object
 const Dashboard = {
+    initializePaddle: function() {
+        if (!currentUser) return;
+        
+        // Show message
+        console.log("Initializing Paddle...");
+        
+        // Get token from Firebase
+        currentUser.getIdToken(true).then(token => {
+            // Call API to get Paddle client token
+            fetch('/api/paddle_token', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.clientToken) {
+                    // Initialize Paddle with token
+                    console.log("Got Paddle token, initializing...");
+                    Paddle.Environment.set('sandbox');
+                    Paddle.Initialize({ 
+                        token: data.clientToken,
+                        eventCallback: function(event) {
+                            console.log("Paddle event:", event);
+                        }
+                    });
+                    
+                    // Show success message
+                    console.log("Paddle initialized successfully!");
+                } else {
+                    console.error("No client token received");
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching Paddle token:', error);
+            });
+        }).catch(error => {
+            console.error('Error getting auth token:', error);
+        });
+    },
     /**
      * Initialize the dashboard
      */
@@ -225,6 +265,9 @@ const Dashboard = {
         
         // Initialize cancel subscription modal
         Dashboard.initCancelSubscriptionModal();
+
+        // Initialize Paddle
+        Dashboard.initializePaddle();
     },
     
 /**
@@ -1284,41 +1327,75 @@ subscribeToPlan: function(planId) {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     }
     
-    // Open Paddle checkout directly
-    Paddle.Checkout.open({
-        items: [{ priceId: planId }], // Note: priceId not product for Billing
-        email: currentUser.email,
-        customData: {
-            uid: currentUser.uid,
-            email: currentUser.email,
-            name: currentUser.displayName || '',
-            firebaseToken: currentUser.getIdToken ? 
-                currentUser.getIdToken(true).then(token => token.substring(0, 20)) : ''
-        },
-        successCallback: function(data) {
-            Dashboard.showToast('Subscription activated successfully!', 'success');
-            
-            // Wait a moment for webhook to process
-            setTimeout(() => {
-                Dashboard.loadDashboardData();
-            }, 2000);
-            
-            // Reset button
-            if (button) {
-                button.disabled = false;
-                button.innerHTML = 'Subscribe Now';
-            }
-        },
-        closeCallback: function() {
-            console.log('Checkout closed without completion');
-            
-            // Reset button
-            if (button) {
-                button.disabled = false;
-                button.innerHTML = 'Subscribe Now';
-            }
+    // Check if Paddle is initialized
+    if (typeof Paddle.Checkout === 'undefined') {
+        console.error('Paddle checkout not initialized');
+        Dashboard.showToast('Payment system not ready. Please try again.', 'error');
+        
+        // Reset button
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Subscribe Now';
         }
-    });
+        return;
+    }
+    
+    // Open Paddle checkout with new format
+    try {
+        console.log("Opening Paddle checkout for plan:", planId);
+        Paddle.Checkout.open({
+            items: [
+                {
+                    priceId: planId,
+                    quantity: 1
+                }
+            ],
+            customer: {
+                email: currentUser.email
+            },
+            customData: {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                name: currentUser.displayName || ''
+            },
+            settings: {
+                theme: 'light',
+                displayMode: 'overlay'
+            },
+            successCallback: function(data) {
+                Dashboard.showToast('Subscription activated successfully!', 'success');
+                
+                // Wait for webhook to process
+                setTimeout(() => {
+                    Dashboard.loadDashboardData();
+                }, 2000);
+                
+                // Reset button
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = 'Subscribe Now';
+                }
+            },
+            closeCallback: function() {
+                console.log('Checkout closed without completion');
+                
+                // Reset button
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = 'Subscribe Now';
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Paddle checkout error:', error);
+        Dashboard.showToast('Failed to open checkout. Please try again.', 'error');
+        
+        // Reset button
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Subscribe Now';
+        }
+    }
 },
 
 /**
