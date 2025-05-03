@@ -26,7 +26,6 @@
     { "source": "/cookies", "destination": "/api/policy_docs.js" },
     
     { "source": "/hero_image.png", "destination": "/hero_image.png" },
-    { "source": "/:path(\\.png|\\.jpg|\\.svg|\\.ico)$", "destination": "/:path" },
     
     { "source": "/price", "destination": "/pricing.html" },
     { "source": "/signin", "destination": "/signin.html" },
@@ -40,7 +39,7 @@
   ],
   "headers": [
     {
-      "source": "/(.*)\\.(?:png|jpg|jpeg|svg|ico)$",
+      "source": "/:file(.+\\.(png|jpg|jpeg|svg|ico))",
       "headers": [
         {
           "key": "Cache-Control",
