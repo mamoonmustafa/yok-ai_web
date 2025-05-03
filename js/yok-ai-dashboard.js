@@ -218,7 +218,7 @@ const Dashboard = {
                             // Initialize Paddle with token
                             console.log("Got Paddle token, initializing...");
                             Paddle.Initialize({ 
-                                token: data.clientToken,
+                                token: 'test_164332024f472fd8e2fe8c44d48',
                                 eventCallback: function(event) {
                                     console.log("Paddle event:", event);
                                 }
