@@ -506,36 +506,41 @@ updateDashboardView: function(status) {
         // Start new interval
         checkVerificationInterval = setInterval(() => {
             // Reload user to check verification status
-            firebase.auth().currentUser.reload()
-                .then(() => {
-                    // Get fresh user data
-                    currentUser = firebase.auth().currentUser;
-                    
-                    // Check if email is now verified
-                    if (currentUser.emailVerified) {
-                        isEmailVerified = true;
+            if (firebase.auth().currentUser) {
+                firebase.auth().currentUser.reload()
+                    .then(() => {
+                        // Get fresh user data
+                        currentUser = firebase.auth().currentUser;
                         
-                        // Stop checking
-                        Dashboard.stopVerificationCheck();
-                        
-                        // Update UI
-                        Dashboard.updateUIForVerification(true);
-                        
-                        // Update user data in Firestore
-                        const db = firebase.firestore();
-                        db.collection('users').doc(currentUser.uid).update({
-                            emailVerified: true
-                        }).catch(error => {
-                            console.error("Error updating verification status:", error);
-                        });
-                        
-                        // Show success message
-                        Dashboard.showToast('Email verified successfully!', 'success');
-                    }
-                })
-                .catch(error => {
-                    console.error("Error reloading user:", error);
-                });
+                        // Check if email is now verified
+                        if (currentUser.emailVerified) {
+                            isEmailVerified = true;
+                            
+                            // Stop checking
+                            Dashboard.stopVerificationCheck();
+                            
+                            // Update UI
+                            Dashboard.updateUIForVerification(true);
+                            
+                            // Update user data in Firestore
+                            const db = firebase.firestore();
+                            db.collection('users').doc(currentUser.uid).update({
+                                emailVerified: true
+                            }).catch(error => {
+                                console.error("Error updating verification status:", error);
+                            });
+                            
+                            // Show success message
+                            Dashboard.showToast('Email verified successfully!', 'success');
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error reloading user:", error);
+                    });
+            } else {
+                // User is no longer signed in, stop checking
+                Dashboard.stopVerificationCheck();
+            }
         }, verificationCheckDelay);
     },
     
@@ -733,40 +738,65 @@ loadSectionData: function(sectionId) {
  * Load dashboard data
  */
 loadDashboardData: function() {
-    // Update loading state
-    Dashboard.updateLoadingState(true);
-    
-    // Call the API
-    ApiService.getDashboardData()
-        .then(data => {
-            if (data && data.subscriptions) {
-                // Store data
-                subscriptionStatus = data.subscriptions.length > 0 ? data.subscriptions[0] : null;
-                creditUsage = data.credit_usage || { used: 0, total: 0 };
-                licenseKey = data.license_keys && data.license_keys.length > 0 ? 
-                    data.license_keys[0].key : null;
+    // Get token from Firebase
+    currentUser.getIdToken(true).then(token => {
+        // Store token for API calls
+        localStorage.setItem('auth_token', token);
+        
+        // Update loading state
+        Dashboard.updateLoadingState(true);
+        
+        // Call the API
+        ApiService.getDashboardData()
+            .then(data => {
+                if (data && data.subscriptions) {
+                    // Store data
+                    subscriptionStatus = {
+                        active: data.subscriptions.length > 0,
+                        plan: data.subscriptions.length > 0 ? {
+                            name: data.subscriptions[0].plan_name || 'Premium Plan',
+                            id: data.subscriptions[0].plan_id
+                        } : null,
+                        id: data.subscriptions.length > 0 ? data.subscriptions[0].id : null,
+                        amount: data.subscriptions.length > 0 ? data.subscriptions[0].amount : 0,
+                        interval: data.subscriptions.length > 0 ? data.subscriptions[0].billing_period || 'month' : 'month',
+                        nextBillingDate: data.subscriptions.length > 0 ? data.subscriptions[0].next_billing_date : null
+                    };
+                    
+                    creditUsage = data.credit_usage || { used: 0, total: 0 };
+                    licenseKey = data.license_keys && data.license_keys.length > 0 ? 
+                        data.license_keys[0].key || data.license_keys[0] : null;
+                    
+                    // Update UI
+                    Dashboard.updateSubscriptionUI(subscriptionStatus);
+                    Dashboard.updateDashboardView(subscriptionStatus);
+                    Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+                    Dashboard.updateLicenseKeyDisplay();
+                } else {
+                    // No subscription data, show available plans
+                    subscriptionStatus = null;
+                    Dashboard.updateSubscriptionUI(null);
+                    Dashboard.updateDashboardView(null);
+                    Dashboard.showAvailablePlans();
+                }
                 
-                // Update UI
-                Dashboard.updateSubscriptionUI(subscriptionStatus);
-                Dashboard.updateDashboardView(subscriptionStatus);
-                Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
-                Dashboard.updateLicenseKeyDisplay();
-            } else {
-                // No subscription data, show available plans
-                subscriptionStatus = null;
-                Dashboard.updateSubscriptionUI(null);
-                Dashboard.updateDashboardView(null);
-                Dashboard.showAvailablePlans();
-            }
-            
-            // Update loading state
-            Dashboard.updateLoadingState(false);
-        })
-        .catch(error => {
-            console.error('Error loading dashboard data:', error);
-            Dashboard.updateLoadingState(false);
-            Dashboard.showToast('Failed to load dashboard data', 'error');
-        });
+                // Update loading state
+                Dashboard.updateLoadingState(false);
+            })
+            .catch(error => {
+                console.error('Error loading dashboard data:', error);
+                Dashboard.updateLoadingState(false);
+                Dashboard.showToast('Failed to load dashboard data', 'error');
+            });
+    }).catch(error => {
+        console.error('Error getting auth token:', error);
+        Dashboard.showToast('Authentication error. Please sign in again.', 'error');
+        
+        // Redirect to sign in page
+        setTimeout(() => {
+            window.location.href = '/signin';
+        }, 2000);
+    });
 },
 
 /**
@@ -1264,19 +1294,31 @@ subscribeToPlan: function(planId) {
     // Show loading
     Dashboard.showToast('Preparing subscription...', 'info');
     
-    // Create subscription using API
-    ApiService.createSubscription(currentUser.uid, planId)
-        .then(subscription => {
-            // Show success message
-            Dashboard.showToast('Subscription activated successfully!', 'success');
-            
-            // Reload dashboard data to update UI
-            Dashboard.loadDashboardData();
-        })
-        .catch(error => {
-            console.error('Subscription error:', error);
-            Dashboard.showToast('Failed to activate subscription', 'error');
-        });
+    // Get customer data from API first
+    currentUser.getIdToken(true).then(token => {
+        localStorage.setItem('auth_token', token);
+        
+        return ApiService.getDashboardData();
+    })
+    .then(data => {
+        if (!data || !data.customer || !data.customer.id) {
+            throw new Error('Customer data not available');
+        }
+        
+        // Create subscription using API
+        return ApiService.createSubscription(data.customer.id, planId);
+    })
+    .then(subscription => {
+        // Show success message
+        Dashboard.showToast('Subscription activated successfully!', 'success');
+        
+        // Reload dashboard data to update UI
+        Dashboard.loadDashboardData();
+    })
+    .catch(error => {
+        console.error('Subscription error:', error);
+        Dashboard.showToast('Failed to activate subscription: ' + error.message, 'error');
+    });
 },
 
 /**
@@ -1414,6 +1456,24 @@ loadTransactionHistory: function() {
 renderTransactionHistory: function() {
     if (!domElements.transactionsTable || !transactionHistory) return;
     
+    // Check if transactions array exists and has items
+    if (!Array.isArray(transactionHistory) || transactionHistory.length === 0) {
+        domElements.transactionsTable.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <div class="empty-state-title">No Transactions Yet</div>
+                        <div class="empty-state-text">Your transaction history will appear here once you make a purchase.</div>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
     // Get filter values
     const typeFilter = document.getElementById('transaction-type')?.value || 'all';
     const periodFilter = document.getElementById('transaction-period')?.value || 'all';
@@ -1445,7 +1505,7 @@ renderTransactionHistory: function() {
         
         if (cutoffDate) {
             filteredTransactions = filteredTransactions.filter(t => {
-                const transactionDate = new Date(t.date);
+                const transactionDate = t.date ? new Date(t.date) : new Date(t.created_at || 0);
                 return transactionDate >= cutoffDate;
             });
         }
@@ -1472,19 +1532,30 @@ renderTransactionHistory: function() {
     let tableHTML = '';
     
     filteredTransactions.forEach(transaction => {
+        // Handle date format safely
+        const transactionDate = transaction.date ? 
+            new Date(transaction.date) : 
+            new Date(transaction.created_at || Date.now());
+            
+        // Safe fallbacks for all fields
+        const description = transaction.description || transaction.type || 'Transaction';
+        const amount = transaction.amount || 0;
+        const status = transaction.status || 'completed';
+        const invoiceUrl = transaction.invoice_url || transaction.receipt_url || null;
+        
         tableHTML += `
             <tr>
-                <td>${Utils.formatDate(transaction.date)}</td>
-                <td>${transaction.description}</td>
-                <td>${Utils.formatCurrency(transaction.amount)}</td>
+                <td>${Utils.formatDate(transactionDate)}</td>
+                <td>${description}</td>
+                <td>${Utils.formatCurrency(amount)}</td>
                 <td>
-                    <span class="status-badge status-${transaction.status === 'completed' ? 'success' : transaction.status === 'pending' ? 'pending' : 'failed'}">
-                        ${transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                    <span class="status-badge status-${status === 'completed' ? 'success' : status === 'pending' ? 'pending' : 'failed'}">
+                        ${status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
                 </td>
                 <td>
-                    ${transaction.invoiceUrl ? 
-                        `<a href="${transaction.invoiceUrl}" target="_blank" class="download-link">
+                    ${invoiceUrl ? 
+                        `<a href="${invoiceUrl}" target="_blank" class="download-link">
                             <i class="fas fa-download"></i> PDF
                         </a>` : 
                         '<span class="text-secondary">N/A</span>'
@@ -1942,63 +2013,57 @@ renderSubscriptionPlans: function() {
 
 // Utility functions
 const Utils = {
-// Format currency
-formatCurrency: (amount) => {
-    return '$' + parseFloat(amount).toFixed(2);
-},
+    // Format currency
+    formatCurrency: (amount) => {
+        return '$' + parseFloat(amount || 0).toFixed(2);
+    },
 
-// Format date
-formatDate: (timestamp) => {
-    if (!timestamp) return '';
-    const date = new Date(timestamp);
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
-},
-
-// Format number with commas
-formatNumber: (number) => {
-    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-},
-
-// Get user initials from name
-getInitials: (name) => {
-    if (!name) return 'U';
-    const names = name.split(' ');
-    if (names.length === 1) return names[0].charAt(0).toUpperCase();
-    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
-},
-
-// Truncate text
-truncateText: (text, length = 40) => {
-    if (!text) return '';
-    if (text.length <= length) return text;
-    return text.substring(0, length) + '...';
-},
-
-// Generate random license key (for demo purposes)
-generateLicenseKey: () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let key = '';
-    
-    // Format: XXXX-XXXX-XXXX-XXXX
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            key += chars.charAt(Math.floor(Math.random() * chars.length));
+    // Format date
+    formatDate: (timestamp) => {
+        if (!timestamp) return 'N/A';
+        try {
+            const date = new Date(timestamp);
+            if (isNaN(date.getTime())) return 'Invalid Date';
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        } catch (e) {
+            console.error('Date formatting error:', e);
+            return 'Invalid Date';
         }
-        if (i < 3) key += '-';
-    }
-    
-    return key;
-},
+    },
 
-// Mask license key for display
-maskLicenseKey: (key) => {
-    if (!key) return '';
-    const parts = key.split('-');
-    if (parts.length !== 4) return key;
-    
-    return parts[0] + '-' + parts[1].substring(0, 2) + '**-****-' + parts[3].substring(2);
-}
+    // Format number with commas
+    formatNumber: (number) => {
+        return (number || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    },
+
+    // Get user initials from name
+    getInitials: (name) => {
+        if (!name) return 'U';
+        const names = name.split(' ');
+        if (names.length === 1) return names[0].charAt(0).toUpperCase();
+        return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    },
+
+    // Mask license key for display
+    maskLicenseKey: (key) => {
+        if (!key) return 'XXXX-XXXX-XXXX-XXXX';
+        
+        // If key has dashes, mask preserving the format
+        if (key.includes('-')) {
+            const parts = key.split('-');
+            if (parts.length >= 4) {
+                return parts[0] + '-' + parts[1].substring(0, 2) + '**-****-' + parts[3].substring(2);
+            }
+        }
+        
+        // Simple masking for keys without expected format
+        if (key.length > 8) {
+            return key.substring(0, 4) + '...' + key.substring(key.length - 4);
+        }
+        
+        return key;
+    }
 };
 
 // Initialize everything when DOM is loaded

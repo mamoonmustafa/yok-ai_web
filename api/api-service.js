@@ -43,6 +43,7 @@ const ApiService = {
             if (!response.ok) {
                 if (response.status === 401) {
                     // Token expired or invalid, redirect to login
+                    localStorage.removeItem('auth_token');
                     window.location.href = '/signin';
                     return null;
                 }
@@ -85,6 +86,14 @@ const ApiService = {
         return this.request('/subscription?action=cancel', 'POST', { 
             subscription_id: subscriptionId, 
             immediate 
+        });
+    },
+    
+    // Purchase additional credits
+    purchaseCredits: function(customerId, amount) {
+        return this.request('/subscription?action=add_credits', 'POST', {
+            customer_id: customerId,
+            credit_amount: amount
         });
     },
     
