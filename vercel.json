@@ -4,7 +4,7 @@
   "trailingSlash": false,
   "builds": [
     { "src": "api/*.py", "use": "@vercel/python" },
-    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "api/policy_docs.js", "use": "@vercel/node" },
     { "src": "*.html", "use": "@vercel/static" },
     { "src": "*.css", "use": "@vercel/static" },
     { "src": "js/*.js", "use": "@vercel/static" }
@@ -16,10 +16,12 @@
     { "source": "/api/transactions", "destination": "/api/transactions.py" },
     { "source": "/api/paddle-webhook", "destination": "/api/paddle_webhook.py" },
     
-    { "source": "/privacypolicy", "destination": "/api/privacypolicy.js" },
-    { "source": "/refundpolicy", "destination": "/api/refundpolicy.js" },
-    { "source": "/termsofservice", "destination": "/api/termsofservice.js" },
-    { "source": "/docs", "destination": "/api/docs.js" },
+    { "source": "/privacypolicy", "destination": "/api/policy_docs.js" },
+    { "source": "/refundpolicy", "destination": "/api/policy_docs.js" },
+    { "source": "/termsofservice", "destination": "/api/policy_docs.js" },
+    { "source": "/docs", "destination": "/api/policy_docs.js" },
+    { "source": "/cookies", "destination": "/api/policy_docs.js" },
+    
     { "source": "/price", "destination": "pricing.html" },
     { "source": "/signin", "destination": "signin.html" },
     { "source": "/signup", "destination": "signup.html" },
@@ -28,8 +30,7 @@
     { "source": "/account", "destination": "newpwd.html" },
     { "source": "/about", "destination": "about.html" },
     { "source": "/contact", "destination": "contact.html" },
-    { "source": "/faq", "destination": "faq.html" },
-    { "source": "/cookies", "destination": "/api/cookies.js" }
+    { "source": "/faq", "destination": "faq.html" }
   ],
   "redirects": [
     { "source": "/pricing.html", "destination": "/price", "permanent": true },
