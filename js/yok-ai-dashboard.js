@@ -23,7 +23,7 @@ const PADDLE_VENDOR_ID = 30514;
 // Subscription plans
 const SUBSCRIPTION_PLANS = {
     BASIC: {
-        id: 'basic-plan-id',
+        id: 'pro_01jsw82ak2y7w7b3g68rn2d8j4',
         name: 'Basic',
         description: 'Perfect for individuals and small projects',
         price: 9.99,
@@ -37,7 +37,7 @@ const SUBSCRIPTION_PLANS = {
         ]
     },
     PRO: {
-        id: 'pro-plan-id',
+        id: 'pro_01jsw88pt1xwgana0zxbjz6rp6',
         name: 'Professional',
         description: 'Ideal for professionals and growing teams',
         price: 29.99,
@@ -53,7 +53,7 @@ const SUBSCRIPTION_PLANS = {
         popular: true
     },
     TEAM: {
-        id: 'team-plan-id',
+        id: 'pro_01jsw8cnyx3gge48dm7659nc9n',
         name: 'Team',
         description: 'Best for teams and businesses',
         price: 79.99,
