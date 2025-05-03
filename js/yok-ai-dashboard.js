@@ -217,18 +217,50 @@ const Dashboard = {
                 
                 // Create script element
                 const script = document.createElement('script');
-                script.src = 'https://cdn.paddle.com/paddle.js';
+                
+                // Use the specific version URL instead of the generic one
+                script.src = 'https://cdn.paddle.com/paddle/paddle.js';
+                
+                // Set crossorigin attribute to improve error reporting
+                script.crossOrigin = 'anonymous';
+                
+                // Add timeout handling
+                const timeoutId = setTimeout(() => {
+                    const errorMsg = "[Paddle] Script loading timed out after 10 seconds";
+                    console.error(errorMsg);
+                    reject(new Error(errorMsg));
+                }, 10000);
                 
                 // Set up event handlers
                 script.onload = function() {
+                    clearTimeout(timeoutId);
                     console.log("[Paddle] Script loaded successfully");
                     resolve(true);
                 };
                 
                 script.onerror = function(error) {
+                    clearTimeout(timeoutId);
                     const errorMsg = "[Paddle] Failed to load script";
                     console.error(errorMsg, error);
-                    reject(new Error(errorMsg));
+                    
+                    // Try alternative URL if first one fails
+                    console.log("[Paddle] Trying alternative script URL...");
+                    const backupScript = document.createElement('script');
+                    backupScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/paddle/3.2.0/paddle.min.js';
+                    backupScript.crossOrigin = 'anonymous';
+                    
+                    backupScript.onload = function() {
+                        console.log("[Paddle] Backup script loaded successfully");
+                        resolve(true);
+                    };
+                    
+                    backupScript.onerror = function(backupError) {
+                        const backupErrorMsg = "[Paddle] Failed to load backup script";
+                        console.error(backupErrorMsg, backupError);
+                        reject(new Error(backupErrorMsg));
+                    };
+                    
+                    document.head.appendChild(backupScript);
                 };
                 
                 // Add to document
@@ -241,7 +273,51 @@ const Dashboard = {
             }
         });
     },
-
+    /**
+     * Debug function to check Paddle connectivity
+     */
+    debugPaddle: function() {
+        console.log("[Paddle Debug] Starting diagnostics...");
+        
+        // Check if Paddle object exists
+        console.log("[Paddle Debug] Paddle object exists:", typeof Paddle !== 'undefined');
+        
+        if (typeof Paddle !== 'undefined') {
+            // Check what properties are available
+            console.log("[Paddle Debug] Paddle properties:", Object.keys(Paddle));
+            
+            // Check if Environment is available
+            console.log("[Paddle Debug] Paddle.Environment exists:", typeof Paddle.Environment !== 'undefined');
+            
+            // Check if Checkout is available
+            console.log("[Paddle Debug] Paddle.Checkout exists:", typeof Paddle.Checkout !== 'undefined');
+            
+            // Check if Initialize is available
+            console.log("[Paddle Debug] Paddle.Initialize exists:", typeof Paddle.Initialize === 'function');
+        }
+        
+        // Test network connectivity to Paddle domains
+        console.log("[Paddle Debug] Testing network connectivity...");
+        
+        fetch('https://cdn.paddle.com/paddle/paddle.js', { method: 'HEAD', mode: 'no-cors' })
+            .then(() => console.log("[Paddle Debug] cdn.paddle.com is reachable"))
+            .catch(err => console.error("[Paddle Debug] cdn.paddle.com is NOT reachable:", err));
+            
+        fetch('https://checkout.paddle.com', { method: 'HEAD', mode: 'no-cors' })
+            .then(() => console.log("[Paddle Debug] checkout.paddle.com is reachable"))
+            .catch(err => console.error("[Paddle Debug] checkout.paddle.com is NOT reachable:", err));
+        
+        // Check content security policy
+        console.log("[Paddle Debug] Checking Content-Security-Policy...");
+        const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+        if (meta) {
+            console.log("[Paddle Debug] CSP found:", meta.content);
+        } else {
+            console.log("[Paddle Debug] No CSP meta tag found");
+        }
+        
+        return "Paddle debugging complete. Check console for results.";
+    },
     /**
      * Initialize Paddle with token - with better error handling
      */
@@ -334,6 +410,11 @@ const Dashboard = {
                 
                 // Load dashboard data
                 Dashboard.loadDashboardData();
+                
+                // Delay Paddle initialization to ensure DOM and other resources are fully loaded
+                setTimeout(() => {
+                    Dashboard.initializePaddle();
+                }, 2000);
             } else {
                 // User is not signed in, redirect to sign in page
                 window.location.href = '/signin';
@@ -354,11 +435,10 @@ const Dashboard = {
         
         // Initialize cancel subscription modal
         Dashboard.initCancelSubscriptionModal();
-
-        // Initialize Paddle
-        Dashboard.initializePaddle();
-    },
-    
+        
+        // Add this at the end of your init function
+        window.debugPaddle = Dashboard.debugPaddle;
+    },    
 /**
  * Update dashboard content based on subscription status
  */
