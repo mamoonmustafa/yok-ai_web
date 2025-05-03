@@ -1291,33 +1291,61 @@ subscribeToPlan: function(planId) {
         return;
     }
     
-    // Show loading
-    Dashboard.showToast('Preparing subscription...', 'info');
+    // Show loading state on button
+    const button = document.querySelector(`.subscribe-btn[data-plan-id="${planId}"]`);
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    }
     
-    // Get customer data from API first
+    // Initialize Paddle with vendor ID
+    Paddle.Setup({ vendor: PADDLE_VENDOR_ID });
+    
+    // Get Firebase token for more secure passthrough
     currentUser.getIdToken(true).then(token => {
-        localStorage.setItem('auth_token', token);
+        // Open Paddle checkout
+        Paddle.Checkout.open({
+            product: planId,
+            email: currentUser.email,
+            passthrough: JSON.stringify({
+                uid: currentUser.uid,
+                email: currentUser.email,
+                name: currentUser.displayName || '',
+                firebaseToken: token.substring(0, 20) // Include part of token for verification
+            }),
+            successCallback: function(data) {
+                Dashboard.showToast('Subscription activated successfully!', 'success');
+                
+                // Wait a moment for webhook to process
+                setTimeout(() => {
+                    Dashboard.loadDashboardData();
+                }, 3000);
+                
+                // Reset button
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = 'Subscribe Now';
+                }
+            },
+            closeCallback: function() {
+                console.log('Checkout closed without completion');
+                
+                // Reset button
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = 'Subscribe Now';
+                }
+            }
+        });
+    }).catch(error => {
+        console.error("Error getting auth token:", error);
+        Dashboard.showToast('Authentication error. Please try again.', 'error');
         
-        return ApiService.getDashboardData();
-    })
-    .then(data => {
-        if (!data || !data.customer || !data.customer.id) {
-            throw new Error('Customer data not available');
+        // Reset button
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Subscribe Now';
         }
-        
-        // Create subscription using API
-        return ApiService.createSubscription(data.customer.id, planId);
-    })
-    .then(subscription => {
-        // Show success message
-        Dashboard.showToast('Subscription activated successfully!', 'success');
-        
-        // Reload dashboard data to update UI
-        Dashboard.loadDashboardData();
-    })
-    .catch(error => {
-        console.error('Subscription error:', error);
-        Dashboard.showToast('Failed to activate subscription: ' + error.message, 'error');
     });
 },
 
