@@ -401,9 +401,11 @@
     <!-- Include Paddle.js -->
     <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
     <script>// Initialize Paddle with your sandbox vendor ID
+        Paddle.Environment.set('sandbox'); // Remove this line when going to production
         Paddle.Setup({ 
             vendor: 30514
-        });</script>
+        });
+    </script>
     <!-- Application Script -->
     <script src="./js/api-service.js"></script>
     <script src="./js/yok-ai-dashboard.js"></script>

@@ -35,14 +35,14 @@ def generate_license_key():
     """Generate a unique license key"""
     return str(uuid.uuid4()).upper().replace('-', '-')
 
-def create_license_key(subscription_id, customer_id, email, plan_id):
+def create_license_key(subscription_id, customer_id, email, price_id):
     """Create a license key for the subscription"""
     # Generate a license key
     license_key = generate_license_key()
     
     # Create license key in Paddle
     response = requests.post(
-        f'{API_BASE_URL}/products/{plan_id}/generate-license',
+        f'{API_BASE_URL}/products/{price_id}/generate-license',
         headers=headers,
         json={
             "customer_id": customer_id,
@@ -86,14 +86,20 @@ class handler(BaseHTTPRequestHandler):
         try:
             # Process different webhook events
             if event_type == 'subscription.created':
-                # Extract necessary data
+                # Extract necessary data - note the different structure
                 subscription_id = event_data.get('id')
                 customer_id = event_data.get('customer_id')
+                
+                # For customer email, the path is different in Billing webhooks
                 customer_email = event_data.get('customer', {}).get('email')
-                plan_id = event_data.get('items', [{}])[0].get('price', {}).get('product_id')
+                
+                # For price/product IDs, the path is also different
+                price_id = None
+                if event_data.get('items') and len(event_data.get('items')) > 0:
+                    price_id = event_data.get('items')[0].get('price', {}).get('id')
                 
                 # Create a license key
-                license_key = create_license_key(subscription_id, customer_id, customer_email, plan_id)
+                license_key = create_license_key(subscription_id, customer_id, customer_email, price_id)
                 
                 # Log for verification (would be stored in Vercel logs)
                 print(f"Created license key {license_key} for subscription {subscription_id}, customer {customer_email}")

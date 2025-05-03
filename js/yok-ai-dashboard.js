@@ -23,7 +23,7 @@ const PADDLE_VENDOR_ID = 30514;
 // Subscription plans
 const SUBSCRIPTION_PLANS = {
     BASIC: {
-        id: 'pro_01jsw82ak2y7w7b3g68rn2d8j4',
+        id: 'pri_01jsw881b64y680g737k4dx7fm',
         name: 'Basic',
         description: 'Perfect for individuals and small projects',
         price: 9.99,
@@ -37,7 +37,7 @@ const SUBSCRIPTION_PLANS = {
         ]
     },
     PRO: {
-        id: 'pro_01jsw88pt1xwgana0zxbjz6rp6',
+        id: 'pri_01jsw8ab6sd8bw2h7epy8tcp14',
         name: 'Professional',
         description: 'Ideal for professionals and growing teams',
         price: 29.99,
@@ -53,7 +53,7 @@ const SUBSCRIPTION_PLANS = {
         popular: true
     },
     TEAM: {
-        id: 'pro_01jsw8cnyx3gge48dm7659nc9n',
+        id: 'pri_01jsw8dtn4araas7xez8e24mdh',
         name: 'Team',
         description: 'Best for teams and businesses',
         price: 79.99,
@@ -1277,20 +1277,6 @@ subscribeToPlan: function(planId) {
         return;
     }
     
-    // Find plan by ID
-    let selectedPlan = null;
-    for (const planKey in SUBSCRIPTION_PLANS) {
-        if (SUBSCRIPTION_PLANS[planKey].id === planId) {
-            selectedPlan = SUBSCRIPTION_PLANS[planKey];
-            break;
-        }
-    }
-    
-    if (!selectedPlan) {
-        Dashboard.showToast('Invalid plan selected', 'error');
-        return;
-    }
-    
     // Show loading state on button
     const button = document.querySelector(`.subscribe-btn[data-plan-id="${planId}"]`);
     if (button) {
@@ -1298,53 +1284,39 @@ subscribeToPlan: function(planId) {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     }
     
-    // Initialize Paddle with vendor ID
-    Paddle.Setup({ vendor: PADDLE_VENDOR_ID });
-    
-    // Get Firebase token for more secure passthrough
-    currentUser.getIdToken(true).then(token => {
-        // Open Paddle checkout
-        Paddle.Checkout.open({
-            product: planId,
+    // Open Paddle checkout directly
+    Paddle.Checkout.open({
+        items: [{ priceId: planId }], // Note: priceId not product for Billing
+        email: currentUser.email,
+        customData: {
+            uid: currentUser.uid,
             email: currentUser.email,
-            passthrough: JSON.stringify({
-                uid: currentUser.uid,
-                email: currentUser.email,
-                name: currentUser.displayName || '',
-                firebaseToken: token.substring(0, 20) // Include part of token for verification
-            }),
-            successCallback: function(data) {
-                Dashboard.showToast('Subscription activated successfully!', 'success');
-                
-                // Wait a moment for webhook to process
-                setTimeout(() => {
-                    Dashboard.loadDashboardData();
-                }, 3000);
-                
-                // Reset button
-                if (button) {
-                    button.disabled = false;
-                    button.innerHTML = 'Subscribe Now';
-                }
-            },
-            closeCallback: function() {
-                console.log('Checkout closed without completion');
-                
-                // Reset button
-                if (button) {
-                    button.disabled = false;
-                    button.innerHTML = 'Subscribe Now';
-                }
+            name: currentUser.displayName || '',
+            firebaseToken: currentUser.getIdToken ? 
+                currentUser.getIdToken(true).then(token => token.substring(0, 20)) : ''
+        },
+        successCallback: function(data) {
+            Dashboard.showToast('Subscription activated successfully!', 'success');
+            
+            // Wait a moment for webhook to process
+            setTimeout(() => {
+                Dashboard.loadDashboardData();
+            }, 2000);
+            
+            // Reset button
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = 'Subscribe Now';
             }
-        });
-    }).catch(error => {
-        console.error("Error getting auth token:", error);
-        Dashboard.showToast('Authentication error. Please try again.', 'error');
-        
-        // Reset button
-        if (button) {
-            button.disabled = false;
-            button.innerHTML = 'Subscribe Now';
+        },
+        closeCallback: function() {
+            console.log('Checkout closed without completion');
+            
+            // Reset button
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = 'Subscribe Now';
+            }
         }
     });
 },
