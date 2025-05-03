@@ -1,7 +1,6 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
+  "buildCommand": "",
   "builds": [
     { "src": "api/*.py", "use": "@vercel/python" },
     { "src": "api/policy_docs.js", "use": "@vercel/node" },
@@ -12,13 +11,6 @@
     { "src": "*.jpg", "use": "@vercel/static" },
     { "src": "*.svg", "use": "@vercel/static" },
     { "src": "*.ico", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/hero_image.png", "dest": "/hero_image.png" },
-    { "src": "/(.*\\.png)", "dest": "/$1" },
-    { "src": "/(.*\\.jpg)", "dest": "/$1" },
-    { "src": "/(.*\\.svg)", "dest": "/$1" },
-    { "src": "/(.*\\.ico)", "dest": "/$1" }
   ],
   "rewrites": [
     { "source": "/api/dashboard", "destination": "/api/dashboard.py" },
@@ -33,25 +25,30 @@
     { "source": "/docs", "destination": "/api/policy_docs.js" },
     { "source": "/cookies", "destination": "/api/policy_docs.js" },
     
-    { "source": "/price", "destination": "pricing.html" },
-    { "source": "/signin", "destination": "signin.html" },
-    { "source": "/signup", "destination": "signup.html" },
-    { "source": "/dashboard", "destination": "dashboard.html" },
-    { "source": "/oops", "destination": "forgot-password.html" },
-    { "source": "/account", "destination": "newpwd.html" },
-    { "source": "/about", "destination": "about.html" },
-    { "source": "/contact", "destination": "contact.html" },
-    { "source": "/faq", "destination": "faq.html" }
+    { "source": "/hero_image.png", "destination": "/hero_image.png" },
+    { "source": "/:path(\\.png|\\.jpg|\\.svg|\\.ico)$", "destination": "/:path" },
+    
+    { "source": "/price", "destination": "/pricing.html" },
+    { "source": "/signin", "destination": "/signin.html" },
+    { "source": "/signup", "destination": "/signup.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/oops", "destination": "/forgot-password.html" },
+    { "source": "/account", "destination": "/newpwd.html" },
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/faq", "destination": "/faq.html" }
   ],
-  "redirects": [
-    { "source": "/pricing.html", "destination": "/price", "permanent": true },
-    { "source": "/signin.html", "destination": "/signin", "permanent": true },
-    { "source": "/signup.html", "destination": "/signup", "permanent": true },
-    { "source": "/dashboard.html", "destination": "/dashboard", "permanent": true },
-    { "source": "/forgot-password.html", "destination": "/oops", "permanent": true },
-    { "source": "/newpwd.html", "destination": "/account", "permanent": true },
-    { "source": "/about.html", "destination": "/about", "permanent": true },
-    { "source": "/contact.html", "destination": "/contact", "permanent": true },
-    { "source": "/faq.html", "destination": "/faq", "permanent": true }
-  ]
+  "headers": [
+    {
+      "source": "/(.*)\\.(?:png|jpg|jpeg|svg|ico)$",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }
