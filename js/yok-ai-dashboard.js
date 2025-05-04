@@ -380,14 +380,19 @@ const Dashboard = {
                 Dashboard.updateUIForVerification(isEmailVerified);
                 Dashboard.updateUserInfo(user);
 
-                // Initialize Paddle now that user is confirmed
-                initializePaddle();
-                
                 // If email is not verified, start checking periodically
                 if (!isEmailVerified) {
                     Dashboard.startVerificationCheck();
                 }
                 
+                // Now that user is authenticated, initialize Paddle
+                initializePaddle().then(() => {
+                    console.log("Paddle initialized successfully after authentication");
+                }).catch(error => {
+                    console.error("Failed to initialize Paddle:", error);
+                    Dashboard.showToast('Payment system initialization failed', 'error');
+                });
+
                 // Save user data if it's a new user
                 Dashboard.saveUserData(user);
                 
@@ -1496,46 +1501,6 @@ generatePlanHTML: function(plan) {
     `;
 },
 
-/**
- * Subscribe to a plan
- */
-subscribeToPlan: function(planId) {
-    if (!currentUser) {
-        Dashboard.showToast('You must be logged in to subscribe', 'error');
-        return;
-    }
-    
-    // Find plan by ID
-    let selectedPlan = null;
-    for (const planKey in SUBSCRIPTION_PLANS) {
-        if (SUBSCRIPTION_PLANS[planKey].id === planId) {
-            selectedPlan = SUBSCRIPTION_PLANS[planKey];
-            break;
-        }
-    }
-    
-    if (!selectedPlan) {
-        Dashboard.showToast('Invalid plan selected', 'error');
-        return;
-    }
-    
-    // Show loading
-    Dashboard.showToast('Preparing subscription...', 'info');
-    
-    // Create subscription using API
-    ApiService.createSubscription(currentUser.uid, planId)
-        .then(subscription => {
-            // Show success message
-            Dashboard.showToast('Subscription activated successfully!', 'success');
-            
-            // Reload dashboard data to update UI
-            Dashboard.loadDashboardData();
-        })
-        .catch(error => {
-            console.error('Subscription error:', error);
-            Dashboard.showToast('Failed to activate subscription', 'error');
-        });
-},
 
 /**
  * Cancel subscription

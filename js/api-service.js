@@ -7,18 +7,30 @@ const ApiService = {
     
     // Get authentication token
     getToken: function() {
-        return localStorage.getItem('auth_token');
+        // Get Firebase auth token instead of local storage token
+        return new Promise((resolve, reject) => {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                user.getIdToken(true)
+                    .then(token => resolve(token))
+                    .catch(error => reject(error));
+            } else {
+                reject(new Error('No authenticated user'));
+            }
+        });
     },
     
     // Set headers for API requests
-    getHeaders: function() {
-        const token = this.getToken();
+    getHeaders: async function() {
         const headers = {
             'Content-Type': 'application/json'
         };
         
-        if (token) {
+        try {
+            const token = await this.getToken();
             headers['Authorization'] = `Bearer ${token}`;
+        } catch (error) {
+            console.error('Failed to get auth token:', error);
         }
         
         return headers;
@@ -27,23 +39,25 @@ const ApiService = {
     // Make API request
     request: async function(endpoint, method = 'GET', data = null) {
         const url = `${this.baseUrl}${endpoint}`;
-        const options = {
-            method,
-            headers: this.getHeaders(),
-            credentials: 'include'
-        };
-        
-        if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-            options.body = JSON.stringify(data);
-        }
         
         try {
+            const headers = await this.getHeaders();
+            
+            const options = {
+                method,
+                headers,
+                credentials: 'include'
+            };
+            
+            if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+                options.body = JSON.stringify(data);
+            }
+            
             const response = await fetch(url, options);
             
             if (!response.ok) {
                 if (response.status === 401) {
                     // Token expired or invalid, redirect to login
-                    localStorage.removeItem('auth_token');
                     window.location.href = '/signin';
                     return null;
                 }
