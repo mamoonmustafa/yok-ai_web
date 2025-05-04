@@ -51,7 +51,7 @@ async function fetchClientToken() {
         
         if (!user) {
             console.error("No user logged in for token fetch");
-            return null; // Return null without redirecting
+            return null;
         }
         
         // Get the Firebase ID token
@@ -67,6 +67,8 @@ async function fetchClientToken() {
         });
         
         if (!response.ok) {
+            const errorData = await response.json();
+            console.error(`API error: ${errorData.error || response.status}`);
             throw new Error(`API returned status ${response.status}`);
         }
         
@@ -83,7 +85,6 @@ async function fetchClientToken() {
         return null;
     }
 }
-
 // Initialize Paddle
 async function initializePaddle() {
     try {
