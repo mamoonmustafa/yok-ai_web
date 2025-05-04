@@ -33,7 +33,6 @@ const CONFIG = {
       },
       enterprise: {
         month: "pri_01jsw8dtn4araas7xez8e24mdh", // Replace with your price ID
-        year: "your_enterprise_yearly_price_id" // Replace with your price ID
       }
     }
 };
@@ -497,6 +496,7 @@ const Dashboard = {
             if (upgradeBtn) {
                 upgradeBtn.addEventListener('click', Dashboard.showAvailablePlans);
             }
+
         } else {
             // User has no subscription, show pricing plans
             const pricingTitle = document.createElement('div');
@@ -504,15 +504,83 @@ const Dashboard = {
             pricingTitle.innerHTML = '<h3>Choose a Plan</h3>';
             subscriptionContainer.appendChild(pricingTitle);
             
-            // Create pricing grid
+            // Create pricing grid with hard-coded plans
             const plansGrid = document.createElement('div');
             plansGrid.className = 'plans-grid';
             
-            // Add plans to grid
-            for (const planKey in SUBSCRIPTION_PLANS) {
-                const plan = SUBSCRIPTION_PLANS[planKey];
-                plansGrid.innerHTML += Dashboard.generatePlanHTML(plan);
-            }
+            // Hard-coded plan HTML
+            plansGrid.innerHTML = `
+                <!-- Starter Plan -->
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <div class="plan-name">Starter</div>
+                        <div class="plan-price">$9.99</div>
+                        <div class="plan-billing">per month</div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> 100 Credits per month</li>
+                            <li><i class="fas fa-check"></i> Basic support</li>
+                            <li><i class="fas fa-check"></i> Single device</li>
+                            <li><i class="fas fa-check"></i> 1GB storage</li>
+                        </ul>
+                    </div>
+                    <div class="plan-action">
+                        <button class="btn btn-primary subscribe-btn" data-plan="starter">
+                            Subscribe Now
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="plan-card popular">
+                    <div class="plan-popular">Most Popular</div>
+                    <div class="plan-header">
+                        <div class="plan-name">Professional</div>
+                        <div class="plan-price">$29.99</div>
+                        <div class="plan-billing">per month</div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> 500 Credits per month</li>
+                            <li><i class="fas fa-check"></i> Priority support</li>
+                            <li><i class="fas fa-check"></i> Up to 3 devices</li>
+                            <li><i class="fas fa-check"></i> 10GB storage</li>
+                            <li><i class="fas fa-check"></i> Advanced analytics</li>
+                        </ul>
+                    </div>
+                    <div class="plan-action">
+                        <button class="btn btn-primary subscribe-btn" data-plan="pro">
+                            Subscribe Now
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Enterprise Plan -->
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <div class="plan-name">Enterprise</div>
+                        <div class="plan-price">$79.99</div>
+                        <div class="plan-billing">per month</div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> 2000 Credits per month</li>
+                            <li><i class="fas fa-check"></i> 24/7 support</li>
+                            <li><i class="fas fa-check"></i> Unlimited devices</li>
+                            <li><i class="fas fa-check"></i> 50GB storage</li>
+                            <li><i class="fas fa-check"></i> Advanced analytics</li>
+                            <li><i class="fas fa-check"></i> Team management</li>
+                            <li><i class="fas fa-check"></i> API access</li>
+                        </ul>
+                    </div>
+                    <div class="plan-action">
+                        <button class="btn btn-primary subscribe-btn" data-plan="enterprise">
+                            Subscribe Now
+                        </button>
+                    </div>
+                </div>
+            `;
             
             subscriptionContainer.appendChild(plansGrid);
             
@@ -525,12 +593,13 @@ const Dashboard = {
                 const subscribeButtons = document.querySelectorAll('.subscribe-btn');
                 subscribeButtons.forEach(button => {
                     button.addEventListener('click', (e) => {
-                        const planId = e.target.getAttribute('data-plan-id');
-                        openCheckout(planId);
+                        const plan = e.target.getAttribute('data-plan');
+                        console.log(`Plan selected: ${plan}`); // Debug log
+                        openCheckout(plan);
                     });
                 });
             }, 0);
-        }
+}
     },
 
 
