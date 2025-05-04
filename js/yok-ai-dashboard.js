@@ -20,6 +20,221 @@ firebase.initializeApp(firebaseConfig);
 // Paddle configuration
 const PADDLE_VENDOR_ID = 30514;
 
+// Configuration
+// Replace with values from your sandbox account - only keeping price IDs, moving token to server
+const CONFIG = {
+    prices: {
+      starter: {
+        month: "pri_01jsw881b64y680g737k4dx7fm" // Replace with your price ID
+      },
+      pro: {
+        month: "pri_01jsw8ab6sd8bw2h7epy8tcp14" // Replace with your price ID
+      },
+      enterprise: {
+        month: "pri_01jsw8dtn4araas7xez8e24mdh", // Replace with your price ID
+        year: "your_enterprise_yearly_price_id" // Replace with your price ID
+      }
+    }
+};
+  
+// State
+let currentBillingCycle = "month";
+let paddleInitialized = false;
+let clientToken = null;
+
+// Fetch token from server using Firebase authentication
+async function fetchClientToken() {
+    try {
+        // Get the current user from Firebase
+        const user = firebase.auth().currentUser;
+        
+        if (!user) {
+            console.error("No user logged in");
+            // Redirect to login page
+            window.location.href = '/signin';
+            return null;
+        }
+        
+        // Get the Firebase ID token
+        const authToken = await user.getIdToken(true);
+        
+        // Call your token endpoint
+        const response = await fetch('/api/paddle_token', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API returned status ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.clientToken) {
+            throw new Error("No client token in API response");
+        }
+        
+        console.log("Paddle token fetched successfully");
+        return data.clientToken;
+    } catch (error) {
+        console.error("Error fetching client token:", error);
+        return null;
+    }
+}
+
+// Initialize Paddle
+async function initializePaddle() {
+    try {
+        // Show loading indicator if you have one
+        const loadingElement = document.getElementById('loading-indicator');
+        if (loadingElement) loadingElement.style.display = 'block';
+        
+        // Fetch token from server
+        clientToken = await fetchClientToken();
+        
+        if (!clientToken) {
+            console.error("Failed to get client token");
+            if (loadingElement) loadingElement.style.display = 'none';
+            return;
+        }
+        
+        // Initialize Paddle with the token
+        Paddle.Environment.set("sandbox");
+        Paddle.Initialize({
+            token: clientToken,
+            eventCallback: function (event) {
+                console.log("Paddle event:", event);
+            }
+        });
+        
+        paddleInitialized = true;
+        updatePrices();
+        console.log("Paddle initialized successfully");
+        
+        // Enable checkout buttons
+        document.querySelectorAll('.checkout-button').forEach(button => {
+            button.disabled = false;
+        });
+    } catch (error) {
+        console.error("Paddle initialization error:", error);
+    } finally {
+        // Hide loading indicator
+        const loadingElement = document.getElementById('loading-indicator');
+        if (loadingElement) loadingElement.style.display = 'none';
+    }
+}
+
+// Open checkout
+async function openCheckout(plan) {
+    if (!paddleInitialized) {
+        console.log("Paddle not initialized yet, attempting to initialize");
+        
+        // Show loading on button
+        const button = document.querySelector(`[data-plan="${plan}"]`);
+        if (button) {
+            const originalText = button.textContent;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            button.disabled = true;
+        }
+        
+        await initializePaddle();
+        
+        // Reset button
+        if (button) {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+        
+        if (!paddleInitialized) {
+            console.error("Failed to initialize Paddle");
+            return;
+        }
+    }
+  
+    try {
+        // For Starter and Pro, always use monthly pricing
+        // For Enterprise, use the currently selected billing cycle
+        const priceId = plan === "enterprise" 
+            ? CONFIG.prices[plan][currentBillingCycle]
+            : CONFIG.prices[plan].month;
+        
+        Paddle.Checkout.open({
+            items: [
+                {
+                    priceId: priceId,
+                    quantity: 1
+                }
+            ],
+            settings: {
+                theme: "light",
+                displayMode: "overlay",
+                variant: "one-page"
+            }
+        });
+    } catch (error) {
+        console.error(`Checkout error: ${error.message}`);
+    }
+}
+
+// Update prices if needed
+function updatePrices() {
+    // Implementation for updating displayed prices
+    console.log("Prices updated");
+}
+
+// Toggle billing cycle
+function toggleBillingCycle(cycle) {
+    currentBillingCycle = cycle;
+    updatePrices();
+    
+    // Update UI to reflect the selected cycle
+    document.querySelectorAll('.billing-toggle').forEach(button => {
+        if (button.dataset.cycle === cycle) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener("DOMContentLoaded", function() {
+    // Set up billing cycle toggles if present
+    document.querySelectorAll('.billing-toggle').forEach(button => {
+        button.addEventListener('click', () => {
+            toggleBillingCycle(button.dataset.cycle);
+        });
+    });
+    
+    // Set up checkout buttons if present
+    document.querySelectorAll('.checkout-button').forEach(button => {
+        button.addEventListener('click', () => {
+            openCheckout(button.dataset.plan);
+        });
+        // Disable buttons until Paddle is initialized
+        button.disabled = true;
+    });
+    
+    // Add a loading indicator to the page if not already present
+    if (!document.getElementById('loading-indicator')) {
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.id = 'loading-indicator';
+        loadingIndicator.style.display = 'none';
+        loadingIndicator.style.position = 'fixed';
+        loadingIndicator.style.top = '50%';
+        loadingIndicator.style.left = '50%';
+        loadingIndicator.style.transform = 'translate(-50%, -50%)';
+        loadingIndicator.innerHTML = '<div class="spinner"></div> Loading...';
+        document.body.appendChild(loadingIndicator);
+    }
+    
+    // Initialize Paddle
+    initializePaddle();
+});
+
 // Subscription plans
 const SUBSCRIPTION_PLANS = {
     BASIC: {
@@ -182,232 +397,7 @@ const domElements = {
 
 // Main Dashboard Object
 const Dashboard = {
-    initializePaddle: function() {
-        console.log("[Paddle] Starting token fetch process...");
-        
-        this.initializePaddleWithToken()
-            .then(() => {
-                console.log("[Paddle] Token fetch successful");
-            })
-            .catch(error => {
-                console.error("[Paddle] Token fetch failed:", error);
-                Dashboard.showToast('Token fetch failed: ' + error.message, 'error');
-            });
-    },
-    debugPaddleToken: function() {
-        if (window.paddleClientToken) {
-            console.log("[Paddle Debug] Client Token:", window.paddleClientToken);
-            Dashboard.showToast('Client token: ' + window.paddleClientToken.substring(0, 10) + '...', 'info');
-            return window.paddleClientToken;
-        } else {
-            console.log("[Paddle Debug] No token found");
-            Dashboard.showToast('No client token found', 'error');
-            return null;
-        }
-    },
-    /**
-     * Load Paddle script programmatically with better error handling
-     */
-    loadPaddleScript: function() {
-        console.log("[Paddle] Loading script programmatically...");
-        
-        return new Promise((resolve, reject) => {
-            try {
-                // Check if already loaded
-                if (typeof Paddle !== 'undefined') {
-                    console.log("[Paddle] Script already loaded");
-                    resolve(true);
-                    return;
-                }
-                
-                // Create script element
-                const script = document.createElement('script');
-                
-                // Use a different approach - load from Paddle's CDN but with crossorigin attribute
-                script.src = 'https://cdn.paddle.com/paddle/paddle.js';
-                script.crossOrigin = 'anonymous';
-                script.defer = true;
-                
-                // Add timeout handling
-                const timeoutId = setTimeout(() => {
-                    const errorMsg = "[Paddle] Script loading timed out after 10 seconds";
-                    console.error(errorMsg);
-                    reject(new Error(errorMsg));
-                }, 10000);
-                
-                // Set up event handlers
-                script.onload = function() {
-                    clearTimeout(timeoutId);
-                    console.log("[Paddle] Script loaded successfully");
-                    resolve(true);
-                };
-                
-                script.onerror = function(error) {
-                    clearTimeout(timeoutId);
-                    const errorMsg = "[Paddle] Failed to load script";
-                    console.error(errorMsg, error);
-                    
-                    // Use a different approach - use a script tag in the HTML instead
-                    const fallbackScript = document.createElement('script');
-                    fallbackScript.src = '/js/paddle.min.js'; // You'll need to host this file locally
-                    fallbackScript.onload = function() {
-                        console.log("[Paddle] Local script loaded successfully");
-                        resolve(true);
-                    };
-                    
-                    fallbackScript.onerror = function(backupError) {
-                        const backupErrorMsg = "[Paddle] Failed to load local script";
-                        console.error(backupErrorMsg, backupError);
-                        
-                        // Last resort - try to initialize without the script
-                        // This will only work if you're using a simpler version of Paddle
-                        console.log("[Paddle] Attempting to initialize without script");
-                        window.Paddle = {
-                            Environment: {
-                                set: function(env) {
-                                    console.log("[Paddle] Environment set to", env);
-                                    return true;
-                                }
-                            },
-                            Setup: function(options) {
-                                console.log("[Paddle] Setup called with", options);
-                                return true;
-                            },
-                            Checkout: {
-                                open: function(options) {
-                                    console.log("[Paddle] Checkout.open called with", options);
-                                    alert("Payment system could not be loaded. Please contact support.");
-                                    return true;
-                                }
-                            },
-                            Initialize: function(options) {
-                                console.log("[Paddle] Initialize called with", options);
-                                return true;
-                            }
-                        };
-                        
-                        window.paddleInitialized = true;
-                        resolve(true);
-                    };
-                    
-                    document.head.appendChild(fallbackScript);
-                };
-                
-                // Add to document
-                document.head.appendChild(script);
-                console.log("[Paddle] Script tag added to document");
-            } catch (error) {
-                const errorMsg = "[Paddle] Error in script loading process";
-                console.error(errorMsg, error);
-                reject(new Error(errorMsg));
-            }
-        });
-    },
-    /**
-     * Debug function to check Paddle connectivity
-     */
-    debugPaddle: function() {
-        console.log("[Paddle Debug] Starting diagnostics...");
-        
-        // Check if Paddle object exists
-        console.log("[Paddle Debug] Paddle object exists:", typeof Paddle !== 'undefined');
-        
-        if (typeof Paddle !== 'undefined') {
-            // Check what properties are available
-            console.log("[Paddle Debug] Paddle properties:", Object.keys(Paddle));
-            
-            // Check if Environment is available
-            console.log("[Paddle Debug] Paddle.Environment exists:", typeof Paddle.Environment !== 'undefined');
-            
-            // Check if Checkout is available
-            console.log("[Paddle Debug] Paddle.Checkout exists:", typeof Paddle.Checkout !== 'undefined');
-            
-            // Check if Initialize is available
-            console.log("[Paddle Debug] Paddle.Initialize exists:", typeof Paddle.Initialize === 'function');
-        }
-        
-        // Test network connectivity to Paddle domains
-        console.log("[Paddle Debug] Testing network connectivity...");
-        
-        fetch('https://cdn.paddle.com/paddle/paddle.js', { method: 'HEAD', mode: 'no-cors' })
-            .then(() => console.log("[Paddle Debug] cdn.paddle.com is reachable"))
-            .catch(err => console.error("[Paddle Debug] cdn.paddle.com is NOT reachable:", err));
-            
-        fetch('https://checkout.paddle.com', { method: 'HEAD', mode: 'no-cors' })
-            .then(() => console.log("[Paddle Debug] checkout.paddle.com is reachable"))
-            .catch(err => console.error("[Paddle Debug] checkout.paddle.com is NOT reachable:", err));
-        
-        // Check content security policy
-        console.log("[Paddle Debug] Checking Content-Security-Policy...");
-        const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
-        if (meta) {
-            console.log("[Paddle Debug] CSP found:", meta.content);
-        } else {
-            console.log("[Paddle Debug] No CSP meta tag found");
-        }
-        
-        return "Paddle debugging complete. Check console for results.";
-    },
 
-   initializePaddleWithToken: function() {
-    console.log("[Paddle] Initializing with token...");
-    
-    return new Promise((resolve, reject) => {
-        try {
-            // Check if user is logged in
-            if (!currentUser) {
-                const errorMsg = "[Paddle] No user logged in, can't get token";
-                console.error(errorMsg);
-                reject(new Error(errorMsg));
-                return;
-            }
-            
-            // Get Firebase token
-            currentUser.getIdToken(true)
-                .then(token => {
-                    console.log("[Paddle] Firebase token obtained, calling API");
-                    
-                    // Call API to get Paddle client token
-                    return fetch('/api/paddle_token', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`API returned status ${response.status}`);
-                    }
-                    console.log("[Paddle] API response received");
-                    return response.json();
-                })
-                .then(data => {
-                    if (!data.clientToken) {
-                        throw new Error("No client token in API response: " + JSON.stringify(data));
-                    }
-                    
-                    console.log("[Paddle] Token received:", data.clientToken);
-                    
-                    // Just display the token instead of initializing Paddle
-                    Dashboard.showToast('Paddle client token received: ' + data.clientToken.substring(0, 10) + '...', 'success');
-                    
-                    // Store token in window for debugging
-                    window.paddleClientToken = data.clientToken;
-                    
-                    resolve(true);
-                })
-                .catch(error => {
-                    const errorMsg = "[Paddle] Token error";
-                    console.error(errorMsg, error);
-                    reject(new Error(errorMsg + ": " + error.message));
-                });
-        } catch (error) {
-            const errorMsg = "[Paddle] Unexpected error in initialization";
-            console.error(errorMsg, error);
-            reject(new Error(errorMsg + ": " + error.message));
-        }
-    });
-},
     /**
      * Initialize the dashboard
      */
@@ -457,11 +447,6 @@ const Dashboard = {
         // Initialize cancel subscription modal
         Dashboard.initCancelSubscriptionModal();
         
-        // Add this at the end of your init function
-        // window.debugPaddle = Dashboard.debugPaddle;
-
-        // Add this at the end of your init function
-        window.debugPaddleToken = Dashboard.debugPaddleToken;
     },    
 /**
  * Update dashboard content based on subscription status
