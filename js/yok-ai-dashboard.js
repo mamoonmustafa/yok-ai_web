@@ -173,6 +173,13 @@ async function openCheckout(plan) {
             await initializePaddle();
         }
         
+        // Get current user information from Firebase
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            Dashboard.showToast('User authentication required', 'error');
+            return;
+        }
+
         // Get the correct price ID based on plan type and billing cycle
         let priceId;
         
@@ -199,11 +206,22 @@ async function openCheckout(plan) {
                     quantity: 1
                 }
             ],
+            customer: {
+                email: user.email,
+                firstName: user.displayName ? user.displayName.split(' ')[0] : '',
+                lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
+                mustAcceptTerms: true
+            },
             settings: {
                 theme: "light",
                 displayMode: "overlay",
                 variant: "one-page",
-                successUrl: window.location.href + '?checkout=success'
+                successUrl: window.location.href + '?checkout=success',
+                customData: {
+                    userId: user.uid
+                },
+                frameStyle: "width: 100%; min-width: 312px; background-color: transparent; border: none;",
+                allowCustomerOverride: false // This prevents changing customer details
             }
         });
     } catch (error) {
