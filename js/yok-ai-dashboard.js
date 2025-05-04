@@ -179,7 +179,7 @@ async function openCheckout(plan) {
             Dashboard.showToast('User authentication required', 'error');
             return;
         }
-
+        
         // Get the correct price ID based on plan type and billing cycle
         let priceId;
         
@@ -198,7 +198,16 @@ async function openCheckout(plan) {
             throw new Error(`No price ID found for plan: ${plan}`);
         }
         
-        // Open Paddle checkout
+        // Split the display name into first and last name if available
+        let firstName = '';
+        let lastName = '';
+        if (user.displayName) {
+            const nameParts = user.displayName.split(' ');
+            firstName = nameParts[0] || '';
+            lastName = nameParts.slice(1).join(' ') || '';
+        }
+        
+        // Open Paddle checkout with pre-filled customer info
         Paddle.Checkout.open({
             items: [
                 {
@@ -208,20 +217,18 @@ async function openCheckout(plan) {
             ],
             customer: {
                 email: user.email,
-                firstName: user.displayName ? user.displayName.split(' ')[0] : '',
-                lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
-                mustAcceptTerms: true
+                firstName: firstName,
+                lastName: lastName
             },
             settings: {
                 theme: "light",
                 displayMode: "overlay",
                 variant: "one-page",
                 successUrl: window.location.href + '?checkout=success',
+                allowLogout: false, // This prevents changing the customer
                 customData: {
-                    userId: user.uid
-                },
-                frameStyle: "width: 100%; min-width: 312px; background-color: transparent; border: none;",
-                allowCustomerOverride: false // This prevents changing customer details
+                    userId: user.uid // Include Firebase UID for webhook processing
+                }
             }
         });
     } catch (error) {
