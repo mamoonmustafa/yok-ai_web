@@ -42,21 +42,48 @@ let currentBillingCycle = "month";
 let paddleInitialized = false;
 let clientToken = null;
 
-// Fetch token from server using Firebase authentication
+/**
+ * Set up global error handling
+ */
+function setupGlobalErrorHandling() {
+    window.addEventListener('error', function(event) {
+        console.error('Global error:', event.error);
+        
+        // Show user-friendly error message for uncaught exceptions
+        Dashboard.showToast('An unexpected error occurred. Please try refreshing the page.', 'error');
+        
+        // Prevent default browser error handling
+        event.preventDefault();
+    });
+    
+    // Handle promise rejections
+    window.addEventListener('unhandledrejection', function(event) {
+        console.error('Unhandled promise rejection:', event.reason);
+        
+        // Show user-friendly error message
+        if (event.reason && event.reason.message) {
+            Dashboard.showToast(`Error: ${event.reason.message}`, 'error');
+        } else {
+            Dashboard.showToast('An unexpected error occurred with a background operation.', 'error');
+        }
+    });
+}
+/**
+ * Fetch Paddle client token from server using Firebase authentication
+ */
 async function fetchClientToken() {
     try {
-        // Get the current user from Firebase
+        // Make sure user is authenticated
         const user = firebase.auth().currentUser;
-        
         if (!user) {
             console.error("No user logged in for token fetch");
-            return null;
+            throw new Error("Authentication required");
         }
         
-        // Get the Firebase ID token
+        // Get Firebase ID token
         const authToken = await user.getIdToken(true);
         
-        // Call your token endpoint
+        // Call server token endpoint
         const response = await fetch('/api/paddle_token', {
             method: 'GET',
             headers: {
@@ -67,106 +94,104 @@ async function fetchClientToken() {
         
         if (!response.ok) {
             const errorData = await response.json();
-            console.error(`API error: ${errorData.error || response.status}`);
-            throw new Error(`API returned status ${response.status}`);
+            throw new Error(errorData.error || `API returned status ${response.status}`);
         }
         
         const data = await response.json();
-        
         if (!data.clientToken) {
             throw new Error("No client token in API response");
         }
         
-        console.log("Paddle token fetched successfully");
         return data.clientToken;
     } catch (error) {
-        console.error("Error fetching client token:", error);
-        return null;
+        console.error("Error fetching Paddle client token:", error);
+        throw error;
     }
 }
-// Initialize Paddle
+
+/**
+ * Initialize Paddle checkout with client token
+ */
 async function initializePaddle() {
+    // Show loading indicator
+    const loadingElement = document.getElementById('loading-indicator');
+    if (loadingElement) loadingElement.style.display = 'block';
+    
     try {
-        // Show loading indicator if you have one
-        const loadingElement = document.getElementById('loading-indicator');
-        if (loadingElement) loadingElement.style.display = 'block';
-        
         // Check if user is authenticated
         if (!firebase.auth().currentUser) {
-            console.log("Waiting for Firebase authentication...");
-            if (loadingElement) loadingElement.style.display = 'none';
-            return; // Exit without redirecting to signin
+            throw new Error("Authentication required");
         }
         
         // Fetch token from server
         clientToken = await fetchClientToken();
         
-        if (!clientToken) {
-            console.error("Failed to get client token");
-            if (loadingElement) loadingElement.style.display = 'none';
-            return;
-        }
-        
         // Initialize Paddle with the token
-        Paddle.Environment.set("sandbox");
+        Paddle.Environment.set("sandbox"); // Change to "production" for live environment
         Paddle.Initialize({
             token: clientToken,
-            eventCallback: function (event) {
+            eventCallback: function(event) {
                 console.log("Paddle event:", event);
+                
+                // Handle specific events
+                if (event.name === "checkout.completed") {
+                    // Reload dashboard data after successful checkout
+                    Dashboard.showToast('Payment successful!', 'success');
+                    setTimeout(() => {
+                        Dashboard.loadDashboardData();
+                    }, 1000);
+                }
             }
         });
         
         paddleInitialized = true;
-        updatePrices();
-        console.log("Paddle initialized successfully");
         
         // Enable checkout buttons
-        document.querySelectorAll('.checkout-button').forEach(button => {
+        document.querySelectorAll('.subscribe-btn, .checkout-button, .buy-credit-btn').forEach(button => {
             button.disabled = false;
         });
+        
+        return true;
     } catch (error) {
         console.error("Paddle initialization error:", error);
+        Dashboard.showToast('Failed to initialize payment system', 'error');
+        throw error;
     } finally {
         // Hide loading indicator
-        const loadingElement = document.getElementById('loading-indicator');
         if (loadingElement) loadingElement.style.display = 'none';
     }
 }
 
-// Open checkout
+/**
+ * Open Paddle checkout for subscription or credit purchase
+ */
 async function openCheckout(plan) {
-    if (!paddleInitialized) {
-        console.log("Paddle not initialized yet, attempting to initialize");
-        
-        // Show loading on button
-        const button = document.querySelector(`[data-plan="${plan}"]`);
-        if (button) {
-            const originalText = button.textContent;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-            button.disabled = true;
-        }
-        
-        await initializePaddle();
-        
-        // Reset button
-        if (button) {
-            button.innerHTML = originalText;
-            button.disabled = false;
-        }
-        
-        if (!paddleInitialized) {
-            console.error("Failed to initialize Paddle");
-            return;
-        }
-    }
-  
     try {
-        // For Starter and Pro, always use monthly pricing
-        // For Enterprise, use the currently selected billing cycle
-        const priceId = plan === "enterprise" 
-            ? CONFIG.prices[plan][currentBillingCycle]
-            : CONFIG.prices[plan].month;
+        // Make sure Paddle is initialized
+        if (!paddleInitialized) {
+            Dashboard.showToast('Initializing payment system...', 'info');
+            await initializePaddle();
+        }
         
+        // Get the correct price ID based on plan type and billing cycle
+        let priceId;
+        
+        if (plan === 'starter' || plan === 'pro' || plan === 'enterprise') {
+            // For subscription plans
+            priceId = CONFIG.prices[plan][currentBillingCycle || 'month'];
+        } else if (plan.startsWith('credit-')) {
+            // For credit purchases
+            const creditAmount = plan.replace('credit-', '');
+            priceId = CONFIG.prices.credits[creditAmount];
+        } else {
+            throw new Error(`Unknown plan type: ${plan}`);
+        }
+        
+        if (!priceId) {
+            throw new Error(`No price ID found for plan: ${plan}`);
+        }
+        
+        // Open Paddle checkout
         Paddle.Checkout.open({
             items: [
                 {
@@ -177,14 +202,135 @@ async function openCheckout(plan) {
             settings: {
                 theme: "light",
                 displayMode: "overlay",
-                variant: "one-page"
+                variant: "one-page",
+                successUrl: window.location.href + '?checkout=success'
             }
         });
     } catch (error) {
         console.error(`Checkout error: ${error.message}`);
+        Dashboard.showToast(`Failed to open checkout: ${error.message}`, 'error');
     }
 }
-
+/**
+ * Initialize Paddle checkout with client token
+ */
+async function initializePaddle() {
+    // Show loading indicator
+    const loadingElement = document.getElementById('loading-indicator');
+    if (loadingElement) loadingElement.style.display = 'block';
+    
+    try {
+        // Check if user is authenticated
+        if (!firebase.auth().currentUser) {
+            throw new Error("Authentication required");
+        }
+        
+        // Fetch token from server
+        clientToken = await fetchClientToken();
+        
+        // Initialize Paddle with the token
+        Paddle.Environment.set("sandbox"); // Change to "production" for live environment
+        Paddle.Initialize({
+            token: clientToken,
+            eventCallback: function(event) {
+                console.log("Paddle event:", event);
+                
+                // Handle specific events
+                if (event.name === "checkout.completed") {
+                    // Reload dashboard data after successful checkout
+                    Dashboard.showToast('Payment successful!', 'success');
+                    setTimeout(() => {
+                        Dashboard.loadDashboardData();
+                    }, 1000);
+                }
+            }
+        });
+        
+        paddleInitialized = true;
+        
+        // Enable checkout buttons
+        document.querySelectorAll('.subscribe-btn, .checkout-button, .buy-credit-btn').forEach(button => {
+            button.disabled = false;
+        });
+        
+        return true;
+    } catch (error) {
+        console.error("Paddle initialization error:", error);
+        Dashboard.showToast('Failed to initialize payment system', 'error');
+        throw error;
+    } finally {
+        // Hide loading indicator
+        if (loadingElement) loadingElement.style.display = 'none';
+    }
+}
+/**
+ * Open Paddle checkout for subscription or credit purchase
+ */
+async function openCheckout(plan) {
+    try {
+        // Make sure Paddle is initialized
+        if (!paddleInitialized) {
+            Dashboard.showToast('Initializing payment system...', 'info');
+            await initializePaddle();
+        }
+        
+        // Get the correct price ID based on plan type and billing cycle
+        let priceId;
+        
+        if (plan === 'starter' || plan === 'pro' || plan === 'enterprise') {
+            // For subscription plans
+            priceId = CONFIG.prices[plan][currentBillingCycle || 'month'];
+        } else if (plan.startsWith('credit-')) {
+            // For credit purchases
+            const creditAmount = plan.replace('credit-', '');
+            priceId = CONFIG.prices.credits[creditAmount];
+        } else {
+            throw new Error(`Unknown plan type: ${plan}`);
+        }
+        
+        if (!priceId) {
+            throw new Error(`No price ID found for plan: ${plan}`);
+        }
+        
+        // Open Paddle checkout
+        Paddle.Checkout.open({
+            items: [
+                {
+                    priceId: priceId,
+                    quantity: 1
+                }
+            ],
+            settings: {
+                theme: "light",
+                displayMode: "overlay",
+                variant: "one-page",
+                successUrl: window.location.href + '?checkout=success'
+            }
+        });
+    } catch (error) {
+        console.error(`Checkout error: ${error.message}`);
+        Dashboard.showToast(`Failed to open checkout: ${error.message}`, 'error');
+    }
+}
+/**
+ * Check system integration on page load
+ */
+function checkSystemIntegration() {
+    // Check Firebase authentication
+    if (typeof firebase === 'undefined' || !firebase.auth) {
+        console.error("Firebase not initialized properly");
+        alert("Error: Authentication system not loaded. Please try refreshing the page.");
+        return false;
+    }
+    
+    // Check Paddle availability
+    if (typeof Paddle === 'undefined') {
+        console.error("Paddle not loaded properly");
+        // Don't alert here as Paddle might be loaded asynchronously
+    }
+    
+    return true;
+}
 // Update prices if needed
 function updatePrices() {
     // Implementation for updating displayed prices
@@ -768,8 +914,13 @@ const Dashboard = {
         
         // Start new interval
         checkVerificationInterval = setInterval(() => {
+            if (!currentUser) {
+                Dashboard.stopVerificationCheck();
+                return;
+            }
+            
             // Reload user to check verification status
-            firebase.auth().currentUser.reload()
+            currentUser.reload()
                 .then(() => {
                     // Get fresh user data
                     currentUser = firebase.auth().currentUser;
@@ -794,6 +945,9 @@ const Dashboard = {
                         
                         // Show success message
                         Dashboard.showToast('Email verified successfully!', 'success');
+                        
+                        // Reload dashboard data
+                        Dashboard.loadDashboardData();
                     }
                 })
                 .catch(error => {
@@ -813,51 +967,48 @@ const Dashboard = {
     },
     
     /**
-     * Send verification email to the user
+     * Send verification email using Firebase
      */
     sendVerificationEmail: function() {
-        if (!currentUser) return;
-        
-        // Disable resend button to prevent spam
-        if (domElements.resendVerificationBtn) {
-            domElements.resendVerificationBtn.disabled = true;
+        if (!currentUser) {
+            Dashboard.showToast('You must be logged in to verify your email', 'error');
+            return;
         }
         
-        if (domElements.overlayResendVerificationBtn) {
-            domElements.overlayResendVerificationBtn.disabled = true;
-        }
+        // Disable resend buttons to prevent spam
+        const resendButtons = [
+            document.getElementById('resend-verification'),
+            document.getElementById('overlay-resend-verification')
+        ];
         
-        // Send verification email
+        resendButtons.forEach(button => {
+            if (button) button.disabled = true;
+        });
+        
+        // Show loading state
+        Dashboard.showToast('Sending verification email...', 'info');
+        
+        // Send verification email using Firebase
         currentUser.sendEmailVerification()
             .then(() => {
-                // Show success message
+                // Success
                 Dashboard.showToast('Verification email sent! Please check your inbox.', 'success');
                 
-                // Re-enable button after delay
+                // Re-enable buttons after 30 seconds to prevent spam
                 setTimeout(() => {
-                    if (domElements.resendVerificationBtn) {
-                        domElements.resendVerificationBtn.disabled = false;
-                    }
-                    
-                    if (domElements.overlayResendVerificationBtn) {
-                        domElements.overlayResendVerificationBtn.disabled = false;
-                    }
-                }, 30000); // 30 seconds cooldown
+                    resendButtons.forEach(button => {
+                        if (button) button.disabled = false;
+                    });
+                }, 30000);
             })
             .catch(error => {
-                console.error("Error sending verification email:", error);
+                console.error('Error sending verification email:', error);
+                Dashboard.showToast('Failed to send verification email: ' + error.message, 'error');
                 
-                // Show error message
-                Dashboard.showToast('Failed to send verification email. Please try again later.', 'error');
-                
-                // Re-enable button
-                if (domElements.resendVerificationBtn) {
-                    domElements.resendVerificationBtn.disabled = false;
-                }
-                
-                if (domElements.overlayResendVerificationBtn) {
-                    domElements.overlayResendVerificationBtn.disabled = false;
-                }
+                // Re-enable buttons
+                resendButtons.forEach(button => {
+                    if (button) button.disabled = false;
+                });
             });
     },
     
@@ -993,42 +1144,66 @@ loadSectionData: function(sectionId) {
 },
 
 /**
- * Load dashboard data
+ * Load dashboard data using Firebase authentication
  */
 loadDashboardData: function() {
-    // Update loading state
-    Dashboard.updateLoadingState(true);
+    if (!currentUser) {
+        console.error("No authenticated user to load dashboard data");
+        return;
+    }
     
-    // Call the API
-    ApiService.getDashboardData()
+    // Show loading state
+    const loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) loadingIndicator.style.display = 'block';
+    
+    // Get Firebase token
+    currentUser.getIdToken(true)
+        .then(token => {
+            // Call the API with Firebase token
+            return fetch('/api/dashboard', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data && data.subscriptions) {
-                // Store data
-                subscriptionStatus = data.subscriptions.length > 0 ? data.subscriptions[0] : null;
+            // Handle the dashboard data
+            if (data) {
+                // Store subscription data
+                subscriptionStatus = data.subscriptions && data.subscriptions.length > 0 ? 
+                    data.subscriptions[0] : null;
+                
+                // Store credit usage data
                 creditUsage = data.credit_usage || { used: 0, total: 0 };
+                
+                // Store license key
                 licenseKey = data.license_keys && data.license_keys.length > 0 ? 
                     data.license_keys[0].key : null;
                 
-                // Update UI
-                Dashboard.updateSubscriptionUI(subscriptionStatus);
+                // Update UI with retrieved data
                 Dashboard.updateDashboardView(subscriptionStatus);
                 Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
                 Dashboard.updateLicenseKeyDisplay();
             } else {
-                // No subscription data, show available plans
+                // No data returned, show available plans
                 subscriptionStatus = null;
-                Dashboard.updateSubscriptionUI(null);
                 Dashboard.updateDashboardView(null);
-                Dashboard.showAvailablePlans();
             }
-            
-            // Update loading state
-            Dashboard.updateLoadingState(false);
         })
         .catch(error => {
             console.error('Error loading dashboard data:', error);
-            Dashboard.updateLoadingState(false);
-            Dashboard.showToast('Failed to load dashboard data', 'error');
+            Dashboard.showToast('Failed to load dashboard data. Please try again later.', 'error');
+        })
+        .finally(() => {
+            // Hide loading indicator
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
         });
 },
 
@@ -1130,41 +1305,55 @@ closeAllModals: function() {
  * Initialize copy buttons functionality
  */
 initCopyButtons: function() {
-    // License key copy
+    // License key copy button in the dashboard section
     const copyLicenseBtn = document.getElementById('copy-license');
-    const licenseKey = document.getElementById('license-key');
-    
-    if (copyLicenseBtn && licenseKey) {
+    if (copyLicenseBtn) {
         copyLicenseBtn.addEventListener('click', () => {
-            // Get the license key text (unmask if needed)
-            const key = licenseKey.getAttribute('data-full-key') || licenseKey.textContent;
+            const licenseKeyElement = document.getElementById('license-key');
+            if (!licenseKeyElement) return;
+            
+            // Get the full key from data attribute
+            const key = licenseKeyElement.getAttribute('data-full-key');
+            if (!key) {
+                Dashboard.showToast('License key not available', 'error');
+                return;
+            }
             
             // Copy to clipboard
-            navigator.clipboard.writeText(key).then(() => {
-                Dashboard.showToast('License key copied to clipboard', 'success');
-            }).catch(err => {
-                console.error('Failed to copy license key:', err);
-                Dashboard.showToast('Failed to copy license key', 'error');
-            });
+            navigator.clipboard.writeText(key)
+                .then(() => {
+                    Dashboard.showToast('License key copied to clipboard', 'success');
+                })
+                .catch(err => {
+                    console.error('Failed to copy license key:', err);
+                    Dashboard.showToast('Failed to copy license key', 'error');
+                });
         });
     }
     
-    // Download license key copy
+    // License key copy button in the downloads section
     const copyDownloadLicenseBtn = document.getElementById('copy-download-license');
-    const downloadLicenseKey = document.getElementById('download-license-key');
-    
-    if (copyDownloadLicenseBtn && downloadLicenseKey) {
+    if (copyDownloadLicenseBtn) {
         copyDownloadLicenseBtn.addEventListener('click', () => {
-            // Get the license key text
-            const key = downloadLicenseKey.getAttribute('data-full-key') || downloadLicenseKey.textContent;
+            const downloadLicenseKey = document.getElementById('download-license-key');
+            if (!downloadLicenseKey) return;
+            
+            // Get the full key from data attribute
+            const key = downloadLicenseKey.getAttribute('data-full-key');
+            if (!key) {
+                Dashboard.showToast('License key not available', 'error');
+                return;
+            }
             
             // Copy to clipboard
-            navigator.clipboard.writeText(key).then(() => {
-                Dashboard.showToast('License key copied to clipboard', 'success');
-            }).catch(err => {
-                console.error('Failed to copy license key:', err);
-                Dashboard.showToast('Failed to copy license key', 'error');
-            });
+            navigator.clipboard.writeText(key)
+                .then(() => {
+                    Dashboard.showToast('License key copied to clipboard', 'success');
+                })
+                .catch(err => {
+                    console.error('Failed to copy license key:', err);
+                    Dashboard.showToast('Failed to copy license key', 'error');
+                });
         });
     }
 },
@@ -1529,7 +1718,7 @@ cancelSubscription: function() {
 },
 
 /**
- * Purchase additional credits
+ * Purchase additional credits using Paddle checkout
  */
 purchaseCredits: function(amount, price) {
     if (!currentUser) {
@@ -1537,30 +1726,53 @@ purchaseCredits: function(amount, price) {
         return;
     }
     
-    // Check if user has active subscription
-    if (!subscriptionStatus || !subscriptionStatus.id) {
-        Dashboard.showToast('You need an active subscription to purchase additional credits', 'error');
+    // Check if Paddle is initialized
+    if (!paddleInitialized) {
+        Dashboard.showToast('Payment system is initializing. Please try again in a moment.', 'info');
+        
+        // Try to initialize Paddle
+        initializePaddle()
+            .then(() => {
+                Dashboard.showToast('Payment system ready. Please try again.', 'success');
+            })
+            .catch(error => {
+                console.error('Paddle initialization error:', error);
+                Dashboard.showToast('Failed to initialize payment system. Please try again later.', 'error');
+            });
         return;
     }
     
-    // Show loading
-    Dashboard.showToast('Processing credit purchase...', 'info');
+    // Find the correct price ID for the credit package
+    const creditPriceId = CONFIG.prices.credits?.[amount] || '';
+    if (!creditPriceId) {
+        console.error(`No price ID configured for ${amount} credits`);
+        Dashboard.showToast('Credit package configuration error', 'error');
+        return;
+    }
     
-    ApiService.purchaseCredits(currentUser.uid, parseInt(amount))
-        .then(result => {
-            // Show success message
-            Dashboard.showToast(`Successfully purchased ${amount} credits!`, 'success');
-            
-            // Reload dashboard data to update credit display
-            Dashboard.loadDashboardData();
-            
-            // Create transaction record (now handled by the API)
-        })
-        .catch(error => {
-            console.error('Credit purchase error:', error);
-            Dashboard.showToast('Failed to purchase credits', 'error');
+    // Open Paddle checkout
+    try {
+        Paddle.Checkout.open({
+            items: [
+                {
+                    priceId: creditPriceId,
+                    quantity: 1
+                }
+            ],
+            settings: {
+                theme: "light",
+                displayMode: "overlay",
+                variant: "one-page",
+                successUrl: window.location.origin + '/dashboard?purchase=success'
+            }
         });
+    } catch (error) {
+        console.error('Error opening checkout:', error);
+        Dashboard.showToast('Failed to open checkout. Please try again later.', 'error');
+    }
 },
+
+
 /**
  * Create a transaction record
  */
@@ -1580,33 +1792,54 @@ createTransactionRecord: function(transaction) {
 },
 
 /**
- * Load transaction history
+ * Load transaction history with Firebase authentication
  */
 loadTransactionHistory: function() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        console.error("No authenticated user to load transactions");
+        return;
+    }
     
-    if (domElements.transactionsTable) {
-        // Show loading
-        domElements.transactionsTable.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center">
-                    <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading transactions...</div>
-                </td>
-            </tr>
-        `;
-        
-        // Get filter values
-        const typeFilter = document.getElementById('transaction-type')?.value || 'all';
-        const periodFilter = document.getElementById('transaction-period')?.value || 'all';
-        
-        // Get transactions from API
-        ApiService.getTransactions(currentUser.uid, {
-            type: typeFilter !== 'all' ? typeFilter : undefined,
-            period: periodFilter !== 'all' ? periodFilter : undefined,
-            limit: 20
+    const transactionsBody = document.getElementById('transactions-body');
+    if (!transactionsBody) return;
+    
+    // Show loading indicator
+    transactionsBody.innerHTML = `
+        <tr>
+            <td colspan="5" class="text-center">
+                <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading transactions...</div>
+            </td>
+        </tr>
+    `;
+    
+    // Get filter values if they exist
+    const typeFilter = document.getElementById('transaction-type')?.value || 'all';
+    const periodFilter = document.getElementById('transaction-period')?.value || 'all';
+    
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    if (typeFilter !== 'all') queryParams.append('type', typeFilter);
+    if (periodFilter !== 'all') queryParams.append('period', periodFilter);
+    
+    // Get Firebase token
+    currentUser.getIdToken(true)
+        .then(token => {
+            // Call the API with Firebase token
+            return fetch(`/api/transactions?${queryParams.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            return response.json();
         })
         .then(data => {
-            // Process transactions
+            // Store transaction data
             transactionHistory = data || [];
             
             // Render transactions
@@ -1614,7 +1847,7 @@ loadTransactionHistory: function() {
         })
         .catch(error => {
             console.error('Error loading transactions:', error);
-            domElements.transactionsTable.innerHTML = `
+            transactionsBody.innerHTML = `
                 <tr>
                     <td colspan="5" class="text-center">
                         <div class="alert alert-error">
@@ -1628,7 +1861,6 @@ loadTransactionHistory: function() {
                 </tr>
             `;
         });
-    }
 },
 
 /**
@@ -1724,21 +1956,26 @@ renderTransactionHistory: function() {
  * Update license key display
  */
 updateLicenseKeyDisplay: function() {
-    if (domElements.licenseKeyElement && licenseKey) {
+    if (!licenseKey) return;
+    
+    // Update license key element in dashboard view
+    const licenseKeyElement = document.getElementById('license-key');
+    if (licenseKeyElement) {
         // Store full key as data attribute
-        domElements.licenseKeyElement.setAttribute('data-full-key', licenseKey);
-        
-        // Display masked key
-        domElements.licenseKeyElement.textContent = Utils.maskLicenseKey(licenseKey);
+        licenseKeyElement.setAttribute('data-full-key', licenseKey);
+        // Display masked key for security
+        licenseKeyElement.textContent = Utils.maskLicenseKey(licenseKey);
     }
     
-    if (domElements.downloadLicenseKeyElement && licenseKey) {
-        // Store full key as data attribute
-        domElements.downloadLicenseKeyElement.setAttribute('data-full-key', licenseKey);
-        
-        // Display masked key
-        domElements.downloadLicenseKeyElement.textContent = Utils.maskLicenseKey(licenseKey);
+    // Update license key element in download section
+    const downloadLicenseKeyElement = document.getElementById('download-license-key');
+    if (downloadLicenseKeyElement) {
+        downloadLicenseKeyElement.setAttribute('data-full-key', licenseKey);
+        downloadLicenseKeyElement.textContent = Utils.maskLicenseKey(licenseKey);
     }
+    
+    // Initialize copy buttons if not already done
+    Dashboard.initCopyButtons();
 },
 
 /**
@@ -1919,32 +2156,53 @@ formatDateForChart: function(dateString) {
 },
 
 /**
- * Load profile data
+ * Load profile data with Firebase authentication
  */
 loadProfileData: function() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        console.error("No authenticated user to load profile data");
+        return;
+    }
     
-    // Show loading state
+    // Set form fields to loading state
     Dashboard.setFormLoading(true);
     
-    // Get user data from Firestore
-    const db = firebase.firestore();
+    // Populate email from Firebase Auth (always up-to-date)
+    const profileEmail = document.getElementById('profile-email');
+    if (profileEmail) {
+        profileEmail.value = currentUser.email || '';
+        profileEmail.disabled = true; // Email should not be editable
+    }
     
+    // Populate name from Firebase Auth
+    const profileName = document.getElementById('profile-name');
+    if (profileName) {
+        profileName.value = currentUser.displayName || '';
+    }
+    
+    // Get additional profile data from Firestore
+    const db = firebase.firestore();
     db.collection('users').doc(currentUser.uid).get()
         .then(doc => {
             if (doc.exists) {
-                const profileData = doc.data();
+                const userData = doc.data();
                 
-                // Populate form fields
-                Dashboard.populateProfileForm(profileData);
-            } else {
-                // User document doesn't exist, create it
-                return Dashboard.createUserDocument(currentUser);
+                // Populate company if field exists
+                const profileCompany = document.getElementById('profile-company');
+                if (profileCompany) {
+                    profileCompany.value = userData.company || '';
+                }
+                
+                // Populate role if field exists
+                const profileRole = document.getElementById('profile-role');
+                if (profileRole) {
+                    profileRole.value = userData.role || '';
+                }
             }
         })
         .catch(error => {
             console.error('Error loading profile data:', error);
-            Dashboard.showToast('Error loading profile data', 'error');
+            Dashboard.showToast('Failed to load profile data', 'error');
         })
         .finally(() => {
             Dashboard.setFormLoading(false);
@@ -1977,7 +2235,7 @@ populateProfileForm: function(data) {
 },
 
 /**
- * Update profile information
+ * Update profile with Firebase authentication
  */
 updateProfile: function(e) {
     e.preventDefault();
@@ -1988,27 +2246,26 @@ updateProfile: function(e) {
     }
     
     // Get form values
-    const name = domElements.profileName.value.trim();
-    const company = domElements.profileCompany ? domElements.profileCompany.value.trim() : '';
-    const role = domElements.profileRole ? domElements.profileRole.value.trim() : '';
+    const name = document.getElementById('profile-name')?.value.trim() || '';
+    const company = document.getElementById('profile-company')?.value.trim() || '';
+    const role = document.getElementById('profile-role')?.value.trim() || '';
     
     // Validate
     if (!name) {
         Dashboard.showToast('Name is required', 'error');
-        domElements.profileName.focus();
+        document.getElementById('profile-name')?.focus();
         return;
     }
     
     // Show loading state
     Dashboard.setFormLoading(true);
     
-    // Update Auth profile first
+    // Update Firebase Authentication profile
     currentUser.updateProfile({
         displayName: name
     }).then(() => {
-        // Then update Firestore
+        // Update Firestore with additional profile data
         const db = firebase.firestore();
-        
         return db.collection('users').doc(currentUser.uid).update({
             displayName: name,
             company: company,
@@ -2016,20 +2273,23 @@ updateProfile: function(e) {
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
     }).then(() => {
-        // Update successful
+        // Success! Update UI elements with new data
         Dashboard.showToast('Profile updated successfully', 'success');
         
-        // Update UI with new name
-        if (domElements.userNameElement) {
-            domElements.userNameElement.textContent = name;
+        // Update user display name in the header
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement) {
+            userNameElement.textContent = name;
         }
         
-        if (domElements.userInitialsElement) {
-            domElements.userInitialsElement.textContent = Utils.getInitials(name);
+        // Update user initials in the header
+        const userInitialsElement = document.getElementById('user-initials');
+        if (userInitialsElement) {
+            userInitialsElement.textContent = Utils.getInitials(name);
         }
     }).catch(error => {
         console.error('Error updating profile:', error);
-        Dashboard.showToast('Error updating profile', 'error');
+        Dashboard.showToast('Failed to update profile', 'error');
     }).finally(() => {
         Dashboard.setFormLoading(false);
     });
@@ -2058,7 +2318,7 @@ setFormLoading: function(isLoading) {
 },
 
 /**
- * Update password
+ * Update password with Firebase authentication
  */
 updatePassword: function(e) {
     e.preventDefault();
@@ -2069,63 +2329,71 @@ updatePassword: function(e) {
     }
     
     // Get form values
-    const current = domElements.currentPassword.value;
-    const newPass = domElements.newPassword.value;
-    const confirmPass = domElements.confirmPassword.value;
+    const currentPasswordElement = document.getElementById('current-password');
+    const newPasswordElement = document.getElementById('new-password');
+    const confirmPasswordElement = document.getElementById('confirm-password');
+    
+    if (!currentPasswordElement || !newPasswordElement || !confirmPasswordElement) {
+        console.error("Password form elements not found");
+        return;
+    }
+    
+    const currentPassword = currentPasswordElement.value;
+    const newPassword = newPasswordElement.value;
+    const confirmPassword = confirmPasswordElement.value;
     
     // Validate
-    if (!current || !newPass || !confirmPass) {
+    if (!currentPassword || !newPassword || !confirmPassword) {
         Dashboard.showToast('All password fields are required', 'error');
         return;
     }
     
-    if (newPass !== confirmPass) {
+    if (newPassword !== confirmPassword) {
         Dashboard.showToast('New passwords do not match', 'error');
-        domElements.confirmPassword.focus();
+        confirmPasswordElement.focus();
         return;
     }
     
     // Check password strength
-    if (newPass.length < 8) {
+    if (newPassword.length < 8) {
         Dashboard.showToast('Password must be at least 8 characters long', 'error');
-        domElements.newPassword.focus();
+        newPasswordElement.focus();
         return;
     }
     
-    // Show loading state
+    // Set loading state
     Dashboard.setPasswordFormLoading(true);
     
-    // Get credentials for reauthentication
+    // Reauthenticate with Firebase before changing password
     const credential = firebase.auth.EmailAuthProvider.credential(
         currentUser.email,
-        current
+        currentPassword
     );
     
-    // Reauthenticate user
     currentUser.reauthenticateWithCredential(credential)
         .then(() => {
-            // Then update password
-            return currentUser.updatePassword(newPass);
+            // Password reauthentication successful, now update password
+            return currentUser.updatePassword(newPassword);
         })
         .then(() => {
-            // Password updated successfully
+            // Password update successful
             Dashboard.showToast('Password updated successfully', 'success');
-            
-            // Clear form
-            domElements.passwordForm.reset();
+            currentPasswordElement.value = '';
+            newPasswordElement.value = '';
+            confirmPasswordElement.value = '';
         })
         .catch(error => {
             console.error('Error updating password:', error);
             
-            // Handle specific errors
+            // Handle specific Firebase error codes
             if (error.code === 'auth/wrong-password') {
                 Dashboard.showToast('Current password is incorrect', 'error');
-                domElements.currentPassword.focus();
+                currentPasswordElement.focus();
             } else if (error.code === 'auth/weak-password') {
                 Dashboard.showToast('New password is too weak', 'error');
-                domElements.newPassword.focus();
+                newPasswordElement.focus();
             } else {
-                Dashboard.showToast('Error updating password', 'error');
+                Dashboard.showToast('Failed to update password: ' + error.message, 'error');
             }
         })
         .finally(() => {
@@ -2226,46 +2494,50 @@ maskLicenseKey: (key) => {
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-Dashboard.init();
+    
+    setupGlobalErrorHandling();
 
-// Add transaction filter event listeners
-const transactionTypeFilter = document.getElementById('transaction-type');
-const transactionPeriodFilter = document.getElementById('transaction-period');
+    // Check system integration
+    if (!checkSystemIntegration()) return;
 
-if (transactionTypeFilter) {
-    transactionTypeFilter.addEventListener('change', Dashboard.renderTransactionHistory);
-}
+    Dashboard.init();
 
-if (transactionPeriodFilter) {
-    transactionPeriodFilter.addEventListener('change', Dashboard.renderTransactionHistory);
-}
+    // Add transaction filter event listeners
+    const transactionTypeFilter = document.getElementById('transaction-type');
+    const transactionPeriodFilter = document.getElementById('transaction-period');
 
-// Set up billing cycle toggles if present
-document.querySelectorAll('.billing-toggle').forEach(button => {
-    button.addEventListener('click', () => {
-        toggleBillingCycle(button.dataset.cycle);
+    if (transactionTypeFilter) {
+        transactionTypeFilter.addEventListener('change', Dashboard.renderTransactionHistory);
+    }
+
+    if (transactionPeriodFilter) {
+        transactionPeriodFilter.addEventListener('change', Dashboard.renderTransactionHistory);
+    }
+
+    // Set up billing cycle toggles if present
+    document.querySelectorAll('.billing-toggle').forEach(button => {
+        button.addEventListener('click', () => {
+            toggleBillingCycle(button.dataset.cycle);
+        });
     });
-});
 
-// Set up checkout buttons if present
-document.querySelectorAll('.checkout-button').forEach(button => {
-    button.addEventListener('click', () => {
-        openCheckout(button.dataset.plan);
+    // Set up checkout buttons if present
+    document.querySelectorAll('.checkout-button').forEach(button => {
+        button.addEventListener('click', () => {
+            openCheckout(button.dataset.plan);
+        });
+        // Disable buttons until Paddle is initialized
+        button.disabled = true;
     });
-    // Disable buttons until Paddle is initialized
-    button.disabled = true;
-});
 
-if (!document.getElementById('loading-indicator')) {
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.id = 'loading-indicator';
-    loadingIndicator.style.display = 'none';
-    loadingIndicator.style.position = 'fixed';
-    loadingIndicator.style.top = '50%';
-    loadingIndicator.style.left = '50%';
-    loadingIndicator.style.transform = 'translate(-50%, -50%)';
-    loadingIndicator.innerHTML = '<div class="spinner"></div> Loading...';
-    document.body.appendChild(loadingIndicator);
-}
+    // Check URL for success parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('checkout') && urlParams.get('checkout') === 'success') {
+        Dashboard.showToast('Payment successful! Your subscription is now active.', 'success');
+        
+        // Clear the URL parameter
+        const newUrl = window.location.href.split('?')[0];
+        window.history.replaceState({}, document.title, newUrl);
+    }
 
 });
