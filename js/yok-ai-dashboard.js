@@ -50,10 +50,8 @@ async function fetchClientToken() {
         const user = firebase.auth().currentUser;
         
         if (!user) {
-            console.error("No user logged in");
-            // Redirect to login page
-            window.location.href = '/signin';
-            return null;
+            console.error("No user logged in for token fetch");
+            return null; // Return null without redirecting
         }
         
         // Get the Firebase ID token
@@ -92,6 +90,13 @@ async function initializePaddle() {
         // Show loading indicator if you have one
         const loadingElement = document.getElementById('loading-indicator');
         if (loadingElement) loadingElement.style.display = 'block';
+        
+        // Check if user is authenticated
+        if (!firebase.auth().currentUser) {
+            console.log("Waiting for Firebase authentication...");
+            if (loadingElement) loadingElement.style.display = 'none';
+            return; // Exit without redirecting to signin
+        }
         
         // Fetch token from server
         clientToken = await fetchClientToken();
@@ -374,6 +379,9 @@ const Dashboard = {
                 isEmailVerified = user.emailVerified;
                 Dashboard.updateUIForVerification(isEmailVerified);
                 Dashboard.updateUserInfo(user);
+
+                // Initialize Paddle now that user is confirmed
+                initializePaddle();
                 
                 // If email is not verified, start checking periodically
                 if (!isEmailVerified) {
@@ -407,122 +415,122 @@ const Dashboard = {
         Dashboard.initCancelSubscriptionModal();
     },
     
-/**
- * Update dashboard content based on subscription status
- */
-updateDashboardView: function(status) {
-    const subscriptionContainer = document.getElementById('subscription-container');
-    const licenseKeyCard = document.getElementById('license-key-card');
-    const downloadsContainer = document.getElementById('downloads-container');
-    
-    if (!subscriptionContainer) return;
-    
-    // Clear subscription container
-    subscriptionContainer.innerHTML = '';
-    
-    if (status && status.active) {
-        // User has active subscription
+    /**
+     * Update dashboard content based on subscription status
+     */
+    updateDashboardView: function(status) {
+        const subscriptionContainer = document.getElementById('subscription-container');
+        const licenseKeyCard = document.getElementById('license-key-card');
+        const downloadsContainer = document.getElementById('downloads-container');
         
-        // 1. Show subscription status
-        const subscriptionCard = document.createElement('div');
-        subscriptionCard.className = 'card';
-        subscriptionCard.innerHTML = `
-            <div class="card-header">
-                <h3>Subscription Status</h3>
-            </div>
-            <div class="card-body">
-                ${Dashboard.generateActiveSubscriptionHTML(status)}
-            </div>
-        `;
-        subscriptionContainer.appendChild(subscriptionCard);
+        if (!subscriptionContainer) return;
         
-        // 2. Show credit usage
-        const creditCard = document.createElement('div');
-        creditCard.className = 'card';
-        creditCard.innerHTML = `
-            <div class="card-header">
-                <h3>Credit Usage</h3>
-            </div>
-            <div class="card-body">
-                <div id="credit-progress-container">
-                    <div class="credit-info">
-                        <span id="credits-used">0</span>
-                        <span> / </span>
-                        <span id="credits-total">0</span>
-                        <span> credits used</span>
+        // Clear subscription container
+        subscriptionContainer.innerHTML = '';
+        
+        if (status && status.active) {
+            // User has active subscription
+            
+            // 1. Show subscription status
+            const subscriptionCard = document.createElement('div');
+            subscriptionCard.className = 'card';
+            subscriptionCard.innerHTML = `
+                <div class="card-header">
+                    <h3>Subscription Status</h3>
+                </div>
+                <div class="card-body">
+                    ${Dashboard.generateActiveSubscriptionHTML(status)}
+                </div>
+            `;
+            subscriptionContainer.appendChild(subscriptionCard);
+            
+            // 2. Show credit usage
+            const creditCard = document.createElement('div');
+            creditCard.className = 'card';
+            creditCard.innerHTML = `
+                <div class="card-header">
+                    <h3>Credit Usage</h3>
+                </div>
+                <div class="card-body">
+                    <div id="credit-progress-container">
+                        <div class="credit-info">
+                            <span id="credits-used">0</span>
+                            <span> / </span>
+                            <span id="credits-total">0</span>
+                            <span> credits used</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="credit-progress" class="progress" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <div class="progress-bar">
-                        <div id="credit-progress" class="progress" style="width: 0%"></div>
+                    <div class="credit-actions">
+                        <button id="buy-more-credits" class="btn btn-outline">Buy More Credits</button>
                     </div>
                 </div>
-                <div class="credit-actions">
-                    <button id="buy-more-credits" class="btn btn-outline">Buy More Credits</button>
-                </div>
-            </div>
-        `;
-        subscriptionContainer.appendChild(creditCard);
-        
-        // 3. Show license key and downloads
-        if (licenseKeyCard) licenseKeyCard.style.display = 'block';
-        if (downloadsContainer) downloadsContainer.style.display = 'block';
-        
-        // 4. Update credit usage display
-        Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
-        
-        // 5. Bind event handlers
-        const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
-        if (buyMoreCreditsBtn) {
-            buyMoreCreditsBtn.addEventListener('click', () => {
-                Dashboard.openModal('buy-credits-modal');
-            });
-        }
-        
-        const cancelBtn = document.getElementById('cancel-subscription-btn');
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', () => {
-                Dashboard.openModal('cancel-subscription-modal');
-            });
-        }
-        
-        const upgradeBtn = document.getElementById('upgrade-subscription-btn');
-        if (upgradeBtn) {
-            upgradeBtn.addEventListener('click', Dashboard.showAvailablePlans);
-        }
-    } else {
-        // User has no subscription, show pricing plans
-        const pricingTitle = document.createElement('div');
-        pricingTitle.className = 'section-subheader';
-        pricingTitle.innerHTML = '<h3>Choose a Plan</h3>';
-        subscriptionContainer.appendChild(pricingTitle);
-        
-        // Create pricing grid
-        const plansGrid = document.createElement('div');
-        plansGrid.className = 'plans-grid';
-        
-        // Add plans to grid
-        for (const planKey in SUBSCRIPTION_PLANS) {
-            const plan = SUBSCRIPTION_PLANS[planKey];
-            plansGrid.innerHTML += Dashboard.generatePlanHTML(plan);
-        }
-        
-        subscriptionContainer.appendChild(plansGrid);
-        
-        // Hide license key and downloads
-        if (licenseKeyCard) licenseKeyCard.style.display = 'none';
-        if (downloadsContainer) downloadsContainer.style.display = 'none';
-        
-        // Bind events to subscribe buttons
-        setTimeout(() => {
-            const subscribeButtons = document.querySelectorAll('.subscribe-btn');
-            subscribeButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const planId = e.target.getAttribute('data-plan-id');
-                    openCheckout(planId);
+            `;
+            subscriptionContainer.appendChild(creditCard);
+            
+            // 3. Show license key and downloads
+            if (licenseKeyCard) licenseKeyCard.style.display = 'block';
+            if (downloadsContainer) downloadsContainer.style.display = 'block';
+            
+            // 4. Update credit usage display
+            Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+            
+            // 5. Bind event handlers
+            const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
+            if (buyMoreCreditsBtn) {
+                buyMoreCreditsBtn.addEventListener('click', () => {
+                    Dashboard.openModal('buy-credits-modal');
                 });
-            });
-        }, 0);
-    }
-},
+            }
+            
+            const cancelBtn = document.getElementById('cancel-subscription-btn');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    Dashboard.openModal('cancel-subscription-modal');
+                });
+            }
+            
+            const upgradeBtn = document.getElementById('upgrade-subscription-btn');
+            if (upgradeBtn) {
+                upgradeBtn.addEventListener('click', Dashboard.showAvailablePlans);
+            }
+        } else {
+            // User has no subscription, show pricing plans
+            const pricingTitle = document.createElement('div');
+            pricingTitle.className = 'section-subheader';
+            pricingTitle.innerHTML = '<h3>Choose a Plan</h3>';
+            subscriptionContainer.appendChild(pricingTitle);
+            
+            // Create pricing grid
+            const plansGrid = document.createElement('div');
+            plansGrid.className = 'plans-grid';
+            
+            // Add plans to grid
+            for (const planKey in SUBSCRIPTION_PLANS) {
+                const plan = SUBSCRIPTION_PLANS[planKey];
+                plansGrid.innerHTML += Dashboard.generatePlanHTML(plan);
+            }
+            
+            subscriptionContainer.appendChild(plansGrid);
+            
+            // Hide license key and downloads
+            if (licenseKeyCard) licenseKeyCard.style.display = 'none';
+            if (downloadsContainer) downloadsContainer.style.display = 'none';
+            
+            // Bind events to subscribe buttons
+            setTimeout(() => {
+                const subscribeButtons = document.querySelectorAll('.subscribe-btn');
+                subscribeButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const planId = e.target.getAttribute('data-plan-id');
+                        openCheckout(planId);
+                    });
+                });
+            }, 0);
+        }
+    },
 
 
     /**
@@ -2213,7 +2221,6 @@ document.querySelectorAll('.checkout-button').forEach(button => {
     button.disabled = true;
 });
 
-// Add a loading indicator to the page if not already present
 if (!document.getElementById('loading-indicator')) {
     const loadingIndicator = document.createElement('div');
     loadingIndicator.id = 'loading-indicator';
@@ -2226,6 +2233,4 @@ if (!document.getElementById('loading-indicator')) {
     document.body.appendChild(loadingIndicator);
 }
 
-// Initialize Paddle
-initializePaddle();
 });
