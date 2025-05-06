@@ -179,7 +179,11 @@ async function openCheckout(plan) {
             Dashboard.showToast('User authentication required', 'error');
             return;
         }
-        
+        console.log("Current user:", {
+            email: user.email,
+            displayName: user.displayName,
+            uid: user.uid
+        });
         // Get the correct price ID based on plan type and billing cycle
         let priceId;
         
@@ -213,7 +217,8 @@ async function openCheckout(plan) {
             lastName: lastName
         });
         // Open Paddle checkout with pre-filled customer info
-        Paddle.Checkout.open({
+        // Create checkout configuration object
+        const checkoutConfig = {
             items: [
                 {
                     priceId: priceId,
@@ -230,118 +235,23 @@ async function openCheckout(plan) {
                 displayMode: "overlay",
                 variant: "one-page",
                 successUrl: window.location.href + '?checkout=success',
-                allowLogout: false, // This prevents changing the customer
+                allowLogout: false,
                 customData: {
-                    userId: user.uid // Include Firebase UID for webhook processing
+                    userId: user.uid
                 }
             }
-        });
-    } catch (error) {
-        console.error(`Checkout error: ${error.message}`);
-        Dashboard.showToast(`Failed to open checkout: ${error.message}`, 'error');
-    }
-}
-/**
- * Initialize Paddle checkout with client token
- */
-async function initializePaddle() {
-    // Show loading indicator
-    const loadingElement = document.getElementById('loading-indicator');
-    if (loadingElement) loadingElement.style.display = 'block';
-    
-    try {
-        // Check if user is authenticated
-        if (!firebase.auth().currentUser) {
-            throw new Error("Authentication required");
-        }
+        };
         
-        // Fetch token from server
-        clientToken = await fetchClientToken();
-        
-        // Initialize Paddle with the token
-        Paddle.Environment.set("sandbox"); // Change to "production" for live environment
-        Paddle.Initialize({
-            token: clientToken,
-            eventCallback: function(event) {
-                console.log("Paddle event:", event);
-                
-                // Handle specific events
-                if (event.name === "checkout.completed") {
-                    // Reload dashboard data after successful checkout
-                    Dashboard.showToast('Payment successful!', 'success');
-                    setTimeout(() => {
-                        Dashboard.loadDashboardData();
-                    }, 1000);
-                }
-            }
-        });
-        
-        paddleInitialized = true;
-        
-        // Enable checkout buttons
-        document.querySelectorAll('.subscribe-btn, .checkout-button, .buy-credit-btn').forEach(button => {
-            button.disabled = false;
-        });
-        
-        return true;
-    } catch (error) {
-        console.error("Paddle initialization error:", error);
-        Dashboard.showToast('Failed to initialize payment system', 'error');
-        throw error;
-    } finally {
-        // Hide loading indicator
-        if (loadingElement) loadingElement.style.display = 'none';
-    }
-}
-/**
- * Open Paddle checkout for subscription or credit purchase
- */
-async function openCheckout(plan) {
-    try {
-        // Make sure Paddle is initialized
-        if (!paddleInitialized) {
-            Dashboard.showToast('Initializing payment system...', 'info');
-            await initializePaddle();
-        }
-        
-        // Get the correct price ID based on plan type and billing cycle
-        let priceId;
-        
-        if (plan === 'starter' || plan === 'pro' || plan === 'enterprise') {
-            // For subscription plans
-            priceId = CONFIG.prices[plan][currentBillingCycle || 'month'];
-        } else if (plan.startsWith('credit-')) {
-            // For credit purchases
-            const creditAmount = plan.replace('credit-', '');
-            priceId = CONFIG.prices.credits[creditAmount];
-        } else {
-            throw new Error(`Unknown plan type: ${plan}`);
-        }
-        
-        if (!priceId) {
-            throw new Error(`No price ID found for plan: ${plan}`);
-        }
+        console.log("Checkout configuration:", JSON.stringify(checkoutConfig));
         
         // Open Paddle checkout
-        Paddle.Checkout.open({
-            items: [
-                {
-                    priceId: priceId,
-                    quantity: 1
-                }
-            ],
-            settings: {
-                theme: "light",
-                displayMode: "overlay",
-                variant: "one-page",
-                successUrl: window.location.href + '?checkout=success'
-            }
-        });
+        Paddle.Checkout.open(checkoutConfig);
     } catch (error) {
         console.error(`Checkout error: ${error.message}`);
         Dashboard.showToast(`Failed to open checkout: ${error.message}`, 'error');
     }
 }
+
 /**
  * Check system integration on page load
  */
