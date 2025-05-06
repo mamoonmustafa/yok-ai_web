@@ -233,10 +233,7 @@ async function openCheckout(plan) {
                 displayMode: "overlay",
                 variant: "one-page",
                 successUrl: window.location.href + '?checkout=success',
-                allowLogout: false,
-                customData: {
-                    userId: user.uid
-                }
+                allowLogout: false
             }
         };
         
