@@ -54,25 +54,70 @@ class handler(BaseHTTPRequestHandler):
             # Get subscriptions
             subscriptions = get_subscriptions(customer['id'])
             
-            # Get license keys for each subscription
+            # Process subscriptions to include active flag and detailed info
+            processed_subscriptions = []
             license_keys = []
+            
             for subscription in subscriptions:
+                # Get license keys for each subscription
                 subscription_keys = get_license_keys(subscription['id'])
                 license_keys.extend(subscription_keys)
                 
                 # Get detailed subscription info
                 details = get_subscription_details(subscription['id'])
+                
                 if details:
-                    subscription.update(details)
+                    # Determine if subscription is active based on status
+                    status = details.get('status', '').lower()
+                    is_active = status in ['active', 'trialing', 'past_due']
+                    
+                    # Create processed subscription with active flag
+                    processed_subscription = {
+                        **subscription,
+                        'status': status,
+                        'active': is_active,  # Add explicit active flag for frontend
+                        'plan': {
+                            'id': details.get('price_id', ''),
+                            'name': details.get('plan_name', 'Unknown Plan')
+                        },
+                        'nextBillingDate': details.get('next_billed_at'),
+                        'amount': details.get('amount', 0),
+                        'interval': details.get('billing_cycle', 'month')
+                    }
+                    
+                    processed_subscriptions.append(processed_subscription)
+            
+            # Determine credit allocation based on subscription
+            total_credits = 0
+            if processed_subscriptions:
+                # Default allocation by plan
+                for subscription in processed_subscriptions:
+                    if subscription.get('active'):
+                        plan_id = subscription.get('plan', {}).get('id', '')
+                        
+                        # Map plans to credit amounts
+                        credit_map = {
+                            "pri_01jsw881b64y680g737k4dx7fm": 100,  # Starter plan
+                            "pri_01jsw8ab6sd8bw2h7epy8tcp14": 500,  # Pro plan
+                            "pri_01jsw8dtn4araas7xez8e24mdh": 2000,  # Enterprise plan
+                        }
+                        
+                        total_credits += credit_map.get(plan_id, 0)
+            
+            # Debug logging
+            print(f"Email: {email}, Customer ID: {customer.get('id')}")
+            print(f"Found {len(processed_subscriptions)} subscriptions")
+            for sub in processed_subscriptions:
+                print(f"Subscription ID: {sub.get('id')}, Status: {sub.get('status')}, Active: {sub.get('active')}")
             
             # Format the response
             dashboard_data = {
                 'customer': customer,
-                'subscriptions': subscriptions,
+                'subscriptions': processed_subscriptions,
                 'license_keys': license_keys,
                 'credit_usage': {
                     'used': 0,  # You would get this from your database
-                    'total': 100  # This would be based on the subscription plan
+                    'total': total_credits
                 }
             }
             
@@ -80,6 +125,7 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(dashboard_data).encode())
             
         except Exception as e:
+            print(f"Dashboard error: {str(e)}")
             self.wfile.write(json.dumps({
                 'error': str(e)
             }).encode())
