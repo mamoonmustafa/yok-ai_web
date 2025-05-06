@@ -207,6 +207,11 @@ async function openCheckout(plan) {
             lastName = nameParts.slice(1).join(' ') || '';
         }
         
+        console.log("Opening checkout with user:", {
+            email: user.email,
+            firstName: firstName,
+            lastName: lastName
+        });
         // Open Paddle checkout with pre-filled customer info
         Paddle.Checkout.open({
             items: [
@@ -217,7 +222,8 @@ async function openCheckout(plan) {
             ],
             customer: {
                 email: user.email,
-                name: user.displayName
+                firstName: firstName,
+                lastName: lastName
             },
             settings: {
                 theme: "light",
