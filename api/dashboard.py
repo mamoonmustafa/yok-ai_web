@@ -1,6 +1,9 @@
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs
 import json
+import traceback
+import sys
+import os
 from .auth import verify_token
 from .paddle_api import (
     get_customer_by_email,
@@ -9,8 +12,18 @@ from .paddle_api import (
     get_subscription_details
 )
 
+# Enable detailed logging for debugging
+DETAILED_LOGGING = True
+
+def log(message, level="INFO"):
+    """Helper function to log messages with timestamps"""
+    if DETAILED_LOGGING or level == "ERROR":
+        print(f"[{level}] dashboard.py: {message}", file=sys.stderr)
+
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
+        log("Starting dashboard API request handling")
+        
         # Set CORS headers for browser security
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
@@ -23,53 +36,101 @@ class handler(BaseHTTPRequestHandler):
         auth_header = self.headers.get('Authorization')
         token = None
         
+        log(f"Authorization header present: {auth_header is not None}")
+        
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header[7:]
+            log(f"Token extracted: {token[:10]}... (truncated)")
         
         if not token:
+            error_msg = "Authorization token required"
+            log(f"Error: {error_msg}", "ERROR")
             self.wfile.write(json.dumps({
-                'error': 'Authorization token required'
+                'error': error_msg
             }).encode())
             return
         
         # Verify token
+        log("Verifying Firebase token")
         user_data = verify_token(token)
         if not user_data:
+            error_msg = "Invalid or expired token"
+            log(f"Error: {error_msg}", "ERROR")
             self.wfile.write(json.dumps({
-                'error': 'Invalid or expired token'
+                'error': error_msg
             }).encode())
             return
+        
+        log(f"Token verified successfully for user: {user_data.get('email')}")
         
         try:
             # Get customer data from Paddle
             email = user_data.get('email')
+            log(f"Getting customer data from Paddle for email: {email}")
+            
             customer = get_customer_by_email(email)
             
             if not customer:
-                self.wfile.write(json.dumps({
-                    'error': 'Customer not found in Paddle'
-                }).encode())
+                error_msg = "Customer not found in Paddle"
+                log(f"Error: {error_msg}", "ERROR")
+                log(f"User exists in Firebase but not in Paddle: {email}", "ERROR")
+                
+                # Return empty subscription data instead of error
+                # This allows frontend to show pricing plans
+                dashboard_data = {
+                    'customer': None,
+                    'subscriptions': [],
+                    'license_keys': [],
+                    'credit_usage': {
+                        'used': 0,
+                        'total': 0
+                    },
+                    'message': 'No Paddle customer found for this user'
+                }
+                
+                self.wfile.write(json.dumps(dashboard_data).encode())
                 return
             
+            # Customer found
+            log(f"Paddle customer found: ID={customer.get('id')}")
+            
             # Get subscriptions
+            log(f"Getting subscriptions for customer ID: {customer.get('id')}")
             subscriptions = get_subscriptions(customer['id'])
+            
+            log(f"Found {len(subscriptions)} subscriptions")
             
             # Process subscriptions to include active flag and detailed info
             processed_subscriptions = []
             license_keys = []
             
-            for subscription in subscriptions:
+            # Detailed logging for subscriptions
+            if not subscriptions:
+                log("No subscriptions found for customer", "WARNING")
+            
+            for idx, subscription in enumerate(subscriptions):
+                log(f"Processing subscription #{idx+1}: ID={subscription.get('id')}")
+                
                 # Get license keys for each subscription
+                log(f"Getting license keys for subscription ID: {subscription.get('id')}")
                 subscription_keys = get_license_keys(subscription['id'])
                 license_keys.extend(subscription_keys)
+                log(f"Found {len(subscription_keys)} license keys")
                 
                 # Get detailed subscription info
+                log(f"Getting detailed info for subscription ID: {subscription.get('id')}")
                 details = get_subscription_details(subscription['id'])
                 
                 if details:
+                    log(f"Subscription details: status={details.get('status')}, "
+                        f"plan={details.get('plan_name', 'Unknown')}, "
+                        f"next_billing={details.get('next_billed_at')}")
+                    
                     # Determine if subscription is active based on status
                     status = details.get('status', '').lower()
                     is_active = status in ['active', 'trialing', 'past_due']
+                    
+                    log(f"Subscription active status: {is_active} (based on status: {status})")
                     
                     # Create processed subscription with active flag
                     processed_subscription = {
@@ -86,6 +147,9 @@ class handler(BaseHTTPRequestHandler):
                     }
                     
                     processed_subscriptions.append(processed_subscription)
+                    log(f"Processed subscription added with active={is_active}")
+                else:
+                    log(f"Failed to get details for subscription ID: {subscription.get('id')}", "WARNING")
             
             # Determine credit allocation based on subscription
             total_credits = 0
@@ -102,13 +166,9 @@ class handler(BaseHTTPRequestHandler):
                             "pri_01jsw8dtn4araas7xez8e24mdh": 2000,  # Enterprise plan
                         }
                         
-                        total_credits += credit_map.get(plan_id, 0)
-            
-            # Debug logging
-            print(f"Email: {email}, Customer ID: {customer.get('id')}")
-            print(f"Found {len(processed_subscriptions)} subscriptions")
-            for sub in processed_subscriptions:
-                print(f"Subscription ID: {sub.get('id')}, Status: {sub.get('status')}, Active: {sub.get('active')}")
+                        credits = credit_map.get(plan_id, 0)
+                        total_credits += credits
+                        log(f"Adding {credits} credits for plan ID: {plan_id}")
             
             # Format the response
             dashboard_data = {
@@ -121,17 +181,34 @@ class handler(BaseHTTPRequestHandler):
                 }
             }
             
+            # Log the final processed data structure (sensitive data redacted)
+            log("Final dashboard data structure:")
+            log(f"- Customer ID: {customer.get('id')}")
+            log(f"- Number of subscriptions: {len(processed_subscriptions)}")
+            log(f"- Number of license keys: {len(license_keys)}")
+            log(f"- Credit usage: {dashboard_data['credit_usage']}")
+            
+            # Check if any subscription is active
+            has_active_subscription = any(sub.get('active', False) for sub in processed_subscriptions)
+            log(f"Has active subscription: {has_active_subscription}")
+            
             # Return dashboard data
+            log("Sending dashboard data response")
             self.wfile.write(json.dumps(dashboard_data).encode())
             
         except Exception as e:
-            print(f"Dashboard error: {str(e)}")
+            error_msg = str(e)
+            log(f"Unhandled exception: {error_msg}", "ERROR")
+            log(traceback.format_exc(), "ERROR")
+            
             self.wfile.write(json.dumps({
-                'error': str(e)
+                'error': error_msg,
+                'trace': traceback.format_exc() if DETAILED_LOGGING else "See server logs for details"
             }).encode())
             
     def do_OPTIONS(self):
         # Handle preflight requests for CORS
+        log("Handling OPTIONS request (CORS preflight)")
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')

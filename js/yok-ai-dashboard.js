@@ -504,18 +504,323 @@ const Dashboard = {
     /**
      * Update dashboard content based on subscription status
      */
-    updateDashboardView: function(status) {
+    //     updateDashboardView: function(status) {
+    //         const subscriptionContainer = document.getElementById('subscription-container');
+    //         const licenseKeyCard = document.getElementById('license-key-card');
+    //         const downloadsContainer = document.getElementById('downloads-container');
+            
+    //         if (!subscriptionContainer) return;
+            
+    //         // Clear subscription container
+    //         subscriptionContainer.innerHTML = '';
+            
+    //         if (status && status.active) {
+    //             // User has active subscription
+                
+    //             // 1. Show subscription status
+    //             const subscriptionCard = document.createElement('div');
+    //             subscriptionCard.className = 'card';
+    //             subscriptionCard.innerHTML = `
+    //                 <div class="card-header">
+    //                     <h3>Subscription Status</h3>
+    //                 </div>
+    //                 <div class="card-body">
+    //                     ${Dashboard.generateActiveSubscriptionHTML(status)}
+    //                 </div>
+    //             `;
+    //             subscriptionContainer.appendChild(subscriptionCard);
+                
+    //             // 2. Show credit usage
+    //             const creditCard = document.createElement('div');
+    //             creditCard.className = 'card';
+    //             creditCard.innerHTML = `
+    //                 <div class="card-header">
+    //                     <h3>Credit Usage</h3>
+    //                 </div>
+    //                 <div class="card-body">
+    //                     <div id="credit-progress-container">
+    //                         <div class="credit-info">
+    //                             <span id="credits-used">0</span>
+    //                             <span> / </span>
+    //                             <span id="credits-total">0</span>
+    //                             <span> credits used</span>
+    //                         </div>
+    //                         <div class="progress-bar">
+    //                             <div id="credit-progress" class="progress" style="width: 0%"></div>
+    //                         </div>
+    //                     </div>
+    //                     <div class="credit-actions">
+    //                         <button id="buy-more-credits" class="btn btn-outline">Buy More Credits</button>
+    //                     </div>
+    //                 </div>
+    //             `;
+    //             subscriptionContainer.appendChild(creditCard);
+                
+    //             // 3. Show license key and downloads
+    //             if (licenseKeyCard) licenseKeyCard.style.display = 'block';
+    //             if (downloadsContainer) downloadsContainer.style.display = 'block';
+                
+    //             // 4. Update credit usage display
+    //             Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+                
+    //             // 5. Bind event handlers
+    //             const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
+    //             if (buyMoreCreditsBtn) {
+    //                 buyMoreCreditsBtn.addEventListener('click', () => {
+    //                     Dashboard.openModal('buy-credits-modal');
+    //                 });
+    //             }
+                
+    //             const cancelBtn = document.getElementById('cancel-subscription-btn');
+    //             if (cancelBtn) {
+    //                 cancelBtn.addEventListener('click', () => {
+    //                     Dashboard.openModal('cancel-subscription-modal');
+    //                 });
+    //             }
+                
+    //             const upgradeBtn = document.getElementById('upgrade-subscription-btn');
+    //             if (upgradeBtn) {
+    //                 upgradeBtn.addEventListener('click', Dashboard.showAvailablePlans);
+    //             }
+
+    //         } else {
+    //             // User has no subscription, show pricing plans
+    //             const pricingTitle = document.createElement('div');
+    //             pricingTitle.className = 'section-subheader';
+    //             pricingTitle.innerHTML = '<h3>Choose a Plan</h3>';
+    //             subscriptionContainer.appendChild(pricingTitle);
+                
+    //             // Create pricing grid with hard-coded plans
+    //             const plansGrid = document.createElement('div');
+    //             plansGrid.className = 'plans-grid';
+                
+    //             // Hard-coded plan HTML
+    //             plansGrid.innerHTML = `
+    //                 <!-- Starter Plan -->
+    //                 <div class="plan-card">
+    //                     <div class="plan-header">
+    //                         <div class="plan-name">Starter</div>
+    //                         <div class="plan-price">$9.99</div>
+    //                         <div class="plan-billing">per month</div>
+    //                     </div>
+    //                     <div class="plan-features">
+    //                         <ul>
+    //                             <li><i class="fas fa-check"></i> 100 Credits per month</li>
+    //                             <li><i class="fas fa-check"></i> Basic support</li>
+    //                             <li><i class="fas fa-check"></i> Single device</li>
+    //                             <li><i class="fas fa-check"></i> 1GB storage</li>
+    //                         </ul>
+    //                     </div>
+    //                     <div class="plan-action">
+    //                         <button class="btn btn-primary subscribe-btn" data-plan="starter">
+    //                             Subscribe Now
+    //                         </button>
+    //                     </div>
+    //                 </div>
+                    
+    //                 <!-- Pro Plan -->
+    //                 <div class="plan-card popular">
+    //                     <div class="plan-popular">Most Popular</div>
+    //                     <div class="plan-header">
+    //                         <div class="plan-name">Professional</div>
+    //                         <div class="plan-price">$29.99</div>
+    //                         <div class="plan-billing">per month</div>
+    //                     </div>
+    //                     <div class="plan-features">
+    //                         <ul>
+    //                             <li><i class="fas fa-check"></i> 500 Credits per month</li>
+    //                             <li><i class="fas fa-check"></i> Priority support</li>
+    //                             <li><i class="fas fa-check"></i> Up to 3 devices</li>
+    //                             <li><i class="fas fa-check"></i> 10GB storage</li>
+    //                             <li><i class="fas fa-check"></i> Advanced analytics</li>
+    //                         </ul>
+    //                     </div>
+    //                     <div class="plan-action">
+    //                         <button class="btn btn-primary subscribe-btn" data-plan="pro">
+    //                             Subscribe Now
+    //                         </button>
+    //                     </div>
+    //                 </div>
+                    
+    //                 <!-- Enterprise Plan -->
+    //                 <div class="plan-card">
+    //                     <div class="plan-header">
+    //                         <div class="plan-name">Enterprise</div>
+    //                         <div class="plan-price">$79.99</div>
+    //                         <div class="plan-billing">per month</div>
+    //                     </div>
+    //                     <div class="plan-features">
+    //                         <ul>
+    //                             <li><i class="fas fa-check"></i> 2000 Credits per month</li>
+    //                             <li><i class="fas fa-check"></i> 24/7 support</li>
+    //                             <li><i class="fas fa-check"></i> Unlimited devices</li>
+    //                             <li><i class="fas fa-check"></i> 50GB storage</li>
+    //                             <li><i class="fas fa-check"></i> Advanced analytics</li>
+    //                             <li><i class="fas fa-check"></i> Team management</li>
+    //                             <li><i class="fas fa-check"></i> API access</li>
+    //                         </ul>
+    //                     </div>
+    //                     <div class="plan-action">
+    //                         <button class="btn btn-primary subscribe-btn" data-plan="enterprise">
+    //                             Subscribe Now
+    //                         </button>
+    //                     </div>
+    //                 </div>
+    //             `;
+                
+    //             subscriptionContainer.appendChild(plansGrid);
+                
+    //             // Hide license key and downloads
+    //             if (licenseKeyCard) licenseKeyCard.style.display = 'none';
+    //             if (downloadsContainer) downloadsContainer.style.display = 'none';
+                
+    //             // Bind events to subscribe buttons
+    //             setTimeout(() => {
+    //                 const subscribeButtons = document.querySelectorAll('.subscribe-btn');
+    //                 subscribeButtons.forEach(button => {
+    //                     button.addEventListener('click', (e) => {
+    //                         const plan = e.target.getAttribute('data-plan');
+    //                         console.log(`Plan selected: ${plan}`); // Debug log
+    //                         openCheckout(plan);
+    //                     });
+    //                 });
+    //             }, 0);
+    // }
+    //     },
+    /**
+     * Add these debugging functions to your yok-ai-dashboard.js file
+     * to trace the subscription detection issues
+     */
+
+    // Add this right after the Dashboard object definition
+    debug : {
+        logLevel: 'verbose', // 'error', 'warn', 'info', 'verbose', 'debug'
+        
+        log: function(message, level = 'info', data = null) {
+            const levelMap = {
+                'error': 0,
+                'warn': 1,
+                'info': 2,
+                'verbose': 3,
+                'debug': 4
+            };
+            
+            const levelNum = levelMap[this.logLevel] || 2;
+            const msgLevelNum = levelMap[level] || 2;
+            
+            if (msgLevelNum <= levelNum) {
+                if (data) {
+                    console[level](`[YokAI Dashboard] ${message}`, data);
+                } else {
+                    console[level](`[YokAI Dashboard] ${message}`);
+                }
+            }
+        }
+    },
+
+    // Modify loadDashboardData function to add detailed logging
+    loadDashboardData : function() {
+        if (!currentUser) {
+            Dashboard.debug.log("No authenticated user to load dashboard data", 'error');
+            return;
+        }
+        
+        // Show loading state
+        const loadingIndicator = document.getElementById('loading-indicator');
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
+        
+        Dashboard.debug.log("Getting Firebase token for dashboard data request", 'verbose');
+        
+        // Get Firebase token
+        currentUser.getIdToken(true)
+            .then(token => {
+                Dashboard.debug.log("Firebase token obtained, calling dashboard API", 'verbose');
+                
+                // Call the API with Firebase token
+                return fetch('/api/dashboard', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            })
+            .then(response => {
+                Dashboard.debug.log(`API response status: ${response.status}`, 'verbose');
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Handle the dashboard data
+                Dashboard.debug.log("Dashboard data received:", 'verbose', data);
+                
+                if (data) {
+                    // Store subscription data
+                    subscriptionStatus = data.subscriptions && data.subscriptions.length > 0 ? 
+                        data.subscriptions[0] : null;
+                    
+                    Dashboard.debug.log("First subscription:", 'verbose', subscriptionStatus);
+                    
+                    if (subscriptionStatus) {
+                        Dashboard.debug.log(`Subscription status: ${subscriptionStatus.status}`, 'info');
+                        Dashboard.debug.log(`Active flag set: ${subscriptionStatus.active}`, 'info');
+                    } else {
+                        Dashboard.debug.log("No subscription found in response", 'warn');
+                    }
+                    
+                    // Store credit usage data
+                    creditUsage = data.credit_usage || { used: 0, total: 0 };
+                    
+                    // Store license key
+                    licenseKey = data.license_keys && data.license_keys.length > 0 ? 
+                        data.license_keys[0].key : null;
+                    
+                    // Update UI with retrieved data
+                    Dashboard.debug.log("Calling updateDashboardView with subscription status", 'verbose');
+                    Dashboard.updateDashboardView(subscriptionStatus);
+                    Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+                    Dashboard.updateLicenseKeyDisplay();
+                } else {
+                    // No data returned, show available plans
+                    Dashboard.debug.log("No data in API response, showing available plans", 'warn');
+                    subscriptionStatus = null;
+                    Dashboard.updateDashboardView(null);
+                }
+            })
+            .catch(error => {
+                Dashboard.debug.log(`Error loading dashboard data: ${error}`, 'error');
+                console.error('Error loading dashboard data:', error);
+                Dashboard.showToast('Failed to load dashboard data. Please try again later.', 'error');
+            })
+            .finally(() => {
+                // Hide loading indicator
+                if (loadingIndicator) loadingIndicator.style.display = 'none';
+            });
+    },
+
+    // Add detailed logging to updateDashboardView
+    updateDashboardView : function(status) {
+        Dashboard.debug.log("updateDashboardView called with status:", 'verbose', status);
+        
         const subscriptionContainer = document.getElementById('subscription-container');
         const licenseKeyCard = document.getElementById('license-key-card');
         const downloadsContainer = document.getElementById('downloads-container');
         
-        if (!subscriptionContainer) return;
+        if (!subscriptionContainer) {
+            Dashboard.debug.log("subscription-container element not found!", 'error');
+            return;
+        }
         
         // Clear subscription container
         subscriptionContainer.innerHTML = '';
         
         if (status && status.active) {
-            // User has active subscription
+            Dashboard.debug.log("Active subscription detected, showing subscription status", 'info');
+            
+            // User has active subscription - Show subscription status, credit usage, etc.
+            // ... Rest of your existing code for active subscription ...
             
             // 1. Show subscription status
             const subscriptionCard = document.createElement('div');
@@ -557,8 +862,14 @@ const Dashboard = {
             subscriptionContainer.appendChild(creditCard);
             
             // 3. Show license key and downloads
-            if (licenseKeyCard) licenseKeyCard.style.display = 'block';
-            if (downloadsContainer) downloadsContainer.style.display = 'block';
+            if (licenseKeyCard) {
+                licenseKeyCard.style.display = 'block';
+                Dashboard.debug.log("Showing license key card", 'verbose');
+            }
+            if (downloadsContainer) {
+                downloadsContainer.style.display = 'block';
+                Dashboard.debug.log("Showing downloads container", 'verbose');
+            }
             
             // 4. Update credit usage display
             Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
@@ -582,8 +893,15 @@ const Dashboard = {
             if (upgradeBtn) {
                 upgradeBtn.addEventListener('click', Dashboard.showAvailablePlans);
             }
-
         } else {
+            // Debug why we're showing pricing plans
+            if (!status) {
+                Dashboard.debug.log("No subscription status data, showing pricing plans", 'warn');
+            } else {
+                Dashboard.debug.log(`Subscription not active. Status: ${status.status}, Active flag: ${status.active}`, 'warn');
+                console.log("Full subscription object:", status);
+            }
+            
             // User has no subscription, show pricing plans
             const pricingTitle = document.createElement('div');
             pricingTitle.className = 'section-subheader';
@@ -671,23 +989,71 @@ const Dashboard = {
             subscriptionContainer.appendChild(plansGrid);
             
             // Hide license key and downloads
-            if (licenseKeyCard) licenseKeyCard.style.display = 'none';
-            if (downloadsContainer) downloadsContainer.style.display = 'none';
+            if (licenseKeyCard) {
+                licenseKeyCard.style.display = 'none';
+                Dashboard.debug.log("Hiding license key card", 'verbose');
+            }
+            if (downloadsContainer) {
+                downloadsContainer.style.display = 'none';
+                Dashboard.debug.log("Hiding downloads container", 'verbose');
+            }
             
             // Bind events to subscribe buttons
             setTimeout(() => {
                 const subscribeButtons = document.querySelectorAll('.subscribe-btn');
+                Dashboard.debug.log(`Found ${subscribeButtons.length} subscribe buttons`, 'verbose');
                 subscribeButtons.forEach(button => {
                     button.addEventListener('click', (e) => {
                         const plan = e.target.getAttribute('data-plan');
-                        console.log(`Plan selected: ${plan}`); // Debug log
+                        Dashboard.debug.log(`Plan selected: ${plan}`, 'info');
                         openCheckout(plan);
                     });
                 });
             }, 0);
-}
+        }
     },
 
+    /**
+     * Add this function to verify response data matches expected format
+     */
+    verifySubscriptionFormat : function(data) {
+        Dashboard.debug.log("Verifying subscription data format", 'verbose');
+        
+        if (!data) {
+            Dashboard.debug.log("No data provided to verification function", 'error');
+            return false;
+        }
+        
+        if (!data.subscriptions || !Array.isArray(data.subscriptions)) {
+            Dashboard.debug.log("Missing subscriptions array in response", 'error');
+            return false;
+        }
+        
+        if (data.subscriptions.length === 0) {
+            Dashboard.debug.log("Subscriptions array is empty, no active subscriptions", 'warn');
+            return true; // Valid empty subscriptions
+        }
+        
+        // Check first subscription format
+        const sub = data.subscriptions[0];
+        
+        if (!sub.hasOwnProperty('active')) {
+            Dashboard.debug.log("Subscription missing 'active' property", 'error');
+            return false;
+        }
+        
+        if (!sub.hasOwnProperty('status')) {
+            Dashboard.debug.log("Subscription missing 'status' property", 'warn');
+        }
+        
+        if (!sub.plan || typeof sub.plan !== 'object') {
+            Dashboard.debug.log("Subscription missing 'plan' object", 'error');
+            return false;
+        }
+        
+        Dashboard.debug.log("Subscription data format valid", 'info');
+        return true;
+    },
 
     /**
      * Setup event listeners
@@ -1081,66 +1447,66 @@ loadSectionData: function(sectionId) {
 /**
  * Load dashboard data using Firebase authentication
  */
-loadDashboardData: function() {
-    if (!currentUser) {
-        console.error("No authenticated user to load dashboard data");
-        return;
-    }
+// loadDashboardData: function() {
+//     if (!currentUser) {
+//         console.error("No authenticated user to load dashboard data");
+//         return;
+//     }
     
-    // Show loading state
-    const loadingIndicator = document.getElementById('loading-indicator');
-    if (loadingIndicator) loadingIndicator.style.display = 'block';
+//     // Show loading state
+//     const loadingIndicator = document.getElementById('loading-indicator');
+//     if (loadingIndicator) loadingIndicator.style.display = 'block';
     
-    // Get Firebase token
-    currentUser.getIdToken(true)
-        .then(token => {
-            // Call the API with Firebase token
-            return fetch('/api/dashboard', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Handle the dashboard data
-            if (data) {
-                // Store subscription data
-                subscriptionStatus = data.subscriptions && data.subscriptions.length > 0 ? 
-                    data.subscriptions[0] : null;
+//     // Get Firebase token
+//     currentUser.getIdToken(true)
+//         .then(token => {
+//             // Call the API with Firebase token
+//             return fetch('/api/dashboard', {
+//                 headers: {
+//                     'Authorization': `Bearer ${token}`,
+//                     'Content-Type': 'application/json'
+//                 }
+//             });
+//         })
+//         .then(response => {
+//             if (!response.ok) {
+//                 throw new Error(`API error: ${response.status}`);
+//             }
+//             return response.json();
+//         })
+//         .then(data => {
+//             // Handle the dashboard data
+//             if (data) {
+//                 // Store subscription data
+//                 subscriptionStatus = data.subscriptions && data.subscriptions.length > 0 ? 
+//                     data.subscriptions[0] : null;
                 
-                // Store credit usage data
-                creditUsage = data.credit_usage || { used: 0, total: 0 };
+//                 // Store credit usage data
+//                 creditUsage = data.credit_usage || { used: 0, total: 0 };
                 
-                // Store license key
-                licenseKey = data.license_keys && data.license_keys.length > 0 ? 
-                    data.license_keys[0].key : null;
+//                 // Store license key
+//                 licenseKey = data.license_keys && data.license_keys.length > 0 ? 
+//                     data.license_keys[0].key : null;
                 
-                // Update UI with retrieved data
-                Dashboard.updateDashboardView(subscriptionStatus);
-                Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
-                Dashboard.updateLicenseKeyDisplay();
-            } else {
-                // No data returned, show available plans
-                subscriptionStatus = null;
-                Dashboard.updateDashboardView(null);
-            }
-        })
-        .catch(error => {
-            console.error('Error loading dashboard data:', error);
-            Dashboard.showToast('Failed to load dashboard data. Please try again later.', 'error');
-        })
-        .finally(() => {
-            // Hide loading indicator
-            if (loadingIndicator) loadingIndicator.style.display = 'none';
-        });
-},
+//                 // Update UI with retrieved data
+//                 Dashboard.updateDashboardView(subscriptionStatus);
+//                 Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+//                 Dashboard.updateLicenseKeyDisplay();
+//             } else {
+//                 // No data returned, show available plans
+//                 subscriptionStatus = null;
+//                 Dashboard.updateDashboardView(null);
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error loading dashboard data:', error);
+//             Dashboard.showToast('Failed to load dashboard data. Please try again later.', 'error');
+//         })
+//         .finally(() => {
+//             // Hide loading indicator
+//             if (loadingIndicator) loadingIndicator.style.display = 'none';
+//         });
+// },
 
 /**
  * Show toast notification
