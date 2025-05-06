@@ -217,8 +217,7 @@ async function openCheckout(plan) {
             ],
             customer: {
                 email: user.email,
-                firstName: firstName,
-                lastName: lastName
+                name: user.displayName
             },
             settings: {
                 theme: "light",
