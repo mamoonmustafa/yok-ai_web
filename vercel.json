@@ -15,7 +15,7 @@
     { "source": "/api/license", "destination": "/api/license.py" },
     { "source": "/api/subscription", "destination": "/api/subscription.py" },
     { "source": "/api/transactions", "destination": "/api/transactions.py" },
-    { "source": "/api/paddle_webhook", "destination": "/api/paddle_webhook/index.js" },
+    { "source": "/api/paddle_webhook", "destination": "/api/paddle_webhook.py" },
     { "source": "/api/paddle_token", "destination": "/api/paddle_token.py" },
     
     { "source": "/privacypolicy", "destination": "/api/policy_docs.js" },
