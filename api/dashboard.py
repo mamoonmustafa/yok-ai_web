@@ -114,15 +114,12 @@ class handler(BaseHTTPRequestHandler):
                             
                             print(f"Found active subscription in Firestore for user {user_id}")
                             
-                            # Format the response
+                            # Format the response with data from Firestore
                             dashboard_data = {
-                                'customer': customer,
-                                'subscriptions': processed_subscriptions,
-                                'license_keys': license_keys,
-                                'credit_usage': {
-                                    'used': 0,
-                                    'total': total_credits
-                                }
+                                'customer': {'id': user_data_firestore.get('paddleCustomerId')},
+                                'subscriptions': [subscription_data],
+                                'license_keys': [{'key': license_key}] if license_key else [],
+                                'credit_usage': credit_usage
                             }
 
                             # Convert timestamps to strings for JSON serialization
