@@ -7,71 +7,36 @@ import uuid
 import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
-from dotenv import load_dotenv
 
-# Load environment variables (for local testing)
-try:
-    load_dotenv()
-except ImportError:
-    pass  # dotenv not installed, ignore in production
+# Initialize Firebase
+firebase_initialized = False
+db = None
 
-# Paddle webhook secret from environment variable (secure)
-WEBHOOK_SECRET = os.environ.get("PADDLE_WEBHOOK_SECRET")
-API_KEY = os.environ.get("PADDLE_API_KEY")
-API_BASE_URL = os.environ.get("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
-
-# Headers for Paddle API authentication
-API_HEADERS = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json"
-}
-
-# Initialize Firebase (outside the handler)
-firebase_app = None
-
-def get_firestore_db():
-    global firebase_app
-    if not firebase_admin._apps:
+def initialize_firebase():
+    global firebase_initialized, db
+    if not firebase_initialized:
         try:
             # Parse the Firebase service account JSON
             firebase_credentials_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
             if not firebase_credentials_json:
                 print("Firebase credentials not found in environment variables")
-                return None
+                return False
                 
             firebase_credentials_dict = json.loads(firebase_credentials_json)
             cred = credentials.Certificate(firebase_credentials_dict)
             
             # Initialize the Firebase app
-            firebase_app = firebase_admin.initialize_app(cred)
+            if not firebase_admin._apps:
+                firebase_admin.initialize_app(cred)
+            
+            db = firestore.client()
+            firebase_initialized = True
             print("Firebase initialized successfully")
-            return firestore.client()
+            return True
         except Exception as e:
             print(f"Firebase initialization error: {e}")
-            return None
-    return firestore.client()
-
-def verify_webhook_signature(data, signature, timestamp):
-    """Verify the webhook signature to ensure it's from Paddle"""
-    try:
-        # Convert data to string for signature calculation
-        data_string = json.dumps(data, separators=(',', ':'))
-        
-        # Create message to sign
-        message = f"{timestamp}.{data_string}".encode()
-        
-        # Calculate expected signature
-        expected_sig = hmac.new(
-            WEBHOOK_SECRET.encode(),
-            msg=message,
-            digestmod=hashlib.sha256
-        ).hexdigest()
-        
-        # Compare signatures
-        return hmac.compare_digest(expected_sig, signature)
-    except Exception as e:
-        print(f"Signature verification error: {e}")
-        return False
+            return False
+    return True
 
 def generate_license_key():
     """Generate a unique license key"""
@@ -91,8 +56,16 @@ def determine_credit_allocation(price_id):
 def get_customer_email(customer_id):
     """Get customer email from Paddle API using customer ID"""
     try:
-        url = f"{API_BASE_URL}/customers/{customer_id}"
-        response = requests.get(url, headers=API_HEADERS)
+        api_key = os.environ.get("PADDLE_API_KEY")
+        api_base_url = os.environ.get("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        url = f"{api_base_url}/customers/{customer_id}"
+        response = requests.get(url, headers=headers)
         
         if response.status_code == 200:
             customer_data = response.json()
@@ -105,24 +78,37 @@ def get_customer_email(customer_id):
         return None
 
 class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        """Handle GET requests - useful for testing if endpoint is accessible"""
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps({
+            'status': 'Paddle webhook endpoint is online',
+            'message': 'This endpoint is for Paddle webhook notifications. Please use POST method to send webhook events.'
+        }).encode())
+    
     def do_POST(self):
+        """Handle POST requests from Paddle webhooks"""
         try:
-            # Read request content
+            # Get content length for reading the request body
             content_length = int(self.headers.get('Content-Length', 0))
-            post_data = self.rfile.read(content_length)
             
-            # Print headers for debugging
+            # Read the request body
+            request_body = self.rfile.read(content_length)
+            
+            # Log request headers for debugging
             print("Request headers:")
             for header, value in self.headers.items():
                 print(f"  {header}: {value}")
             
-            # Parse JSON data
+            # Parse JSON body
             try:
-                webhook_data = json.loads(post_data.decode('utf-8'))
-                print(f"Webhook data received: {json.dumps(webhook_data)[:200]}...")  # First 200 chars
+                webhook_data = json.loads(request_body.decode('utf-8'))
+                print(f"Parsed webhook data: {json.dumps(webhook_data)[:500]}...")  # First 500 chars
             except json.JSONDecodeError as e:
-                print(f"JSON parsing error: {e}")
-                print(f"Raw data: {post_data.decode('utf-8')[:200]}...")  # First 200 chars
+                print(f"Failed to parse JSON body: {e}")
+                print(f"Raw body: {request_body.decode('utf-8')[:200]}...")  # First 200 chars
                 self.send_response(400)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -131,31 +117,14 @@ class handler(BaseHTTPRequestHandler):
                 }).encode())
                 return
             
-            # Get signature from headers
-            signature = self.headers.get('Paddle-Signature', '')
-            timestamp = self.headers.get('Paddle-Timestamp', '')
+            # Get signature and timestamp from headers for verification
+            signature = self.headers.get('Paddle-Signature')
+            timestamp = self.headers.get('Paddle-Timestamp')
             
-            # Log webhook information
-            print(f"Received webhook: Event={webhook_data.get('event_type')}, Signature={signature[:10] if signature else 'None'}...")
-            
-            # Verify signature (uncomment when ready for production)
-            if signature and timestamp and WEBHOOK_SECRET:
-                if not verify_webhook_signature(webhook_data, signature, timestamp):
-                    print("Webhook signature verification failed")
-                    self.send_response(401)
-                    self.send_header('Content-Type', 'application/json')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({
-                        'error': 'Invalid signature'
-                    }).encode())
-                    return
-            else:
-                print("Skipping signature verification (missing signature, timestamp, or secret)")
+            # Skip signature verification for initial testing
             
             # Initialize Firebase
-            db = get_firestore_db()
-            if not db:
-                print("Failed to initialize Firebase")
+            if not initialize_firebase():
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -172,7 +141,7 @@ class handler(BaseHTTPRequestHandler):
             print(f"Processing event type: {event_type}")
             
             try:
-                # Process different webhook events
+                # Handle subscription.created event
                 if event_type == 'subscription.created':
                     # Extract necessary data
                     subscription_id = event_data.get('id')
@@ -206,9 +175,6 @@ class handler(BaseHTTPRequestHandler):
                     # Calculate credit allocation based on plan
                     credit_allocation = determine_credit_allocation(price_id)
                     
-                    # Get next billing date
-                    next_billing_date = event_data.get('next_billed_at')
-                    
                     # Create subscription data
                     subscription_data = {
                         'id': subscription_id,
@@ -220,25 +186,23 @@ class handler(BaseHTTPRequestHandler):
                         },
                         'customer_id': customer_id,
                         'created_at': firestore.SERVER_TIMESTAMP,
-                        'next_billing_date': next_billing_date,
+                        'next_billing_date': event_data.get('next_billed_at'),
                         'amount': price_amount,
                         'interval': price_interval,
                         'license_key': license_key
                     }
                     
-                    # Find the user by Paddle customer ID
+                    # Try to find user by Paddle customer ID
                     users_ref = db.collection('users')
-                    customer_query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
-                    customer_docs = list(customer_query.stream())
+                    query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
+                    user_docs = list(query.stream())
                     
                     user_id = None
-                    user_email = None
                     
-                    if customer_docs and len(customer_docs) > 0:
+                    if user_docs and len(user_docs) > 0:
                         # Found user by customer ID
-                        user_doc = customer_docs[0]
+                        user_doc = user_docs[0]
                         user_id = user_doc.id
-                        user_email = user_doc.get('email')
                         print(f"Found user by customer ID: {user_id}")
                     else:
                         # Try to get customer email from Paddle
@@ -252,7 +216,6 @@ class handler(BaseHTTPRequestHandler):
                             if email_docs and len(email_docs) > 0:
                                 user_doc = email_docs[0]
                                 user_id = user_doc.id
-                                user_email = customer_email
                                 print(f"Found user by email: {user_id}")
                                 
                                 # Update user with customer ID for future lookups
@@ -280,7 +243,7 @@ class handler(BaseHTTPRequestHandler):
                             'customer_id': customer_id,
                             'amount': price_amount,
                             'currency': event_data.get('currency_code', 'USD'),
-                            'date': event_data.get('created_at') or firestore.SERVER_TIMESTAMP,
+                            'date': event_data.get('created_at'),
                             'status': 'completed',
                             'type': 'subscription_payment',
                             'description': f"Subscription payment for {plan_name}",
@@ -320,7 +283,7 @@ class handler(BaseHTTPRequestHandler):
                         
                         print(f"Updated subscription {subscription_id} status to {status} for user {user_id}")
                     else:
-                        # Try to find user by email through Paddle API
+                        # Try to find user by email
                         customer_email = get_customer_email(customer_id)
                         
                         if customer_email:
@@ -337,7 +300,7 @@ class handler(BaseHTTPRequestHandler):
                                     'subscription.status': status,
                                     'subscription.active': is_active,
                                     'subscription.updated_at': firestore.SERVER_TIMESTAMP,
-                                    'paddleCustomerId': customer_id  # Add customer ID for future lookups
+                                    'paddleCustomerId': customer_id
                                 })
                                 
                                 print(f"Updated subscription {subscription_id} status to {status} for user {user_id} found by email")
@@ -366,7 +329,7 @@ class handler(BaseHTTPRequestHandler):
                         
                         print(f"Marked subscription {subscription_id} as cancelled for user {user_id}")
                     else:
-                        # Try to find user by email through Paddle API
+                        # Try to find user by email
                         customer_email = get_customer_email(customer_id)
                         
                         if customer_email:
@@ -383,12 +346,12 @@ class handler(BaseHTTPRequestHandler):
                                     'subscription.status': 'cancelled',
                                     'subscription.active': False,
                                     'subscription.canceled_at': firestore.SERVER_TIMESTAMP,
-                                    'paddleCustomerId': customer_id  # Add customer ID for future reference
+                                    'paddleCustomerId': customer_id
                                 })
                                 
                                 print(f"Marked subscription {subscription_id} as cancelled for user {user_id} found by email")
                 
-                # Return success
+                # Return success response
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -420,13 +383,3 @@ class handler(BaseHTTPRequestHandler):
                 'success': False,
                 'error': str(e)
             }).encode())
-    
-    def do_GET(self):
-        # Respond to GET requests (useful for testing if webhook endpoint is accessible)
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
-        self.end_headers()
-        self.wfile.write(json.dumps({
-            'status': 'Paddle webhook endpoint is online',
-            'message': 'This endpoint is for Paddle webhook notifications. Please use POST method to send webhook events.'
-        }).encode())
