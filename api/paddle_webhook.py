@@ -117,11 +117,36 @@ class handler(BaseHTTPRequestHandler):
                 }).encode())
                 return
             
-            # Get signature and timestamp from headers for verification
+            # Get signature and timestamp from headers
             signature = self.headers.get('Paddle-Signature')
             timestamp = self.headers.get('Paddle-Timestamp')
-            
-            # Skip signature verification for initial testing
+            webhook_secret = os.environ.get("PADDLE_WEBHOOK_SECRET")
+
+            # Verify Paddle signature if available
+            if webhook_secret and signature and timestamp:
+                # Convert data to string for signature verification
+                data_string = json.dumps(webhook_data, separators=(',', ':'))
+                
+                # Create message to sign
+                message = f"{timestamp}.{data_string}".encode()
+                
+                # Calculate expected signature
+                expected_sig = hmac.new(
+                    webhook_secret.encode(),
+                    msg=message,
+                    digestmod=hashlib.sha256
+                ).hexdigest()
+                
+                # Compare signatures
+                if not hmac.compare_digest(expected_sig, signature):
+                    print("Webhook signature verification failed")
+                    self.send_response(401)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        'error': 'Invalid signature'
+                    }).encode())
+                    return
             
             # Initialize Firebase
             if not initialize_firebase():
