@@ -4,6 +4,7 @@ import hmac
 import hashlib
 import os
 import uuid
+import datetime
 import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -87,6 +88,24 @@ class handler(BaseHTTPRequestHandler):
             'status': 'Paddle webhook endpoint is online',
             'message': 'This endpoint is for Paddle webhook notifications. Please use POST method to send webhook events.'
         }).encode())
+        
+    def serialize_for_log(self, data):
+        """Create a JSON-serializable copy of data, replacing Sentinel values."""
+        if isinstance(data, dict):
+            result = {}
+            for key, value in data.items():
+                if key in ('created_at', 'updated_at', 'canceled_at') and value == firestore.SERVER_TIMESTAMP:
+                    result[key] = datetime.datetime.now().isoformat()
+                elif isinstance(value, dict):
+                    result[key] = self.serialize_for_log(value)
+                elif isinstance(value, list):
+                    result[key] = [self.serialize_for_log(item) for item in value]
+                else:
+                    result[key] = value
+            return result
+        elif isinstance(data, list):
+            return [self.serialize_for_log(item) for item in data]
+        return data
     
     def do_POST(self):
         """Handle POST requests from Paddle webhooks"""
@@ -169,130 +188,166 @@ class handler(BaseHTTPRequestHandler):
             try:
                 # Handle subscription.created event
                 if event_type == 'subscription.created':
-                    # Extract necessary data
-                    subscription_id = event_data.get('id')
-                    customer_id = event_data.get('customer_id')
-                    
-                    # Extract price/product details
-                    price_id = None
-                    plan_name = "Unknown Plan"
-                    price_amount = 0
-                    price_interval = "month"
-                    
-                    if event_data.get('items') and len(event_data.get('items')) > 0:
-                        item = event_data.get('items')[0]
-                        price = item.get('price', {})
-                        price_id = price.get('id')
-                        plan_name = price.get('description') or price.get('name', "Unknown Plan")
+                    try:
+                        # Extract necessary data
+                        subscription_id = event_data.get('id')
+                        customer_id = event_data.get('customer_id')
                         
-                        # Extract price amount
-                        unit_price = price.get('unit_price', {})
-                        if unit_price:
-                            price_amount = int(unit_price.get('amount', 0)) / 100  # Convert from cents
+                        # Extract price/product details
+                        price_id = None
+                        plan_name = "Unknown Plan"
+                        price_amount = 0
+                        price_interval = "month"
                         
-                        # Extract billing interval
-                        billing_cycle = price.get('billing_cycle', {})
-                        if billing_cycle:
-                            price_interval = billing_cycle.get('interval', 'month')
-                    
-                    # Generate a license key
-                    license_key = generate_license_key()
-                    
-                    # Calculate credit allocation based on plan
-                    credit_allocation = determine_credit_allocation(price_id)
-                    
-                    # Create subscription data
-                    subscription_data = {
-                        'id': subscription_id,
-                        'status': 'active',
-                        'active': True,
-                        'plan': {
-                            'id': price_id,
-                            'name': plan_name
-                        },
-                        'customer_id': customer_id,
-                        'created_at': firestore.SERVER_TIMESTAMP,
-                        'next_billing_date': event_data.get('next_billed_at'),
-                        'amount': price_amount,
-                        'interval': price_interval,
-                        'license_key': license_key
-                    }
-                    
-                    print(f"Subscription data being processed: {json.dumps(subscription_data)}")
-                    print(f"Looking up user for customer_id: {customer_id}")
-
-                    # Try to find user by Paddle customer ID
-                    users_ref = db.collection('users')
-                    query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
-                    user_docs = list(query.stream())
-                    
-                    user_id = None
-                    
-                    if user_docs and len(user_docs) > 0:
-                        # Found user by customer ID
-                        user_doc = user_docs[0]
-                        user_id = user_doc.id
-                        print(f"Found user by customer ID: {user_id}")
-                    else:
-                        # Try to get customer email from Paddle
-                        customer_email = get_customer_email(customer_id)
-                        print(f"Customer email from Paddle: {customer_email}")
-
-                        if customer_email:
-                            # Try to find user by email
-                            email_query = users_ref.where('email', '==', customer_email).limit(1)
-                            email_docs = list(email_query.stream())
+                        if event_data.get('items') and len(event_data.get('items')) > 0:
+                            item = event_data.get('items')[0]
+                            price = item.get('price', {})
+                            price_id = price.get('id')
+                            plan_name = price.get('description') or price.get('name', "Unknown Plan")
                             
-                            if email_docs and len(email_docs) > 0:
-                                user_doc = email_docs[0]
-                                user_id = user_doc.id
-                                print(f"Found user by email: {user_id}")
-                                
-                                # Update user with customer ID for future lookups
-                                user_ref = db.collection('users').document(user_id)
-                                user_ref.update({
-                                    'paddleCustomerId': customer_id
-                                })
-                                print(f"Updated user {user_id} with Paddle customer ID: {customer_id}")
-                    
-                    
-                    if user_id:
-                        # Update user with subscription data
-                        user_ref = db.collection('users').document(user_id)
-                        print(f"Updating user {user_id} with subscription data")
-                        update_data = {
-                            'subscription': subscription_data,
-                            'creditUsage': {
-                                'used': 0,
-                                'total': credit_allocation
+                            # Extract price amount
+                            unit_price = price.get('unit_price', {})
+                            if unit_price:
+                                price_amount = int(unit_price.get('amount', 0)) / 100  # Convert from cents
+                            
+                            # Extract billing interval
+                            billing_cycle = price.get('billing_cycle', {})
+                            if billing_cycle:
+                                price_interval = billing_cycle.get('interval', 'month')
+                        
+                        # Generate a license key
+                        license_key = generate_license_key()
+                        
+                        # Calculate credit allocation based on plan
+                        credit_allocation = determine_credit_allocation(price_id)
+                        
+                        # Create subscription data - WITHOUT the SERVER_TIMESTAMP for now
+                        subscription_data = {
+                            'id': subscription_id,
+                            'status': 'active',
+                            'active': True,
+                            'plan': {
+                                'id': price_id,
+                                'name': plan_name
                             },
-                            'licenseKey': license_key,
-                            'paddleCustomerId': customer_id
-                        }
-                        
-                        user_ref.update(update_data)
-                        print(f"Successfully updated user {user_id} with subscription data")
-
-                        
-                        # Create transaction record
-                        transaction_data = {
-                            'id': event_data.get('transaction_id', f"txn_{subscription_id}"),
-                            'subscription_id': subscription_id,
                             'customer_id': customer_id,
+                            'next_billing_date': event_data.get('next_billed_at'),
                             'amount': price_amount,
-                            'currency': event_data.get('currency_code', 'USD'),
-                            'date': event_data.get('created_at'),
-                            'status': 'completed',
-                            'type': 'subscription_payment',
-                            'description': f"Subscription payment for {plan_name}",
-                            'created_at': firestore.SERVER_TIMESTAMP
+                            'interval': price_interval,
+                            'license_key': license_key
                         }
                         
-                        db.collection('users').document(user_id).collection('transactions').add(transaction_data)
-                        print(f"Created license key {license_key} for subscription {subscription_id}, user {user_id}")
-                    else:
-                        print(f"No user found for customer ID {customer_id}")
-                
+                        # Log a serializable version of the data
+                        print(f"Subscription data being processed: {json.dumps(subscription_data)}")
+                        
+                        # Now add the SERVER_TIMESTAMP for the database version
+                        subscription_data['created_at'] = firestore.SERVER_TIMESTAMP
+                        
+                        # Try to find user by Paddle customer ID
+                        users_ref = db.collection('users')
+                        query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
+                        user_docs = list(query.stream())
+                        
+                        user_id = None
+                        
+                        if user_docs and len(user_docs) > 0:
+                            # Found user by customer ID
+                            user_doc = user_docs[0]
+                            user_id = user_doc.id
+                            print(f"Found user by customer ID: {user_id}")
+                        else:
+                            # Try to get customer email from Paddle
+                            customer_email = get_customer_email(customer_id)
+                            print(f"Customer email from Paddle: {customer_email}")
+                            
+                            if customer_email:
+                                # Debug - list some users for troubleshooting
+                                try:
+                                    all_users = list(users_ref.limit(10).stream())
+                                    print(f"Found {len(all_users)} users in database")
+                                    for user in all_users:
+                                        user_data = user.to_dict()
+                                        print(f"User ID: {user.id}, Email: {user_data.get('email')}")
+                                except Exception as e:
+                                    print(f"Error listing users: {e}")
+                                
+                                # Try to find user by email
+                                email_query = users_ref.where('email', '==', customer_email).limit(1)
+                                email_docs = list(email_query.stream())
+                                
+                                if email_docs and len(email_docs) > 0:
+                                    user_doc = email_docs[0]
+                                    user_id = user_doc.id
+                                    print(f"Found user by email: {user_id}")
+                                    
+                                    # Update user with customer ID for future lookups
+                                    user_ref = db.collection('users').document(user_id)
+                                    user_ref.update({
+                                        'paddleCustomerId': customer_id
+                                    })
+                                    print(f"Updated user {user_id} with Paddle customer ID: {customer_id}")
+                                else:
+                                    print(f"No user found with email: {customer_email}")
+                                    # Last resort - case insensitive search
+                                    try:
+                                        all_users = list(users_ref.stream())
+                                        for user in all_users:
+                                            user_data = user.to_dict()
+                                            user_email = user_data.get('email', '').lower()
+                                            if user_email == customer_email.lower():
+                                                user_id = user.id
+                                                print(f"Found user by case-insensitive email: {user_id}")
+                                                break
+                                    except Exception as e:
+                                        print(f"Error in case-insensitive search: {e}")
+                        
+                        if user_id:
+                            # Update user with subscription data
+                            user_ref = db.collection('users').document(user_id)
+                            print(f"Updating user {user_id} with subscription data")
+                            
+                            update_data = {
+                                'subscription': subscription_data,
+                                'creditUsage': {
+                                    'used': 0,
+                                    'total': credit_allocation
+                                },
+                                'licenseKey': license_key,
+                                'paddleCustomerId': customer_id
+                            }
+                            
+                            user_ref.update(update_data)
+                            print(f"Successfully updated user {user_id} with subscription data")
+                            
+                            # Create transaction record - without SERVER_TIMESTAMP for now
+                            transaction_data = {
+                                'id': event_data.get('transaction_id', f"txn_{subscription_id}"),
+                                'subscription_id': subscription_id,
+                                'customer_id': customer_id,
+                                'amount': price_amount,
+                                'currency': event_data.get('currency_code', 'USD'),
+                                'date': event_data.get('created_at'),
+                                'status': 'completed',
+                                'type': 'subscription_payment',
+                                'description': f"Subscription payment for {plan_name}"
+                            }
+                            
+                            # Log a serializable version
+                            print(f"Transaction data: {json.dumps(transaction_data)}")
+                            
+                            # Add the SERVER_TIMESTAMP for storage
+                            transaction_data['created_at'] = firestore.SERVER_TIMESTAMP
+                            
+                            db.collection('users').document(user_id).collection('transactions').add(transaction_data)
+                            print(f"Created license key {license_key} for subscription {subscription_id}, user {user_id}")
+                        else:
+                            print(f"ERROR: No user found for customer ID {customer_id} with email {customer_email}")
+                    except Exception as e:
+                        import traceback
+                        traceback_str = traceback.format_exc()
+                        print(f"Error in subscription.created handler: {str(e)}")
+                        print(traceback_str)
+
                 elif event_type == 'subscription.updated':
                     # Extract data
                     subscription_id = event_data.get('id')
@@ -402,7 +457,7 @@ class handler(BaseHTTPRequestHandler):
                         else:
                             print(f"ERROR: Could not find customer email for customer_id {customer_id}")
                 
-                
+
                 # Return success response
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
@@ -425,7 +480,9 @@ class handler(BaseHTTPRequestHandler):
                 }).encode())
                 
         except Exception as e:
+            import traceback
             print(f"Critical webhook error: {str(e)}")
+            print(traceback.format_exc())
             
             # Still return 200 to acknowledge receipt
             self.send_response(200)

@@ -147,6 +147,12 @@ async function initializePaddle() {
                         setTimeout(() => {
                             console.log("Second attempt to reload dashboard data after checkout completion");
                             Dashboard.loadDashboardData();
+                            
+                            // One final attempt after a longer delay
+                            setTimeout(() => {
+                                console.log("Final attempt to reload dashboard data after checkout completion");
+                                Dashboard.loadDashboardData();
+                            }, 10000);
                         }, 5000);
                     }, 2000);
                 }
