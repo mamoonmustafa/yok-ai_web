@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs
 import json
 import os
+import datetime
 from .auth import verify_token
 from .paddle_api import (
     get_customer_by_email,
@@ -41,7 +42,23 @@ def initialize_firebase():
             print(f"Firebase initialization error: {e}")
             return False
     return True
-
+def convert_timestamps_to_strings(data):
+    """Convert Firestore timestamp objects to ISO strings for JSON serialization"""
+    if isinstance(data, firebase_admin.firestore.DocumentSnapshot):
+        # Convert DocumentSnapshot to dict first
+        data = data.to_dict()
+        
+    if isinstance(data, datetime.datetime):
+        return data.isoformat()
+    
+    if isinstance(data, dict):
+        for key, value in list(data.items()):
+            data[key] = convert_timestamps_to_strings(value)
+    
+    elif isinstance(data, list):
+        return [convert_timestamps_to_strings(item) for item in data]
+    
+    return data
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         # Set CORS headers for browser security
@@ -97,13 +114,21 @@ class handler(BaseHTTPRequestHandler):
                             
                             print(f"Found active subscription in Firestore for user {user_id}")
                             
+                            # Format the response
                             dashboard_data = {
-                                'customer': {'id': user_data_firestore.get('paddleCustomerId')},
-                                'subscriptions': [subscription_data],
-                                'license_keys': [{'key': license_key}] if license_key else [],
-                                'credit_usage': credit_usage
+                                'customer': customer,
+                                'subscriptions': processed_subscriptions,
+                                'license_keys': license_keys,
+                                'credit_usage': {
+                                    'used': 0,
+                                    'total': total_credits
+                                }
                             }
-                            
+
+                            # Convert timestamps to strings for JSON serialization
+                            dashboard_data = convert_timestamps_to_strings(dashboard_data)
+
+                            # Return dashboard data
                             self.wfile.write(json.dumps(dashboard_data).encode())
                             return
                         else:
@@ -178,7 +203,7 @@ class handler(BaseHTTPRequestHandler):
                         }
                         
                         total_credits += credit_map.get(plan_id, 0)
-                        
+
             # If user has an active subscription in Paddle but not in Firebase, update Firebase
             if processed_subscriptions and any(sub.get('active') for sub in processed_subscriptions) and initialize_firebase():
                 active_sub = next((sub for sub in processed_subscriptions if sub.get('active')), None)
