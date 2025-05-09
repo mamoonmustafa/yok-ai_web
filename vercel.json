@@ -24,6 +24,10 @@
     { "source": "/docs", "destination": "/api/policy_docs.js" },
     { "source": "/cookies", "destination": "/api/policy_docs.js" },
     
+    { "source": "/api/paddle_webhook/", "destination": "/api/paddle_webhook.py" },
+    { "source": "/(.*)/api/paddle_webhook", "destination": "/api/paddle_webhook.py" },
+    { "source": "/(.*)/api/paddle_webhook/", "destination": "/api/paddle_webhook.py" },
+
     { "source": "/", "destination": "/index.html" },
     { "source": "/hero_image.png", "destination": "/public/hero_image.png" },
     
