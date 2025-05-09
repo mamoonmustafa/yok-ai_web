@@ -133,13 +133,22 @@ async function initializePaddle() {
             eventCallback: function(event) {
                 console.log("Paddle event:", event);
                 
-                // Handle specific events
+                // 1. Enhanced checkout event handling with better timeouts
                 if (event.name === "checkout.completed") {
-                    // Reload dashboard data after successful checkout
-                    Dashboard.showToast('Payment successful!', 'success');
+                    // Show a more informative message
+                    Dashboard.showToast('Payment successful! Processing your subscription...', 'success');
+                    
+                    // Wait longer for webhook to process before first attempt
                     setTimeout(() => {
+                        console.log("First attempt to reload dashboard data after checkout completion");
                         Dashboard.loadDashboardData();
-                    }, 1000);
+                        
+                        // Try again after another delay for webhook processing
+                        setTimeout(() => {
+                            console.log("Second attempt to reload dashboard data after checkout completion");
+                            Dashboard.loadDashboardData();
+                        }, 5000);
+                    }, 2000);
                 }
             }
         });
@@ -179,6 +188,19 @@ async function openCheckout(plan) {
             Dashboard.showToast('User authentication required', 'error');
             return;
         }
+        
+        // Ensure email is properly stored in Firestore for webhook to match
+        try {
+            const db = firebase.firestore();
+            await db.collection('users').doc(user.uid).update({
+                email: user.email  // Ensure email field is explicitly set
+            });
+            console.log("Updated user email in Firestore for webhook matching");
+        } catch (error) {
+            console.warn("Could not update user email in Firestore:", error);
+            // Continue anyway, might still work with authentication data
+        }
+
         console.log("Current user:", {
             email: user.email,
             displayName: user.displayName,
@@ -514,10 +536,17 @@ const Dashboard = {
         // Clear subscription container
         subscriptionContainer.innerHTML = '';
         
-        if (status && status.active) {
+        // Log subscription status for debugging
+        console.log("Subscription status:", status);
+        
+        // Convert status.active to boolean if it's a string
+        if (status && typeof status.active === 'string') {
+            status.active = status.active.toLowerCase() === 'true';
+        }
+        
+        // Check if status exists AND is active (explicit boolean check)
+        if (status && status.active === true) {
             // User has active subscription
-            
-            // 1. Show subscription status
             const subscriptionCard = document.createElement('div');
             subscriptionCard.className = 'card';
             subscriptionCard.innerHTML = `
@@ -530,7 +559,7 @@ const Dashboard = {
             `;
             subscriptionContainer.appendChild(subscriptionCard);
             
-            // 2. Show credit usage
+            // Show credit usage
             const creditCard = document.createElement('div');
             creditCard.className = 'card';
             creditCard.innerHTML = `
@@ -556,14 +585,14 @@ const Dashboard = {
             `;
             subscriptionContainer.appendChild(creditCard);
             
-            // 3. Show license key and downloads
+            // Show license key and downloads
             if (licenseKeyCard) licenseKeyCard.style.display = 'block';
             if (downloadsContainer) downloadsContainer.style.display = 'block';
             
-            // 4. Update credit usage display
+            // Update credit usage display
             Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
             
-            // 5. Bind event handlers
+            // Bind event handlers
             const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
             if (buyMoreCreditsBtn) {
                 buyMoreCreditsBtn.addEventListener('click', () => {
@@ -582,9 +611,42 @@ const Dashboard = {
             if (upgradeBtn) {
                 upgradeBtn.addEventListener('click', Dashboard.showAvailablePlans);
             }
-
-        } else {
-            // User has no subscription, show pricing plans
+        } 
+        else if (status && status.id) {
+            // Has subscription ID but not active (pending, error state)
+            const pendingCard = document.createElement('div');
+            pendingCard.className = 'card';
+            pendingCard.innerHTML = `
+                <div class="card-header">
+                    <h3>Subscription Processing</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="alert-icon fas fa-info-circle"></i>
+                        <div class="alert-content">
+                            <div class="alert-title">Subscription Being Processed</div>
+                            <div class="alert-message">Your subscription is being processed. This may take a few moments. If this message persists, please refresh the page.</div>
+                        </div>
+                    </div>
+                    <button id="refresh-subscription-btn" class="btn btn-primary mt-16">Refresh Status</button>
+                </div>
+            `;
+            subscriptionContainer.appendChild(pendingCard);
+            
+            // Add event listener for the refresh button
+            setTimeout(() => {
+                const refreshBtn = document.getElementById('refresh-subscription-btn');
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', Dashboard.loadDashboardData);
+                }
+            }, 0);
+            
+            // Hide license key and downloads until active
+            if (licenseKeyCard) licenseKeyCard.style.display = 'none';
+            if (downloadsContainer) downloadsContainer.style.display = 'none';
+        } 
+        else {
+            // No subscription data, show pricing plans
             const pricingTitle = document.createElement('div');
             pricingTitle.className = 'section-subheader';
             pricingTitle.innerHTML = '<h3>Choose a Plan</h3>';
@@ -685,8 +747,9 @@ const Dashboard = {
                     });
                 });
             }, 0);
-}
+        }
     },
+    
 
 
     /**
@@ -1091,9 +1154,12 @@ const Dashboard = {
         const loadingIndicator = document.getElementById('loading-indicator');
         if (loadingIndicator) loadingIndicator.style.display = 'block';
         
+        console.log("Starting dashboard data load");
+        
         // Get Firebase token
         currentUser.getIdToken(true)
             .then(token => {
+                console.log("Firebase token obtained, calling dashboard API");
                 // Call the API with Firebase token
                 return fetch('/api/dashboard', {
                     headers: {
@@ -1109,11 +1175,22 @@ const Dashboard = {
                 return response.json();
             })
             .then(data => {
+                console.log("Dashboard API response:", data);
                 // Handle the dashboard data
                 if (data) {
-                    // Store subscription data
-                    subscriptionStatus = data.subscriptions && data.subscriptions.length > 0 ? 
-                        data.subscriptions[0] : null;
+                    // Store subscription data - check for properly formed subscription with active flag
+                    if (data.subscriptions && data.subscriptions.length > 0) {
+                        subscriptionStatus = data.subscriptions[0];
+                        
+                        // Ensure 'active' is a boolean
+                        if (typeof subscriptionStatus.active === 'string') {
+                            subscriptionStatus.active = subscriptionStatus.active.toLowerCase() === 'true';
+                        }
+                        
+                        console.log("Subscription status:", subscriptionStatus);
+                    } else {
+                        subscriptionStatus = null;
+                    }
                     
                     // Store credit usage data
                     creditUsage = data.credit_usage || { used: 0, total: 0 };
@@ -1128,6 +1205,7 @@ const Dashboard = {
                     Dashboard.updateLicenseKeyDisplay();
                 } else {
                     // No data returned, show available plans
+                    console.log("No dashboard data returned from API");
                     subscriptionStatus = null;
                     Dashboard.updateDashboardView(null);
                 }
@@ -1141,6 +1219,7 @@ const Dashboard = {
                 if (loadingIndicator) loadingIndicator.style.display = 'none';
             });
     },
+    
 
     /**
      * Show toast notification

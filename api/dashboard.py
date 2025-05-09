@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs
 import json
+import os
 from .auth import verify_token
 from .paddle_api import (
     get_customer_by_email,
@@ -8,6 +9,38 @@ from .paddle_api import (
     get_license_keys,
     get_subscription_details
 )
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Initialize Firebase
+firebase_initialized = False
+db = None
+
+def initialize_firebase():
+    global firebase_initialized, db
+    if not firebase_initialized:
+        try:
+            # Parse the Firebase service account JSON
+            firebase_credentials_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
+            if not firebase_credentials_json:
+                print("Firebase credentials not found in environment variables")
+                return False
+                
+            firebase_credentials_dict = json.loads(firebase_credentials_json)
+            cred = credentials.Certificate(firebase_credentials_dict)
+            
+            # Initialize the Firebase app
+            if not firebase_admin._apps:
+                firebase_admin.initialize_app(cred)
+            
+            db = firestore.client()
+            firebase_initialized = True
+            print("Firebase initialized successfully")
+            return True
+        except Exception as e:
+            print(f"Firebase initialization error: {e}")
+            return False
+    return True
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -41,11 +74,53 @@ class handler(BaseHTTPRequestHandler):
             return
         
         try:
+            # First try to get subscription data from Firebase
+            if initialize_firebase():
+                # Get the user ID from the token
+                user_id = user_data.get('user_id')
+                
+                if user_id:
+                    print(f"Looking up Firebase data for user: {user_id}")
+                    user_ref = db.collection('users').document(user_id)
+                    user_doc = user_ref.get()
+                    
+                    if user_doc.exists:
+                        user_data_firestore = user_doc.to_dict()
+                        print(f"Found user data in Firestore: {user_id}")
+                        
+                        # Check if user has subscription data stored in Firebase
+                        if 'subscription' in user_data_firestore and user_data_firestore['subscription'].get('active', False):
+                            # User has an active subscription in Firebase
+                            subscription_data = user_data_firestore['subscription']
+                            license_key = user_data_firestore.get('licenseKey')
+                            credit_usage = user_data_firestore.get('creditUsage', {'used': 0, 'total': 0})
+                            
+                            print(f"Found active subscription in Firestore for user {user_id}")
+                            
+                            dashboard_data = {
+                                'customer': {'id': user_data_firestore.get('paddleCustomerId')},
+                                'subscriptions': [subscription_data],
+                                'license_keys': [{'key': license_key}] if license_key else [],
+                                'credit_usage': credit_usage
+                            }
+                            
+                            self.wfile.write(json.dumps(dashboard_data).encode())
+                            return
+                        else:
+                            print(f"No active subscription found in Firestore for user {user_id}")
+                    else:
+                        print(f"User document not found in Firestore for user {user_id}")
+            
+            # If we reach this point, either Firebase wasn't initialized or the user doesn't have
+            # an active subscription in Firestore. Fall back to Paddle API.
+
             # Get customer data from Paddle
             email = user_data.get('email')
+            print(f"Falling back to Paddle API for user email: {email}")
             customer = get_customer_by_email(email)
             
             if not customer:
+                print(f"Customer not found in Paddle for email: {email}")
                 self.wfile.write(json.dumps({
                     'error': 'Customer not found in Paddle'
                 }).encode())
@@ -103,6 +178,36 @@ class handler(BaseHTTPRequestHandler):
                         }
                         
                         total_credits += credit_map.get(plan_id, 0)
+                        
+            # If user has an active subscription in Paddle but not in Firebase, update Firebase
+            if processed_subscriptions and any(sub.get('active') for sub in processed_subscriptions) and initialize_firebase():
+                active_sub = next((sub for sub in processed_subscriptions if sub.get('active')), None)
+                
+                if active_sub and user_data.get('user_id'):
+                    try:
+                        print(f"Updating Firebase with active subscription from Paddle API")
+                        user_ref = db.collection('users').document(user_data.get('user_id'))
+                        
+                        # Generate a license key if none exists
+                        if not license_keys:
+                            import uuid
+                            license_key = str(uuid.uuid4()).upper()
+                        else:
+                            license_key = license_keys[0].get('key')
+                        
+                        # Update user document in Firebase
+                        user_ref.update({
+                            'subscription': active_sub,
+                            'creditUsage': {
+                                'used': 0,
+                                'total': total_credits
+                            },
+                            'licenseKey': license_key,
+                            'paddleCustomerId': customer['id']
+                        })
+                        print(f"Successfully updated Firebase from Paddle API data")
+                    except Exception as e:
+                        print(f"Error updating Firebase from Paddle API: {str(e)}")
             
             # Debug logging
             print(f"Email: {email}, Customer ID: {customer.get('id')}")

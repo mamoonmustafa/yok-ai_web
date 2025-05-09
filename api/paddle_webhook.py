@@ -164,7 +164,8 @@ class handler(BaseHTTPRequestHandler):
             event_data = webhook_data.get('data', {})
             
             print(f"Processing event type: {event_type}")
-            
+            print(f"Event data details: {json.dumps(event_data)[:1000]}...")
+
             try:
                 # Handle subscription.created event
                 if event_type == 'subscription.created':
@@ -217,6 +218,9 @@ class handler(BaseHTTPRequestHandler):
                         'license_key': license_key
                     }
                     
+                    print(f"Subscription data being processed: {json.dumps(subscription_data)}")
+                    print(f"Looking up user for customer_id: {customer_id}")
+
                     # Try to find user by Paddle customer ID
                     users_ref = db.collection('users')
                     query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
@@ -232,7 +236,8 @@ class handler(BaseHTTPRequestHandler):
                     else:
                         # Try to get customer email from Paddle
                         customer_email = get_customer_email(customer_id)
-                        
+                        print(f"Customer email from Paddle: {customer_email}")
+
                         if customer_email:
                             # Try to find user by email
                             email_query = users_ref.where('email', '==', customer_email).limit(1)
@@ -248,18 +253,26 @@ class handler(BaseHTTPRequestHandler):
                                 user_ref.update({
                                     'paddleCustomerId': customer_id
                                 })
+                                print(f"Updated user {user_id} with Paddle customer ID: {customer_id}")
+                    
                     
                     if user_id:
                         # Update user with subscription data
                         user_ref = db.collection('users').document(user_id)
-                        user_ref.update({
+                        print(f"Updating user {user_id} with subscription data")
+                        update_data = {
                             'subscription': subscription_data,
                             'creditUsage': {
                                 'used': 0,
                                 'total': credit_allocation
                             },
-                            'licenseKey': license_key
-                        })
+                            'licenseKey': license_key,
+                            'paddleCustomerId': customer_id
+                        }
+                        
+                        user_ref.update(update_data)
+                        print(f"Successfully updated user {user_id} with subscription data")
+
                         
                         # Create transaction record
                         transaction_data = {
@@ -285,6 +298,8 @@ class handler(BaseHTTPRequestHandler):
                     subscription_id = event_data.get('id')
                     status = event_data.get('status')
                     customer_id = event_data.get('customer_id')
+                    
+                    print(f"Processing subscription.updated for {subscription_id}, status: {status}")
                     
                     # Determine if subscription is active
                     is_active = status.lower() in ['active', 'trialing', 'past_due']
@@ -329,11 +344,18 @@ class handler(BaseHTTPRequestHandler):
                                 })
                                 
                                 print(f"Updated subscription {subscription_id} status to {status} for user {user_id} found by email")
+                            else:
+                                print(f"ERROR: Could not find user with email {customer_email} for subscription update")
+                        else:
+                            print(f"ERROR: Could not find customer email for customer_id {customer_id}")
                 
+
                 elif event_type == 'subscription.cancelled':
                     # Extract data
                     subscription_id = event_data.get('id')
                     customer_id = event_data.get('customer_id')
+                    
+                    print(f"Processing subscription.cancelled for {subscription_id}")
                     
                     # Find user by customer ID
                     users_ref = db.collection('users')
@@ -375,6 +397,11 @@ class handler(BaseHTTPRequestHandler):
                                 })
                                 
                                 print(f"Marked subscription {subscription_id} as cancelled for user {user_id} found by email")
+                            else:
+                                print(f"ERROR: Could not find user with email {customer_email} for subscription cancellation")
+                        else:
+                            print(f"ERROR: Could not find customer email for customer_id {customer_id}")
+                
                 
                 # Return success response
                 self.send_response(200)
