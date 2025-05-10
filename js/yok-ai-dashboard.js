@@ -1959,10 +1959,10 @@ const Dashboard = {
                         </span>
                     </td>
                     <td>
-                        ${transaction.invoiceUrl ? 
-                            `<a href="${transaction.invoiceUrl}" target="_blank" class="download-link">
-                                <i class="fas fa-download"></i> PDF
-                            </a>` : 
+                        ${transaction.invoiceId ? 
+                            `<button class="btn btn-sm btn-outline" onclick="Dashboard.requestInvoice('${transaction.id}')">
+                                <i class="fas fa-envelope"></i> Send Invoice
+                            </button>` : 
                             '<span class="text-secondary">N/A</span>'
                         }
                     </td>
@@ -2449,6 +2449,41 @@ const Dashboard = {
      */
     renderSubscriptionPlans: function() {
         Dashboard.showAvailablePlans();
+    },
+
+    requestInvoice: function(transactionId) {
+        if (!currentUser || !transactionId) {
+            Dashboard.showToast('Unable to request invoice', 'error');
+            return;
+        }
+        
+        Dashboard.showToast('Sending invoice to your email...', 'info');
+        
+        // Call the same transactions endpoint with POST method
+        currentUser.getIdToken(true)
+            .then(token => {
+                return fetch('/api/transactions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ transactionId: transactionId })
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to send invoice');
+                }
+                return response.json();
+            })
+            .then(data => {
+                Dashboard.showToast('Invoice sent to your email!', 'success');
+            })
+            .catch(error => {
+                console.error('Invoice request error:', error);
+                Dashboard.showToast('Failed to send invoice', 'error');
+            });
     }
     };
 

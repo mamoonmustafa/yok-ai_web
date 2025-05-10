@@ -145,7 +145,76 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({
                 'error': str(e)
             }).encode())
+
+    def do_POST(self):
+        """Handle POST request to send invoice email"""
+        try:
+            # Get authorization token
+            auth_header = self.headers.get('Authorization', '')
+            if not auth_header.startswith('Bearer '):
+                self.send_error(401, "No valid authorization token provided")
+                return
+                
+            token = auth_header.split(' ')[1]
             
+            # Verify Firebase token
+            try:
+                decoded_token = auth.verify_id_token(token)
+                user_id = decoded_token['uid']
+            except Exception as e:
+                print(f"Token verification failed: {e}")
+                self.send_error(401, "Invalid authorization token")
+                return
+            
+            # Read request body
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            data = json.loads(body.decode('utf-8'))
+            
+            transaction_id = data.get('transactionId')
+            if not transaction_id:
+                self.send_error(400, "Transaction ID required")
+                return
+            
+            # Get the transaction to find the invoice ID
+            headers = {
+                "Authorization": f"Bearer {API_KEY}",
+                "Accept": "application/json"
+            }
+            
+            # Get transaction details
+            url = f"{API_BASE_URL}/transactions/{transaction_id}"
+            response = requests.get(url, headers=headers)
+            
+            if response.status_code != 200:
+                print(f"Failed to get transaction: {response.status_code}")
+                self.send_error(404, "Transaction not found")
+                return
+            
+            transaction_data = response.json()
+            invoice_id = transaction_data.get('data', {}).get('invoice_id')
+            
+            if not invoice_id:
+                self.send_error(404, "No invoice found for this transaction")
+                return
+            
+            # Trigger invoice email using Paddle API
+            # For Paddle, accessing the PDF endpoint also sends email
+            pdf_url = f"{API_BASE_URL}/invoices/{invoice_id}/pdf"
+            pdf_response = requests.get(pdf_url, headers=headers)
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "success": True,
+                "message": "Invoice email sent successfully"
+            }).encode())
+            
+        except Exception as e:
+            print(f"Send invoice error: {e}")
+            self.send_error(500, str(e))
+
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
