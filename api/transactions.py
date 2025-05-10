@@ -2,14 +2,38 @@ from http.server import BaseHTTPRequestHandler
 import json
 from urllib.parse import parse_qs, urlparse
 from .auth import verify_token
-from .paddle_api import get_customer_by_email
 import os
 import requests
 import datetime
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Initialize Firebase
+firebase_initialized = False
+db = None
+
+def initialize_firebase():
+    global firebase_initialized, db
+    if not firebase_initialized:
+        try:
+            firebase_credentials_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
+            if firebase_credentials_json:
+                firebase_credentials_dict = json.loads(firebase_credentials_json)
+                cred = credentials.Certificate(firebase_credentials_dict)
+                
+                if not firebase_admin._apps:
+                    firebase_admin.initialize_app(cred)
+                
+                db = firestore.client()
+                firebase_initialized = True
+                return True
+        except Exception as e:
+            print(f"Firebase initialization error: {e}")
+    return firebase_initialized
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        # Set CORS headers for browser security
+        # Set CORS headers
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -17,7 +41,7 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.end_headers()
         
-        # Get authorization token from headers
+        # Get authorization token
         auth_header = self.headers.get('Authorization')
         token = None
         
@@ -33,123 +57,84 @@ class handler(BaseHTTPRequestHandler):
         # Verify token
         user_data = verify_token(token)
         if not user_data:
-            print("Token verification failed")
             self.wfile.write(json.dumps({
                 'error': 'Invalid or expired token'
             }).encode())
             return
         
-        print(f"User data from token: {user_data}")
-        
-        # Parse URL parameters
-        parsed_url = urlparse(self.path)
-        query_params = parse_qs(parsed_url.query)
-        type_filter = query_params.get('type', ['all'])[0]
-        period_filter = query_params.get('period', ['all'])[0]
-        
-        print(f"Filters - Type: {type_filter}, Period: {period_filter}")
-        
         try:
-            # Get user email from token
-            email = user_data.get('email')
-            if not email:
-                print("No email found in user data")
-                self.wfile.write(json.dumps({
-                    'error': 'User email not found'
-                }).encode())
-                return
-            
-            print(f"User email: {email}")
-            
-            # Get customer from Paddle
-            customer = get_customer_by_email(email)
-            print(f"Customer lookup result: {customer}")
-            
-            if not customer:
-                print("Customer not found in Paddle")
-                # Return empty array if customer not found
-                self.wfile.write(json.dumps([]).encode())
-                return
-            
-            print(f"Customer ID: {customer.get('id')}")
-            
-            # Get Paddle API credentials
-            API_KEY = os.getenv("PADDLE_API_KEY")
-            API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
-            
-            # Build request to Paddle transactions endpoint
-            headers = {
-                "Authorization": f"Bearer {API_KEY}",
-                "Content-Type": "application/json"
-            }
-            
-            # Try to get transactions by customer_id
-            params = {
-                'customer_id': customer['id'],
-                'per_page': 50
-            }
-            
-            print(f"Requesting transactions with params: {params}")
-            
-            # Get transactions from Paddle
-            url = f'{API_BASE_URL}/transactions'
-            response = requests.get(url, headers=headers, params=params)
-            
-            print(f"Paddle API response status: {response.status_code}")
-            
-            if response.status_code == 200:
-                data = response.json()
-                transactions = data.get('data', [])
+            # Initialize Firebase and get customer ID from Firestore
+            if initialize_firebase():
+                user_id = user_data.get('user_id')
+                user_ref = db.collection('users').document(user_id)
+                user_doc = user_ref.get()
                 
-                print(f"Number of transactions found: {len(transactions)}")
-                if transactions:
-                    print(f"First transaction: {json.dumps(transactions[0], indent=2)[:500]}...")
-                
-                # Format transactions for frontend
-                formatted_transactions = []
-                
-                for trans in transactions:
-                    # Format transaction for frontend
-                    formatted_transaction = {
-                        'id': trans.get('id'),
-                        'date': trans.get('billed_at') or trans.get('created_at', ''),
-                        'description': 'Payment',  # Default description
-                        'amount': 0,
-                        'status': trans.get('status', 'completed'),
-                        'type': 'subscription',
-                        'invoiceUrl': None,
-                        'currency': trans.get('currency_code', 'USD')
-                    }
+                if user_doc.exists:
+                    user_firestore_data = user_doc.to_dict()
+                    paddle_customer_id = user_firestore_data.get('paddleCustomerId')
                     
-                    # Get amount from transaction
-                    details = trans.get('details', {})
-                    if details:
-                        totals = details.get('totals', {})
-                        grand_total = totals.get('grand_total')
-                        if grand_total:
-                            # Convert from cents to dollars
-                            formatted_transaction['amount'] = float(grand_total) / 100
-                    
-                    # Get description from items
-                    items = trans.get('items', [])
-                    if items:
-                        item = items[0]
-                        price = item.get('price', {})
-                        formatted_transaction['description'] = price.get('description') or price.get('name', 'Payment')
-                    
-                    formatted_transactions.append(formatted_transaction)
-                
-                print(f"Formatted transactions: {len(formatted_transactions)}")
-                
-                # Return formatted transactions
-                self.wfile.write(json.dumps(formatted_transactions).encode())
-            else:
-                print(f"Paddle API error: {response.status_code}")
-                print(f"Response text: {response.text}")
-                self.wfile.write(json.dumps([]).encode())
-                
+                    if paddle_customer_id:
+                        print(f"Found Paddle customer ID in Firestore: {paddle_customer_id}")
+                        
+                        # Get transactions directly using customer ID
+                        API_KEY = os.getenv("PADDLE_API_KEY")
+                        API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
+                        
+                        headers = {
+                            "Authorization": f"Bearer {API_KEY}",
+                            "Content-Type": "application/json"
+                        }
+                        
+                        # Get transactions using customer ID
+                        url = f'{API_BASE_URL}/transactions'
+                        params = {
+                            'customer_id': paddle_customer_id,
+                            'status': 'completed,billed'
+                        }
+                        
+                        response = requests.get(url, headers=headers, params=params)
+                        
+                        if response.status_code == 200:
+                            data = response.json()
+                            transactions = data.get('data', [])
+                            
+                            # Format transactions for frontend
+                            formatted_transactions = []
+                            for trans in transactions:
+                                # Get amount
+                                details = trans.get('details', {})
+                                totals = details.get('totals', {})
+                                amount = float(totals.get('grand_total', '0')) / 100
+                                
+                                # Get description from items
+                                description = 'Payment'
+                                items = trans.get('items', [])
+                                if items:
+                                    price = items[0].get('price', {})
+                                    description = price.get('description') or price.get('name', 'Payment')
+                                
+                                formatted_transaction = {
+                                    'id': trans.get('id'),
+                                    'date': trans.get('billed_at') or trans.get('created_at', ''),
+                                    'description': description,
+                                    'amount': amount,
+                                    'status': trans.get('status', 'completed'),
+                                    'type': 'subscription',
+                                    'invoiceUrl': None,
+                                    'currency': trans.get('currency_code', 'USD')
+                                }
+                                formatted_transactions.append(formatted_transaction)
+                            
+                            self.wfile.write(json.dumps(formatted_transactions).encode())
+                            return
+                        else:
+                            print(f"Paddle API error: {response.status_code} - {response.text}")
+            
+            # If we get here, something went wrong
+            self.wfile.write(json.dumps([]).encode())
+            
         except Exception as e:
-            print(f"Error loading transactions: {str(e)}")
+            print(f"Error: {str(e)}")
             import traceback
             print(traceback.format_exc())
             self.wfile.write(json.dumps({
@@ -157,7 +142,6 @@ class handler(BaseHTTPRequestHandler):
             }).encode())
             
     def do_OPTIONS(self):
-        # Handle preflight requests for CORS
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')

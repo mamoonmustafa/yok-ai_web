@@ -19,28 +19,44 @@ def get_customer_by_email(email):
     """Retrieve customer information using email address"""
     print(f"Looking up customer with email: {email}")
     
-    # Try exact match first
-    response = requests.get(
-        f'{API_BASE_URL}/customers',
-        headers=headers,
-        params={'email': email}
-    )
+    # The Paddle API might require exact parameter formatting
+    url = f'{API_BASE_URL}/customers'
+    params = {
+        'email': email,
+        'status': 'active'  # Only look for active customers
+    }
     
-    print(f"Customer search response status: {response.status_code}")
+    print(f"API URL: {url}")
+    print(f"Headers: {headers}")
     
-    if response.status_code == 200:
-        data = response.json()
-        print(f"Customer search response: {json.dumps(data, indent=2)[:500]}...")
+    try:
+        response = requests.get(
+            url,
+            headers=headers,
+            params=params
+        )
         
-        if data['data']:
-            customer = data['data'][0]
-            print(f"Found customer: {json.dumps(customer, indent=2)[:200]}...")
-            return customer
-    else:
-        print(f"Customer search failed: {response.text}")
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            customers = data.get('data', [])
+            
+            if customers:
+                # Return the first matching customer
+                customer = customers[0]
+                print(f"Found customer ID: {customer.get('id')}")
+                return customer
+            else:
+                print("No customers found with this email")
+        else:
+            print(f"API Error: {response.status_code} - {response.text}")
+            
+    except Exception as e:
+        print(f"Exception: {str(e)}")
     
-    print("No customer found")
     return None
+
 
 def get_subscriptions(customer_id):
     """Get all subscriptions for a customer"""
