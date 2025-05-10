@@ -85,12 +85,17 @@ class handler(BaseHTTPRequestHandler):
                             "Content-Type": "application/json"
                         }
                         
-                        # Get transactions using customer ID
+                        # Get transactions using customer ID - ensure API_BASE_URL is properly formatted
+                        API_BASE_URL = API_BASE_URL.rstrip('/')
                         url = f'{API_BASE_URL}/transactions'
                         params = {
                             'customer_id': paddle_customer_id,
-                            'status': 'completed,billed'
+                            'status': ['completed', 'billed']  # Use list format for multiple statuses
                         }
+
+                        print(f"Fetching transactions from URL: {url}")
+                        print(f"With params: {params}")
+                        print(f"API_BASE_URL from env: {API_BASE_URL}")
                         
                         response = requests.get(url, headers=headers, params=params)
                         
