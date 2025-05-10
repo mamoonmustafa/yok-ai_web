@@ -1887,7 +1887,8 @@ const Dashboard = {
      * Render transaction history
      */
     renderTransactionHistory: function() {
-        if (!domElements.transactionsTable || !transactionHistory) return;
+        const transactionsTable = document.getElementById('transactions-body');
+        if (!transactionsTable || !transactionHistory) return;
         
         // Get filter values
         const typeFilter = document.getElementById('transaction-type')?.value || 'all';
@@ -1969,7 +1970,7 @@ const Dashboard = {
             `;
         });
         
-        domElements.transactionsTable.innerHTML = tableHTML;
+        transactionsTable.innerHTML = tableHTML;
     },
 
     /**
