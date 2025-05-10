@@ -110,6 +110,7 @@ class handler(BaseHTTPRequestHandler):
                             # Format transactions for frontend
                             formatted_transactions = []
                             for trans in transactions:
+                                print(f"Processing transaction: {json.dumps(trans, indent=2)}")
                                 # Get amount
                                 details = trans.get('details', {})
                                 totals = details.get('totals', {})
@@ -122,6 +123,15 @@ class handler(BaseHTTPRequestHandler):
                                     price = items[0].get('price', {})
                                     description = price.get('description') or price.get('name', 'Payment')
                                 
+                                # Look for invoice in different places
+                                invoice_id = trans.get('invoice_id')
+                                invoice_number = trans.get('invoice_number')
+                                # Check if there's invoice info in details
+                                if not invoice_id and 'invoice' in trans:
+                                    invoice_id = trans['invoice'].get('id')
+                                
+                                print(f"Found invoice_id: {invoice_id}, invoice_number: {invoice_number}")
+
                                 formatted_transaction = {
                                     'id': trans.get('id'),
                                     'date': trans.get('billed_at') or trans.get('created_at', ''),
@@ -154,14 +164,28 @@ class handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Handle POST request to send invoice email"""
+        # Set CORS headers for POST
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json') 
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        
         try:
             # Get authorization token
             auth_header = self.headers.get('Authorization', '')
             if not auth_header.startswith('Bearer '):
-                self.send_error(401, "No valid authorization token provided")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'error': 'No valid authorization token provided'
+                }).encode())
                 return
                 
             token = auth_header.split(' ')[1]
+            
+            # Initialize Firebase if needed
+            if not firebase_initialized:
+                initialize_firebase()
             
             # Verify Firebase token
             try:
@@ -169,7 +193,10 @@ class handler(BaseHTTPRequestHandler):
                 user_id = decoded_token['uid']
             except Exception as e:
                 print(f"Token verification failed: {e}")
-                self.send_error(401, "Invalid authorization token")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'error': 'Invalid authorization token'
+                }).encode())
                 return
             
             # Read request body
@@ -178,9 +205,18 @@ class handler(BaseHTTPRequestHandler):
             data = json.loads(body.decode('utf-8'))
             
             transaction_id = data.get('transactionId')
+            print(f"Received transaction ID: {transaction_id}")
+            
             if not transaction_id:
-                self.send_error(400, "Transaction ID required")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'error': 'Transaction ID required'
+                }).encode())
                 return
+            
+            # Get Paddle API credentials
+            API_KEY = os.getenv("PADDLE_API_KEY")
+            API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
             
             # Get the transaction to find the invoice ID
             headers = {
@@ -188,38 +224,99 @@ class handler(BaseHTTPRequestHandler):
                 "Accept": "application/json"
             }
             
-            # Get transaction details
+            # First, try to get the transaction
             url = f"{API_BASE_URL}/transactions/{transaction_id}"
+            print(f"Fetching transaction from: {url}")
+            
             response = requests.get(url, headers=headers)
+            print(f"Transaction response status: {response.status_code}")
             
             if response.status_code != 200:
                 print(f"Failed to get transaction: {response.status_code}")
-                self.send_error(404, "Transaction not found")
+                print(f"Response: {response.text}")
+                
+                # If transaction not found, let's check if we can get the invoice directly
+                # Sometimes the transaction ID is actually an invoice ID
+                invoice_url = f"{API_BASE_URL}/invoices/{transaction_id}"
+                print(f"Trying to fetch as invoice from: {invoice_url}")
+                
+                invoice_response = requests.get(invoice_url, headers=headers)
+                
+                if invoice_response.status_code == 200:
+                    # It was an invoice ID, not a transaction ID
+                    invoice_id = transaction_id
+                else:
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        'error': 'Transaction not found'
+                    }).encode())
+                    return
+            else:
+                # Get invoice ID from transaction
+                transaction_data = response.json()
+                print(f"Transaction data: {json.dumps(transaction_data, indent=2)}")
+                
+                invoice_id = transaction_data.get('data', {}).get('invoice_id')
+                
+                if not invoice_id:
+                    # Check if there's an invoice_number instead
+                    invoice_number = transaction_data.get('data', {}).get('invoice_number')
+                    if invoice_number:
+                        invoice_id = invoice_number
+                    else:
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            'error': 'No invoice found for this transaction'
+                        }).encode())
+                        return
+            
+            print(f"Invoice ID found: {invoice_id}")
+            
+            # Get the invoice details first to see if it exists
+            invoice_details_url = f"{API_BASE_URL}/invoices/{invoice_id}"
+            invoice_details_response = requests.get(invoice_details_url, headers=headers)
+            
+            if invoice_details_response.status_code != 200:
+                print(f"Invoice not found: {invoice_details_response.status_code}")
+                print(f"Response: {invoice_details_response.text}")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'error': 'Invoice not found'
+                }).encode())
                 return
-            
-            transaction_data = response.json()
-            invoice_id = transaction_data.get('data', {}).get('invoice_id')
-            
-            if not invoice_id:
-                self.send_error(404, "No invoice found for this transaction")
-                return
-            
-            # Trigger invoice email using Paddle API
-            # For Paddle, accessing the PDF endpoint also sends email
+                
+            # Now get the PDF (which in Paddle also sends the email)
             pdf_url = f"{API_BASE_URL}/invoices/{invoice_id}/pdf"
+            print(f"Getting invoice PDF from: {pdf_url}")
+            
             pdf_response = requests.get(pdf_url, headers=headers)
             
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "success": True,
-                "message": "Invoice email sent successfully"
-            }).encode())
+            if pdf_response.status_code == 200:
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "message": "Invoice email sent successfully",
+                    "invoiceId": invoice_id
+                }).encode())
+            else:
+                print(f"Failed to get invoice PDF: {pdf_response.status_code}")
+                print(f"Response: {pdf_response.text}")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'error': 'Failed to send invoice email'
+                }).encode())
             
         except Exception as e:
             print(f"Send invoice error: {e}")
-            self.send_error(500, str(e))
+            import traceback
+            print(traceback.format_exc())
+            
+            if not self._headers_buffer:  # Only send headers if not already sent
+                self.end_headers()
+            
+            self.wfile.write(json.dumps({
+                'error': str(e)
+            }).encode())
 
     def do_OPTIONS(self):
         self.send_response(200)
