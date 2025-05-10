@@ -17,15 +17,29 @@ headers = {
 
 def get_customer_by_email(email):
     """Retrieve customer information using email address"""
+    print(f"Looking up customer with email: {email}")
+    
+    # Try exact match first
     response = requests.get(
         f'{API_BASE_URL}/customers',
         headers=headers,
         params={'email': email}
     )
+    
+    print(f"Customer search response status: {response.status_code}")
+    
     if response.status_code == 200:
         data = response.json()
+        print(f"Customer search response: {json.dumps(data, indent=2)[:500]}...")
+        
         if data['data']:
-            return data['data'][0]  # Assuming the first match is the correct customer
+            customer = data['data'][0]
+            print(f"Found customer: {json.dumps(customer, indent=2)[:200]}...")
+            return customer
+    else:
+        print(f"Customer search failed: {response.text}")
+    
+    print("No customer found")
     return None
 
 def get_subscriptions(customer_id):

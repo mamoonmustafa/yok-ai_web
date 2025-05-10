@@ -33,10 +33,13 @@ class handler(BaseHTTPRequestHandler):
         # Verify token
         user_data = verify_token(token)
         if not user_data:
+            print("Token verification failed")
             self.wfile.write(json.dumps({
                 'error': 'Invalid or expired token'
             }).encode())
             return
+        
+        print(f"User data from token: {user_data}")
         
         # Parse URL parameters
         parsed_url = urlparse(self.path)
@@ -44,138 +47,111 @@ class handler(BaseHTTPRequestHandler):
         type_filter = query_params.get('type', ['all'])[0]
         period_filter = query_params.get('period', ['all'])[0]
         
+        print(f"Filters - Type: {type_filter}, Period: {period_filter}")
+        
         try:
             # Get user email from token
             email = user_data.get('email')
             if not email:
+                print("No email found in user data")
                 self.wfile.write(json.dumps({
                     'error': 'User email not found'
                 }).encode())
                 return
             
+            print(f"User email: {email}")
+            
             # Get customer from Paddle
             customer = get_customer_by_email(email)
+            print(f"Customer lookup result: {customer}")
+            
             if not customer:
+                print("Customer not found in Paddle")
                 # Return empty array if customer not found
                 self.wfile.write(json.dumps([]).encode())
                 return
+            
+            print(f"Customer ID: {customer.get('id')}")
             
             # Get Paddle API credentials
             API_KEY = os.getenv("PADDLE_API_KEY")
             API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
             
+            # Build request to Paddle transactions endpoint
             headers = {
                 "Authorization": f"Bearer {API_KEY}",
                 "Content-Type": "application/json"
             }
             
-            # Build query parameters for Paddle API
+            # Try to get transactions by customer_id
             params = {
                 'customer_id': customer['id'],
-                'per_page': 50,  # Get more results
-                'status': 'billed,completed'  # Only get completed/billed transactions
+                'per_page': 50
             }
             
-            # Apply date filter based on period
-            if period_filter != 'all':
-                now = datetime.datetime.now()
-                cutoff_date = None
-                
-                if period_filter == 'month':
-                    cutoff_date = now.replace(day=1)
-                elif period_filter == '3month':
-                    month = now.month - 3
-                    year = now.year
-                    if month <= 0:
-                        month += 12
-                        year -= 1
-                    cutoff_date = now.replace(year=year, month=month, day=1)
-                elif period_filter == 'year':
-                    cutoff_date = now.replace(month=1, day=1)
-                
-                if cutoff_date:
-                    params['billed_at[gte]'] = cutoff_date.strftime('%Y-%m-%dT00:00:00Z')
+            print(f"Requesting transactions with params: {params}")
             
             # Get transactions from Paddle
-            response = requests.get(
-                f'{API_BASE_URL}/transactions',
-                headers=headers,
-                params=params
-            )
+            url = f'{API_BASE_URL}/transactions'
+            response = requests.get(url, headers=headers, params=params)
+            
+            print(f"Paddle API response status: {response.status_code}")
             
             if response.status_code == 200:
                 data = response.json()
                 transactions = data.get('data', [])
                 
+                print(f"Number of transactions found: {len(transactions)}")
+                if transactions:
+                    print(f"First transaction: {json.dumps(transactions[0], indent=2)[:500]}...")
+                
                 # Format transactions for frontend
                 formatted_transactions = []
                 
                 for trans in transactions:
-                    # Determine type based on transaction data
-                    trans_type = 'subscription'
-                    if trans.get('origin') == 'web':
-                        trans_type = 'one_time'
-                    elif trans.get('subscription_id'):
-                        trans_type = 'subscription'
-                    
-                    # Apply type filter
-                    if type_filter != 'all' and trans_type != type_filter:
-                        continue
-                    
-                    # Get amount from totals
-                    totals = trans.get('details', {}).get('totals', {})
-                    amount = totals.get('grand_total', '0')
-                    
-                    # Convert amount from string to float
-                    try:
-                        amount_float = float(amount) / 100  # Convert from cents
-                    except:
-                        amount_float = 0
-                    
-                    # Format date
-                    billed_at = trans.get('billed_at') or trans.get('created_at', '')
-                    
-                    # Build description
-                    items = trans.get('items', [])
-                    description = 'Payment'
-                    
-                    if items:
-                        # Get product/price name from first item
-                        item = items[0]
-                        price_info = item.get('price', {})
-                        description = price_info.get('description') or price_info.get('name', 'Payment')
-                    
-                    # Get invoice download URL if available
-                    invoice_url = None
-                    if trans.get('invoice_number'):
-                        # Construct invoice URL format for Paddle
-                        invoice_url = f"{API_BASE_URL}/invoices/{trans.get('invoice_id')}/pdf" if trans.get('invoice_id') else None
-                    
+                    # Format transaction for frontend
                     formatted_transaction = {
                         'id': trans.get('id'),
-                        'date': billed_at,
-                        'description': description,
-                        'amount': amount_float,
+                        'date': trans.get('billed_at') or trans.get('created_at', ''),
+                        'description': 'Payment',  # Default description
+                        'amount': 0,
                         'status': trans.get('status', 'completed'),
-                        'type': trans_type,
-                        'invoiceUrl': invoice_url,
-                        'invoice_number': trans.get('invoice_number'),
+                        'type': 'subscription',
+                        'invoiceUrl': None,
                         'currency': trans.get('currency_code', 'USD')
                     }
                     
+                    # Get amount from transaction
+                    details = trans.get('details', {})
+                    if details:
+                        totals = details.get('totals', {})
+                        grand_total = totals.get('grand_total')
+                        if grand_total:
+                            # Convert from cents to dollars
+                            formatted_transaction['amount'] = float(grand_total) / 100
+                    
+                    # Get description from items
+                    items = trans.get('items', [])
+                    if items:
+                        item = items[0]
+                        price = item.get('price', {})
+                        formatted_transaction['description'] = price.get('description') or price.get('name', 'Payment')
+                    
                     formatted_transactions.append(formatted_transaction)
                 
-                # Sort by date descending
-                formatted_transactions.sort(key=lambda x: x.get('date', ''), reverse=True)
+                print(f"Formatted transactions: {len(formatted_transactions)}")
                 
                 # Return formatted transactions
                 self.wfile.write(json.dumps(formatted_transactions).encode())
             else:
-                print(f"Paddle API error: {response.status_code} - {response.text}")
+                print(f"Paddle API error: {response.status_code}")
+                print(f"Response text: {response.text}")
                 self.wfile.write(json.dumps([]).encode())
                 
         except Exception as e:
             print(f"Error loading transactions: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
             self.wfile.write(json.dumps({
                 'error': str(e)
             }).encode())
