@@ -6,11 +6,15 @@ import os
 import requests
 import datetime
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, auth
 
 # Initialize Firebase
 firebase_initialized = False
 db = None
+
+# Add these global variables
+API_KEY = os.getenv("PADDLE_API_KEY")
+API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
 
 def initialize_firebase():
     global firebase_initialized, db
@@ -125,6 +129,8 @@ class handler(BaseHTTPRequestHandler):
                                     'amount': amount,
                                     'status': trans.get('status', 'completed'),
                                     'type': 'subscription',
+                                    'invoiceId': trans.get('invoice_id'),  # ADD THIS LINE
+                                    'invoiceNumber': trans.get('invoice_number'),  # ADD THIS LINE
                                     'invoiceUrl': None,
                                     'currency': trans.get('currency_code', 'USD')
                                 }
