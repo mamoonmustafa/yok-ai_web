@@ -14,7 +14,7 @@ db = None
 
 # Add these global variables
 API_KEY = os.getenv("PADDLE_API_KEY")
-API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
+API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com").rstrip('/')
 
 def initialize_firebase():
     global firebase_initialized, db
@@ -129,7 +129,11 @@ class handler(BaseHTTPRequestHandler):
                                 # Check if there's invoice info in details
                                 if not invoice_id and 'invoice' in trans:
                                     invoice_id = trans['invoice'].get('id')
-                                
+                                # Check billing details
+                                if not invoice_id:
+                                    billing = trans.get('billing', {})
+                                    invoice_id = billing.get('invoice_id')
+
                                 print(f"Found invoice_id: {invoice_id}, invoice_number: {invoice_number}")
 
                                 formatted_transaction = {
@@ -216,7 +220,7 @@ class handler(BaseHTTPRequestHandler):
             
             # Get Paddle API credentials
             API_KEY = os.getenv("PADDLE_API_KEY")
-            API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
+            API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com").rstrip('/')
             
             # Get the transaction to find the invoice ID
             headers = {
@@ -255,20 +259,32 @@ class handler(BaseHTTPRequestHandler):
                 # Get invoice ID from transaction
                 transaction_data = response.json()
                 print(f"Transaction data: {json.dumps(transaction_data, indent=2)}")
-                
-                invoice_id = transaction_data.get('data', {}).get('invoice_id')
-                
+
+                # Look for invoice in various places within the Paddle response
+                invoice_id = None
+
+                # Try different paths in the response
+                data_obj = transaction_data.get('data', {})
+                invoice_id = data_obj.get('invoice_id')
+
                 if not invoice_id:
-                    # Check if there's an invoice_number instead
-                    invoice_number = transaction_data.get('data', {}).get('invoice_number')
-                    if invoice_number:
-                        invoice_id = invoice_number
-                    else:
-                        self.end_headers()
-                        self.wfile.write(json.dumps({
-                            'error': 'No invoice found for this transaction'
-                        }).encode())
-                        return
+                    # Check billing field
+                    billing = data_obj.get('billing', {})
+                    invoice_id = billing.get('invoice_id')
+
+                if not invoice_id:
+                    # Check details
+                    details = data_obj.get('details', {})
+                    invoice_id = details.get('invoice_id')
+
+                if not invoice_id:
+                    print("No invoice ID found in transaction data")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        'error': 'No invoice found for this transaction',
+                        'details': 'Transaction exists but no invoice associated'
+                    }).encode())
+                    return
             
             print(f"Invoice ID found: {invoice_id}")
             
