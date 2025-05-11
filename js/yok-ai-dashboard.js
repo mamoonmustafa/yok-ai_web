@@ -36,8 +36,8 @@ const CONFIG = {
       },
       credits: {
         '100': "pri_01jtz766cqbgr935jgfwd3ktcs",  // Replace with your 100 credits price ID
-        '200': "pri_01jtz77rkb4m97m0nmtrn5ktcq",  // Replace with your 500 credits price ID
-        '500': "pri_01jtz797bh3j54dbyzgq96tcqt"  // Replace with your 1000 credits price ID
+        '500': "pri_01jtz77rkb4m97m0nmtrn5ktcq",  // Replace with your 500 credits price ID
+        '1000': "pri_01jtz797bh3j54dbyzgq96tcqt"  // Replace with your 1000 credits price ID
       }
     }
 };
