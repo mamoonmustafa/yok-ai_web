@@ -1401,33 +1401,28 @@ const Dashboard = {
      * Initialize buy credits modal
      */
     initBuyCreditsModal: function() {
-        const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
-        const buyCreditsModal = document.getElementById('buy-credits-modal');
-        const buyPackageButtons = document.querySelectorAll('.buy-credit-btn');
+        console.log('Initializing buy credits modal with event delegation');
         
-        console.log('Buy credits modal initialized');
-        console.log('Buy more credits button found:', !!buyMoreCreditsBtn);
-        console.log('Found package buttons:', buyPackageButtons.length);
-        
-        if (buyMoreCreditsBtn && buyCreditsModal) {
-            buyMoreCreditsBtn.addEventListener('click', () => {
-                console.log('Opening buy credits modal');
-                Dashboard.openModal('buy-credits-modal');
-            });
-            
-            // Buy credit package buttons
-            buyPackageButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    console.log('Credit button clicked - Amount:', amount);
+        // Use event delegation for all credit-related clicks
+        document.addEventListener('click', function(e) {
+            // Check if target is a buy-credit-btn or its child
+            const creditBtn = e.target.closest('.buy-credit-btn');
+            if (creditBtn) {
+                e.preventDefault();
+                e.stopPropagation();
                 
+                const amount = creditBtn.getAttribute('data-amount');
+                console.log('Credit button clicked - Amount:', amount);
+                
+                if (amount) {
                     // Call openCheckout with credit- prefix
                     openCheckout(`credit-${amount}`);
                     
                     // Close modal
                     Dashboard.closeAllModals();
-                });
-            });
-        }
+                }
+            }
+        });
     },
 
     /**
