@@ -575,14 +575,6 @@ const Dashboard = {
                 </div>
             `;
             subscriptionContainer.appendChild(subscriptionCard);
-            
-            const supportNotice = document.createElement('div');
-            supportNotice.className = 'info-notice mt-3';
-            supportNotice.innerHTML = `
-                <i class="fas fa-info-circle"></i>
-                <p>For subscription changes or cancellations, please contact <a href="mailto:support@yok-ai.com">support@yok-ai.com</a></p>
-            `;
-            subscriptionContainer.appendChild(supportNotice);
 
             // Show credit usage
             const creditCard = document.createElement('div');
@@ -1614,6 +1606,9 @@ const Dashboard = {
                     <div class="progress-bar">
                         <div class="progress" style="width: ${creditUsage.total > 0 ? (creditUsage.used / creditUsage.total) * 100 : 0}%"></div>
                     </div>
+                    <p class="text-muted" style="margin-top: 1rem;">
+                        For subscription changes or cancellations, please contact <a href="mailto:support@yok-ai.com">support@yok-ai.com</a>
+                    </p>
                 </div>
             </div>
         `;
