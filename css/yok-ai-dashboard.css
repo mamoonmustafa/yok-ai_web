@@ -1222,3 +1222,63 @@ textarea.form-control {
         border: 1px solid var(--gray-300);
     }
 }
+
+.support-contact-info {
+    margin: 2rem 0;
+}
+
+.contact-method {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: 8px;
+}
+
+.contact-method i {
+    font-size: 24px;
+    color: var(--primary-color);
+    margin-right: 1rem;
+    margin-top: 0.25rem;
+}
+
+.contact-method h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.contact-method p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.support-email {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.support-email:hover {
+    text-decoration: underline;
+}
+
+.support-notice {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    background: var(--info-bg, #f0f9ff);
+    border-radius: 8px;
+    margin-top: 1.5rem;
+}
+
+.support-notice i {
+    color: var(--info-color, #0ea5e9);
+    margin-right: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.support-notice p {
+    margin: 0;
+    color: var(--text-secondary);
+}
