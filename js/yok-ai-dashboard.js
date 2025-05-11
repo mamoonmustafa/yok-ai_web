@@ -1236,7 +1236,7 @@ const Dashboard = {
                     
                     // Store credit usage data
                     creditUsage = data.creditUsage || { used: 0, total: 0 };
-                    
+                    console.log("Credit usage data:", data.credit_usage || data.creditUsage);
                     // Store license key
                     licenseKey = data.license_keys && data.license_keys.length > 0 ? 
                         data.license_keys[0].key : null;
