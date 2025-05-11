@@ -121,7 +121,7 @@ class handler(BaseHTTPRequestHandler):
                                     'customer': {'id': user_data_firestore.get('paddleCustomerId')},
                                     'subscriptions': [subscription_data],
                                     'license_keys': [{'key': license_key}] if license_key else [],
-                                    'credit_usage': user_data_firestore.get('creditUsage', {'used': 0, 'total': 0})
+                                    'creditUsage': user_data_firestore.get('creditUsage', {'used': 0, 'total': 0})
                                 }
 
                                 # Convert timestamps to strings for JSON serialization
@@ -255,7 +255,7 @@ class handler(BaseHTTPRequestHandler):
                 'customer': customer,
                 'subscriptions': processed_subscriptions,
                 'license_keys': license_keys,
-                'credit_usage': credit_usage_data
+                'creditUsage': credit_usage_data
             }
             
             # Return dashboard data

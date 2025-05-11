@@ -1235,7 +1235,7 @@ const Dashboard = {
                     }
                     
                     // Store credit usage data
-                    creditUsage = data.creditUsage || { used: 0, total: 0 };
+                    creditUsage = data.creditUsage || data.credit_usage || { used: 0, total: 0 };
                     console.log("Credit usage data:", data.credit_usage || data.creditUsage);
                     // Store license key
                     licenseKey = data.license_keys && data.license_keys.length > 0 ? 
@@ -1479,7 +1479,7 @@ const Dashboard = {
                         // Check if user has subscription data
                         if (userData.subscription) {
                             subscriptionStatus = userData.subscription;
-                            creditUsage = userData.creditUsage || { used: 0, total: 0 };
+                            creditUsage = data.creditUsage || data.credit_usage || { used: 0, total: 0 };
                             licenseKey = userData.licenseKey;
                             
                             // Update UI with subscription data
@@ -1487,7 +1487,9 @@ const Dashboard = {
                             Dashboard.updateDashboardView(subscriptionStatus); // Add this line
                             
                             // Update credit usage display
-                            Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+                            setTimeout(() => {
+                                Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
+                            }, 100);
                             
                             // Update license key display
                             Dashboard.updateLicenseKeyDisplay();
