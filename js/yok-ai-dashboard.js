@@ -33,6 +33,11 @@ const CONFIG = {
       },
       enterprise: {
         month: "pri_01jsw8dtn4araas7xez8e24mdh", // Replace with your price ID
+      },
+      credits: {
+        '100': "pri_01jtz766cqbgr935jgfwd3ktcs",  // Replace with your 100 credits price ID
+        '200': "pri_01jtz77rkb4m97m0nmtrn5ktcq",  // Replace with your 500 credits price ID
+        '500': "pri_01jtz797bh3j54dbyzgq96tcqt"  // Replace with your 1000 credits price ID
       }
     }
 };
@@ -182,6 +187,10 @@ async function initializePaddle() {
  */
 async function openCheckout(plan) {
     try {
+        console.log('=== OpenCheckout Debug ===');
+        console.log('Plan requested:', plan);
+        console.log('CONFIG.prices:', CONFIG.prices);
+
         // Make sure Paddle is initialized
         if (!paddleInitialized) {
             Dashboard.showToast('Initializing payment system...', 'info');
@@ -221,12 +230,16 @@ async function openCheckout(plan) {
         } else if (plan.startsWith('credit-')) {
             // For credit purchases
             const creditAmount = plan.replace('credit-', '');
+            console.log('Credit amount extracted:', creditAmount);
+            console.log('Available credit prices:', CONFIG.prices.credits);
             priceId = CONFIG.prices.credits[creditAmount];
+            console.log('Credit price ID found:', priceId);
         } else {
             throw new Error(`Unknown plan type: ${plan}`);
         }
         
         if (!priceId) {
+            console.error('Available plans:', CONFIG.prices);
             throw new Error(`No price ID found for plan: ${plan}`);
         }
         
@@ -270,7 +283,7 @@ async function openCheckout(plan) {
         // Open Paddle checkout
         Paddle.Checkout.open(checkoutConfig);
     } catch (error) {
-        console.error(`Checkout error: ${error.message}`);
+        console.error(`Checkout error:`, error);
         Dashboard.showToast(`Failed to open checkout: ${error.message}`, 'error');
     }
 }
@@ -755,9 +768,33 @@ const Dashboard = {
             }, 0);
         }
     },
-    
-
-
+    /**
+     * Initialize buy credits modal
+     */
+    initBuyCreditsModal: function() {
+        const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
+        const buyCreditsModal = document.getElementById('buy-credits-modal');
+        const buyPackageButtons = document.querySelectorAll('.buy-credit-btn');
+        
+        if (buyMoreCreditsBtn && buyCreditsModal) {
+            buyMoreCreditsBtn.addEventListener('click', () => {
+                Dashboard.openModal('buy-credits-modal');
+            });
+            
+            // Buy credit package buttons
+            buyPackageButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const amount = button.getAttribute('data-amount');
+                    
+                    // Call openCheckout with credit- prefixed plan
+                    openCheckout(`credit-${amount}`);
+                    
+                    // Close modal
+                    Dashboard.closeAllModals();
+                });
+            });
+        }
+    },
     /**
      * Setup event listeners
      */
@@ -1386,8 +1423,12 @@ const Dashboard = {
         const buyCreditsModal = document.getElementById('buy-credits-modal');
         const buyPackageButtons = document.querySelectorAll('.buy-credit-btn');
         
+        console.log('Buy credits modal initialized');
+        console.log('Found buttons:', buyPackageButtons.length);
+        
         if (buyMoreCreditsBtn && buyCreditsModal) {
             buyMoreCreditsBtn.addEventListener('click', () => {
+                console.log('Opening buy credits modal');
                 Dashboard.openModal('buy-credits-modal');
             });
             
@@ -1396,6 +1437,8 @@ const Dashboard = {
                 button.addEventListener('click', () => {
                     const amount = button.getAttribute('data-amount');
                     const price = button.getAttribute('data-price');
+                    
+                    console.log('Credit button clicked - Amount:', amount, 'Price:', price);
                     
                     Dashboard.purchaseCredits(amount, price);
                     
@@ -1746,50 +1789,10 @@ const Dashboard = {
             return;
         }
         
-        // Check if Paddle is initialized
-        if (!paddleInitialized) {
-            Dashboard.showToast('Payment system is initializing. Please try again in a moment.', 'info');
-            
-            // Try to initialize Paddle
-            initializePaddle()
-                .then(() => {
-                    Dashboard.showToast('Payment system ready. Please try again.', 'success');
-                })
-                .catch(error => {
-                    console.error('Paddle initialization error:', error);
-                    Dashboard.showToast('Failed to initialize payment system. Please try again later.', 'error');
-                });
-            return;
-        }
+        console.log('Purchase credits called - Amount:', amount, 'Price:', price);
         
-        // Find the correct price ID for the credit package
-        const creditPriceId = CONFIG.prices.credits?.[amount] || '';
-        if (!creditPriceId) {
-            console.error(`No price ID configured for ${amount} credits`);
-            Dashboard.showToast('Credit package configuration error', 'error');
-            return;
-        }
-        
-        // Open Paddle checkout
-        try {
-            Paddle.Checkout.open({
-                items: [
-                    {
-                        priceId: creditPriceId,
-                        quantity: 1
-                    }
-                ],
-                settings: {
-                    theme: "light",
-                    displayMode: "overlay",
-                    variant: "one-page",
-                    successUrl: window.location.origin + '/dashboard?purchase=success'
-                }
-            });
-        } catch (error) {
-            console.error('Error opening checkout:', error);
-            Dashboard.showToast('Failed to open checkout. Please try again later.', 'error');
-        }
+        // Call openCheckout with credit- prefix
+        openCheckout(`credit-${amount}`);
     },
 
 
