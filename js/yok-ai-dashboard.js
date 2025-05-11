@@ -1989,21 +1989,26 @@ const Dashboard = {
         used = used || creditUsage.used;
         total = total || creditUsage.total;
         
-        if (domElements.creditsUsed && domElements.creditsTotal && domElements.creditProgress) {
-            domElements.creditsUsed.textContent = Utils.formatNumber(used);
-            domElements.creditsTotal.textContent = Utils.formatNumber(total);
+        // Query for elements directly instead of using domElements
+        const creditsUsed = document.getElementById('credits-used');
+        const creditsTotal = document.getElementById('credits-total');
+        const creditProgress = document.getElementById('credit-progress');
+        
+        if (creditsUsed && creditsTotal && creditProgress) {
+            creditsUsed.textContent = Utils.formatNumber(used);
+            creditsTotal.textContent = Utils.formatNumber(total);
             
             // Calculate percentage
             const percentage = total > 0 ? (used / total) * 100 : 0;
-            domElements.creditProgress.style.width = `${percentage}%`;
+            creditProgress.style.width = `${percentage}%`;
             
             // Change color based on usage
             if (percentage > 90) {
-                domElements.creditProgress.className = 'progress strength-weak';
+                creditProgress.className = 'progress strength-weak';
             } else if (percentage > 70) {
-                domElements.creditProgress.className = 'progress strength-medium';
+                creditProgress.className = 'progress strength-medium';
             } else {
-                domElements.creditProgress.className = 'progress strength-strong';
+                creditProgress.className = 'progress strength-strong';
             }
         }
     },
