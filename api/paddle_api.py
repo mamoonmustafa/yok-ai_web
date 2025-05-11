@@ -20,7 +20,8 @@ def get_customer_by_email(email):
     print(f"Looking up customer with email: {email}")
     
     # The Paddle API might require exact parameter formatting
-    url = f'{API_BASE_URL}/customers'
+    # url = f'{API_BASE_URL}/customers'
+    url = f'{API_BASE_URL.rstrip("/")}/customers'
     params = {
         'email': email,
         'status': 'active'  # Only look for active customers

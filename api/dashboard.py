@@ -106,28 +106,30 @@ class handler(BaseHTTPRequestHandler):
                         print(f"Found user data in Firestore: {user_id}")
                         
                         # Check if user has subscription data stored in Firebase
-                        if 'subscription' in user_data_firestore and user_data_firestore['subscription'].get('active', False):
-                            # User has an active subscription in Firebase
-                            subscription_data = user_data_firestore['subscription']
-                            license_key = user_data_firestore.get('licenseKey')
-                            credit_usage = user_data_firestore.get('creditUsage', {'used': 0, 'total': 0})
-                            
-                            print(f"Found active subscription in Firestore for user {user_id}")
-                            
-                            # Format the response with data from Firestore
-                            dashboard_data = {
-                                'customer': {'id': user_data_firestore.get('paddleCustomerId')},
-                                'subscriptions': [subscription_data],
-                                'license_keys': [{'key': license_key}] if license_key else [],
-                                'credit_usage': user_data_firestore.get('creditUsage', {'used': 0, 'total': 0})
-                            }
+                        if 'subscription' in user_data_firestore:
+                            subscription_data = user_data_firestore.get('subscription', {})
+                            if subscription_data and subscription_data.get('active', False):
+                                # User has an active subscription in Firebase
+                                subscription_data = user_data_firestore['subscription']
+                                license_key = user_data_firestore.get('licenseKey')
+                                credit_usage = user_data_firestore.get('creditUsage', {'used': 0, 'total': 0})
+                                
+                                print(f"Found active subscription in Firestore for user {user_id}")
+                                
+                                # Format the response with data from Firestore
+                                dashboard_data = {
+                                    'customer': {'id': user_data_firestore.get('paddleCustomerId')},
+                                    'subscriptions': [subscription_data],
+                                    'license_keys': [{'key': license_key}] if license_key else [],
+                                    'credit_usage': user_data_firestore.get('creditUsage', {'used': 0, 'total': 0})
+                                }
 
-                            # Convert timestamps to strings for JSON serialization
-                            dashboard_data = convert_timestamps_to_strings(dashboard_data)
+                                # Convert timestamps to strings for JSON serialization
+                                dashboard_data = convert_timestamps_to_strings(dashboard_data)
 
-                            # Return dashboard data
-                            self.wfile.write(json.dumps(dashboard_data).encode())
-                            return
+                                # Return dashboard data
+                                self.wfile.write(json.dumps(dashboard_data).encode())
+                                return
                         else:
                             print(f"No active subscription found in Firestore for user {user_id}")
                     else:
