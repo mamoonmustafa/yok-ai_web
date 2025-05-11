@@ -66,17 +66,20 @@ def get_customer_details(customer_id):
         
         headers = {
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Accept": "application/json"
         }
         
-        # First try to get customer directly with customer ID
+        # Get customer directly with customer ID
         url = f"{api_base_url}/customers/{customer_id}"
         print(f"Fetching customer details from: {url}")
         
         response = requests.get(url, headers=headers)
+        print(f"Response status: {response.status_code}")
         
         if response.status_code == 200:
-            customer_data = response.json().get('data', {})
+            data = response.json()
+            customer_data = data.get('data', {})
             print(f"Successfully retrieved customer data: {json.dumps(customer_data)[:500]}")
             return {
                 'email': customer_data.get('email'),
@@ -87,10 +90,12 @@ def get_customer_details(customer_id):
         return None
     except Exception as e:
         print(f"Error getting customer details: {e}")
+        import traceback
+        print(traceback.format_exc())
         return None
 
 def find_user_by_email(email):
-    """Find a Firebase user by email (case-insensitive)"""
+    """Find a Firebase user by email"""
     if not email or not initialize_firebase():
         return None, None
     
@@ -102,72 +107,20 @@ def find_user_by_email(email):
         email_query = users_ref.where('email', '==', email).limit(1)
         email_docs = list(email_query.stream())
         
-        if email_docs and len(email_docs) > 0:
+        if email_docs:
             user_doc = email_docs[0]
             user_id = user_doc.id
             print(f"Found user by exact email match: {user_id}")
             return user_id, user_doc
         
-        # If exact match fails, try case-insensitive search by querying with email variations
-        print("Exact match failed, trying case-sensitive variations")
-        
-        # Try lowercase email
-        email_lower = email.lower()
-        email_query_lower = users_ref.where('email', '==', email_lower).limit(1)
-        email_docs_lower = list(email_query_lower.stream())
-        
-        if email_docs_lower and len(email_docs_lower) > 0:
-            user_doc = email_docs_lower[0]
-            user_id = user_doc.id
-            print(f"Found user by lowercase email: {user_id}")
-            return user_id, user_doc
-        
-        # Try original case email with different field variations
-        print("Trying to find user by checking Firebase Auth users")
-        
-        # Since Firebase Auth and Firestore might have different email cases,
-        # let's check if we can find by other means
-        # Note: This is still secure as we're only querying by email
-        print(f"No user found with email variations for: {email}")
+        print(f"No user found with email: {email}")
         return None, None
         
     except Exception as e:
         print(f"Error searching for user by email: {e}")
+        import traceback
+        print(traceback.format_exc())
         return None, None
-
-def extract_email_from_webhook_data(webhook_data, event_data):
-    """Extract email from various possible locations in webhook data"""
-    possible_email_locations = [
-        # Check in the main event data
-        event_data.get('customer', {}).get('email'),
-        
-        # Check in customer object
-        event_data.get('customer_email'),
-        
-        # Check in billing details
-        event_data.get('billing_details', {}).get('email'),
-        event_data.get('billing', {}).get('email'),
-        
-        # Check in the root webhook data
-        webhook_data.get('customer', {}).get('email'),
-        webhook_data.get('email'),
-        
-        # Check in notification data
-        webhook_data.get('data', {}).get('customer', {}).get('email'),
-        webhook_data.get('data', {}).get('customer_email'),
-        
-        # Check in the items/price data
-        event_data.get('items', [{}])[0].get('customer_email') if event_data.get('items') else None,
-    ]
-    
-    # Return the first non-None email found
-    for email in possible_email_locations:
-        if email:
-            print(f"Found email in webhook data: {email}")
-            return email
-    
-    print("No email found in webhook data")
-    return None
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -179,24 +132,6 @@ class handler(BaseHTTPRequestHandler):
             'status': 'Paddle webhook endpoint is online',
             'message': 'This endpoint is for Paddle webhook notifications. Please use POST method to send webhook events.'
         }).encode())
-        
-    def serialize_for_log(self, data):
-        """Create a JSON-serializable copy of data, replacing Sentinel values."""
-        if isinstance(data, dict):
-            result = {}
-            for key, value in data.items():
-                if key in ('created_at', 'updated_at', 'canceled_at') and value == firestore.SERVER_TIMESTAMP:
-                    result[key] = datetime.datetime.now().isoformat()
-                elif isinstance(value, dict):
-                    result[key] = self.serialize_for_log(value)
-                elif isinstance(value, list):
-                    result[key] = [self.serialize_for_log(item) for item in value]
-                else:
-                    result[key] = value
-            return result
-        elif isinstance(data, list):
-            return [self.serialize_for_log(item) for item in data]
-        return data
     
     def do_POST(self):
         """Handle POST requests from Paddle webhooks"""
@@ -226,37 +161,6 @@ class handler(BaseHTTPRequestHandler):
                     'error': 'Invalid JSON payload'
                 }).encode())
                 return
-            
-            # Get signature and timestamp from headers
-            signature = self.headers.get('Paddle-Signature')
-            timestamp = self.headers.get('Paddle-Timestamp')
-            webhook_secret = os.environ.get("PADDLE_WEBHOOK_SECRET")
-
-            # Verify Paddle signature if available
-            if webhook_secret and signature and timestamp:
-                # Convert data to string for signature verification
-                data_string = json.dumps(webhook_data, separators=(',', ':'))
-                
-                # Create message to sign
-                message = f"{timestamp}.{data_string}".encode()
-                
-                # Calculate expected signature
-                expected_sig = hmac.new(
-                    webhook_secret.encode(),
-                    msg=message,
-                    digestmod=hashlib.sha256
-                ).hexdigest()
-                
-                # Compare signatures
-                if not hmac.compare_digest(expected_sig, signature):
-                    print("Webhook signature verification failed")
-                    self.send_response(401)
-                    self.send_header('Content-Type', 'application/json')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({
-                        'error': 'Invalid signature'
-                    }).encode())
-                    return
             
             # Initialize Firebase
             if not initialize_firebase():
@@ -334,41 +238,20 @@ class handler(BaseHTTPRequestHandler):
                         # Now add the SERVER_TIMESTAMP for the database version
                         subscription_data['created_at'] = firestore.SERVER_TIMESTAMP
                         
-                        # Find user - prioritize email lookup
+                        # Find user by getting customer email from Paddle API
                         user_id = None
                         user_doc = None
                         customer_email = None
                         
-                        # Step 1: First try to extract email from webhook data directly
-                        customer_email = extract_email_from_webhook_data(webhook_data, event_data)
+                        # Get customer details from Paddle API
+                        customer_details = get_customer_details(customer_id)
                         
-                        if customer_email:
-                            print(f"Found email in webhook data: {customer_email}")
+                        if customer_details and customer_details.get('email'):
+                            customer_email = customer_details.get('email')
+                            print(f"Got email from Paddle API: {customer_email}")
                             user_id, user_doc = find_user_by_email(customer_email)
-                        
-                        # Step 2: If no email in webhook, try to get from Paddle API
-                        if not customer_email:
-                            print("No email in webhook data, trying Paddle API")
-                            customer_details = get_customer_details(customer_id)
-                            
-                            if customer_details and customer_details.get('email'):
-                                customer_email = customer_details.get('email')
-                                print(f"Got email from Paddle API: {customer_email}")
-                                user_id, user_doc = find_user_by_email(customer_email)
-                            else:
-                                print(f"Could not get customer email from Paddle API for customer ID: {customer_id}")
-                        
-                        # Step 3: If still no user found, try by customer ID (for existing customers)
-                        if not user_id:
-                            print("Trying to find user by customer ID as fallback")
-                            users_ref = db.collection('users')
-                            query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
-                            user_docs = list(query.stream())
-                            
-                            if user_docs and len(user_docs) > 0:
-                                user_doc = user_docs[0]
-                                user_id = user_doc.id
-                                print(f"Found user by customer ID: {user_id}")
+                        else:
+                            print(f"Could not get customer email from Paddle API for customer ID: {customer_id}")
                         
                         if user_id:
                             # Update user with subscription data
@@ -421,9 +304,9 @@ class handler(BaseHTTPRequestHandler):
                             debug_collection.add(debug_doc)
                             print(f"Created debug document in paddle_webhook_debug collection")
                     except Exception as e:
-                        traceback_str = traceback.format_exc()
                         print(f"Error in subscription.created handler: {str(e)}")
-                        print(traceback_str)
+                        import traceback
+                        print(traceback.format_exc())
 
                 elif event_type == 'subscription.updated':
                     # Extract data
@@ -436,32 +319,21 @@ class handler(BaseHTTPRequestHandler):
                     # Determine if subscription is active
                     is_active = status.lower() in ['active', 'trialing', 'past_due']
                     
-                    # Find user - prioritize email lookup
+                    # Find user by customer ID first (since they should already have it after subscription.created)
                     user_id = None
-                    customer_email = None
+                    users_ref = db.collection('users')
+                    query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
+                    user_docs = list(query.stream())
                     
-                    # First try to get email from webhook data
-                    customer_email = extract_email_from_webhook_data(webhook_data, event_data)
-                    
-                    if customer_email:
-                        user_id, user_doc = find_user_by_email(customer_email)
-                    
-                    # If no email in webhook, try Paddle API
-                    if not customer_email or not user_id:
+                    if user_docs:
+                        user_doc = user_docs[0]
+                        user_id = user_doc.id
+                    else:
+                        # Fallback to email lookup
                         customer_details = get_customer_details(customer_id)
                         if customer_details and customer_details.get('email'):
                             customer_email = customer_details.get('email')
                             user_id, user_doc = find_user_by_email(customer_email)
-                    
-                    # Fallback to customer ID lookup
-                    if not user_id:
-                        users_ref = db.collection('users')
-                        query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
-                        user_docs = list(query.stream())
-                        
-                        if user_docs and len(user_docs) > 0:
-                            user_doc = user_docs[0]
-                            user_id = user_doc.id
                     
                     if user_id:
                         # Update subscription status
@@ -469,14 +341,12 @@ class handler(BaseHTTPRequestHandler):
                         user_ref.update({
                             'subscription.status': status,
                             'subscription.active': is_active,
-                            'subscription.updated_at': firestore.SERVER_TIMESTAMP,
-                            'paddleCustomerId': customer_id
+                            'subscription.updated_at': firestore.SERVER_TIMESTAMP
                         })
                         
                         print(f"Updated subscription {subscription_id} status to {status} for user {user_id}")
                     else:
-                        print(f"ERROR: Could not find user for subscription update - customer_id: {customer_id}, email: {customer_email}")
-                
+                        print(f"ERROR: Could not find user for subscription update - customer_id: {customer_id}")
 
                 elif event_type == 'subscription.cancelled':
                     # Extract data
@@ -485,32 +355,21 @@ class handler(BaseHTTPRequestHandler):
                     
                     print(f"Processing subscription.cancelled for {subscription_id}")
                     
-                    # Find user - prioritize email lookup
+                    # Find user by customer ID
                     user_id = None
-                    customer_email = None
+                    users_ref = db.collection('users')
+                    query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
+                    user_docs = list(query.stream())
                     
-                    # First try to get email from webhook data
-                    customer_email = extract_email_from_webhook_data(webhook_data, event_data)
-                    
-                    if customer_email:
-                        user_id, user_doc = find_user_by_email(customer_email)
-                    
-                    # If no email in webhook, try Paddle API
-                    if not customer_email or not user_id:
+                    if user_docs:
+                        user_doc = user_docs[0]
+                        user_id = user_doc.id
+                    else:
+                        # Fallback to email lookup
                         customer_details = get_customer_details(customer_id)
                         if customer_details and customer_details.get('email'):
                             customer_email = customer_details.get('email')
                             user_id, user_doc = find_user_by_email(customer_email)
-                    
-                    # Fallback to customer ID lookup
-                    if not user_id:
-                        users_ref = db.collection('users')
-                        query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
-                        user_docs = list(query.stream())
-                        
-                        if user_docs and len(user_docs) > 0:
-                            user_doc = user_docs[0]
-                            user_id = user_doc.id
                     
                     if user_id:
                         # Update subscription status
@@ -518,14 +377,12 @@ class handler(BaseHTTPRequestHandler):
                         user_ref.update({
                             'subscription.status': 'cancelled',
                             'subscription.active': False,
-                            'subscription.canceled_at': firestore.SERVER_TIMESTAMP,
-                            'paddleCustomerId': customer_id
+                            'subscription.canceled_at': firestore.SERVER_TIMESTAMP
                         })
                         
                         print(f"Marked subscription {subscription_id} as cancelled for user {user_id}")
                     else:
-                        print(f"ERROR: Could not find user for subscription cancellation - customer_id: {customer_id}, email: {customer_email}")
-                
+                        print(f"ERROR: Could not find user for subscription cancellation - customer_id: {customer_id}")
 
                 # Return success response
                 self.send_response(200)
@@ -538,6 +395,8 @@ class handler(BaseHTTPRequestHandler):
                 
             except Exception as e:
                 print(f"Error processing webhook event: {str(e)}")
+                import traceback
+                print(traceback.format_exc())
                 
                 # Create a debug collection entry
                 if initialize_firebase():
@@ -565,8 +424,8 @@ class handler(BaseHTTPRequestHandler):
                 }).encode())
                 
         except Exception as e:
-            import traceback
             print(f"Critical webhook error: {str(e)}")
+            import traceback
             print(traceback.format_exc())
             
             # Still return 200 to acknowledge receipt
@@ -577,3 +436,11 @@ class handler(BaseHTTPRequestHandler):
                 'success': False,
                 'error': str(e)
             }).encode())
+    
+    def do_OPTIONS(self):
+        # Handle preflight requests for CORS
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
