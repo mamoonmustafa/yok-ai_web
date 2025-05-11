@@ -614,7 +614,7 @@ const Dashboard = {
                     });
                 }
             }, 0);
-             
+
             // Update credit usage display
             Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
             
@@ -1599,7 +1599,7 @@ const Dashboard = {
                     </div>
                     <div class="subscription-detail">
                         <div class="subscription-detail-label">Next Billing</div>
-                        <div class="subscription-detail-value">${Utils.formatDate(status.nextBillingDate) || 'Unknown'}</div>
+                        <div class="subscription-detail-value">${Utils.formatDate(status.next_billing_date) || 'Unknown'}</div>
                     </div>
                     <div class="subscription-detail">
                         <div class="subscription-detail-label">Amount</div>
