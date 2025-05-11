@@ -1615,11 +1615,6 @@ const Dashboard = {
                         <div class="progress" style="width: ${creditUsage.total > 0 ? (creditUsage.used / creditUsage.total) * 100 : 0}%"></div>
                     </div>
                 </div>
-                <div class="subscription-actions">
-                    <button id="upgrade-subscription-btn" class="btn btn-primary">Upgrade Plan</button>
-                    <button id="buy-more-credits-btn" class="btn btn-outline">Buy More Credits</button>
-                    <button id="cancel-subscription-btn" class="btn btn-outline btn-danger">Cancel Subscription</button>
-                </div>
             </div>
         `;
     },
