@@ -604,6 +604,17 @@ const Dashboard = {
             if (licenseKeyCard) licenseKeyCard.style.display = 'block';
             if (downloadsContainer) downloadsContainer.style.display = 'block';
             
+            // Add event listener for buy more credits button
+            setTimeout(() => {
+                const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
+                if (buyMoreCreditsBtn) {
+                    buyMoreCreditsBtn.addEventListener('click', () => {
+                        console.log('Buy More Credits clicked');
+                        Dashboard.openModal('buy-credits-modal');
+                    });
+                }
+            }, 0);
+             
             // Update credit usage display
             Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
             
@@ -1595,21 +1606,9 @@ const Dashboard = {
                         <div class="subscription-detail-value">${Utils.formatCurrency(status.amount || 0)} / ${status.interval || 'month'}</div>
                     </div>
                 </div>
-                <div class="credit-info-container">
-                    <h4>Credits</h4>
-                    <div class="credit-info">
-                        <span class="credits-used">${Utils.formatNumber(creditUsage.used)}</span>
-                        <span> / </span>
-                        <span class="credits-total">${Utils.formatNumber(creditUsage.total)}</span>
-                        <span> credits used</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress" style="width: ${creditUsage.total > 0 ? (creditUsage.used / creditUsage.total) * 100 : 0}%"></div>
-                    </div>
-                    <p class="text-muted" style="margin-top: 1rem;">
-                        For subscription changes or cancellations, please contact <a href="mailto:support@yok-ai.com">support@yok-ai.com</a>
-                    </p>
-                </div>
+                <p class="text-muted" style="margin-top: 1rem;">
+                    For subscription changes or cancellations, please contact <a href="mailto:support@yok-ai.com">support@yok-ai.com</a>
+                </p>
             </div>
         `;
     },
