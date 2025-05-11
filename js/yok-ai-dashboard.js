@@ -576,6 +576,14 @@ const Dashboard = {
             `;
             subscriptionContainer.appendChild(subscriptionCard);
             
+            const supportNotice = document.createElement('div');
+            supportNotice.className = 'info-notice mt-3';
+            supportNotice.innerHTML = `
+                <i class="fas fa-info-circle"></i>
+                <p>For subscription changes or cancellations, please contact <a href="mailto:support@yok-ai.com">support@yok-ai.com</a></p>
+            `;
+            subscriptionContainer.appendChild(supportNotice);
+
             // Show credit usage
             const creditCard = document.createElement('div');
             creditCard.className = 'card minimal';
@@ -1595,18 +1603,16 @@ const Dashboard = {
                         <div class="subscription-detail-value">${Utils.formatCurrency(status.amount || 0)} / ${status.interval || 'month'}</div>
                     </div>
                 </div>
-                <div class="credit-info mb-16">
-                    <h4 class="mb-8">Credits</h4>
-                    <div class="credit-progress-container">
-                        <div class="credit-info">
-                            <span class="credits-used">${Utils.formatNumber(creditUsage.used)}</span>
-                            <span> / </span>
-                            <span class="credits-total">${Utils.formatNumber(creditUsage.total)}</span>
-                            <span> credits used</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress" style="width: ${creditUsage.total > 0 ? (creditUsage.used / creditUsage.total) * 100 : 0}%"></div>
-                        </div>
+                <div class="credit-info-container">
+                    <h4>Credits</h4>
+                    <div class="credit-info">
+                        <span class="credits-used">${Utils.formatNumber(creditUsage.used)}</span>
+                        <span> / </span>
+                        <span class="credits-total">${Utils.formatNumber(creditUsage.total)}</span>
+                        <span> credits used</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${creditUsage.total > 0 ? (creditUsage.used / creditUsage.total) * 100 : 0}%"></div>
                     </div>
                 </div>
                 <div class="subscription-actions">
@@ -2182,7 +2188,7 @@ const Dashboard = {
             profileEmailDisplay.textContent = currentUser.email;
         }
     },
-    
+
     /**
      * Populate profile form with user data
      */

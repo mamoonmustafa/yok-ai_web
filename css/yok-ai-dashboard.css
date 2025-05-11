@@ -6,6 +6,7 @@
     --primary-light: rgba(0, 113, 227, 0.1);
     --dark: #000000;
     --light: #f8f9fa;
+    --gray-50: #f9fafb;
     --gray-100: #f8f9fa;
     --gray-200: #e9ecef;
     --gray-300: #dee2e6;
@@ -880,6 +881,83 @@ textarea.form-control {
 
 .modal-body {
     padding: 1.5rem;
+}
+
+/* Subscription Details */
+.subscription-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.subscription-detail {
+    background-color: var(--gray-50);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.subscription-detail-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    font-weight: 400;
+}
+
+.subscription-detail-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Badge styling */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.badge-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--success);
+}
+
+/* Credit Info Container */
+.credit-info-container {
+    margin-top: 1.5rem;
+}
+
+.credit-info {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+#credit-progress-container {
+    margin: 1rem 0;
+}
+
+/* Update button group styling */
+.subscription-actions,
+.credit-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-danger {
+    background-color: transparent;
+    border: 1px solid var(--error);
+    color: var(--error);
+}
+
+.btn-danger:hover {
+    background-color: var(--error);
+    color: white;
 }
 
 /* Verification Banner */
