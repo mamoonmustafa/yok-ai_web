@@ -567,12 +567,10 @@ const Dashboard = {
         if (status && status.active === true) {
             // User has active subscription
             const subscriptionCard = document.createElement('div');
-            subscriptionCard.className = 'card';
+            subscriptionCard.className = 'card minimal';
             subscriptionCard.innerHTML = `
-                <div class="card-header">
-                    <h3>Subscription Status</h3>
-                </div>
                 <div class="card-body">
+                    <h3>Subscription Status</h3>
                     ${Dashboard.generateActiveSubscriptionHTML(status)}
                 </div>
             `;
@@ -580,12 +578,10 @@ const Dashboard = {
             
             // Show credit usage
             const creditCard = document.createElement('div');
-            creditCard.className = 'card';
+            creditCard.className = 'card minimal';
             creditCard.innerHTML = `
-                <div class="card-header">
-                    <h3>Credit Usage</h3>
-                </div>
                 <div class="card-body">
+                    <h3>Credit Usage</h3>
                     <div id="credit-progress-container">
                         <div class="credit-info">
                             <span id="credits-used">0</span>
@@ -644,12 +640,10 @@ const Dashboard = {
         else if (status && status.id) {
             // Has subscription ID but not active (pending, error state)
             const pendingCard = document.createElement('div');
-            pendingCard.className = 'card';
+            pendingCard.className = 'card minimal';
             pendingCard.innerHTML = `
-                <div class="card-header">
-                    <h3>Subscription Processing</h3>
-                </div>
                 <div class="card-body">
+                    <h3>Subscription Processing</h3>
                     <div class="alert alert-info">
                         <i class="alert-icon fas fa-info-circle"></i>
                         <div class="alert-content">
@@ -1093,8 +1087,20 @@ const Dashboard = {
         if (domElements.userNameElement && user) {
             domElements.userNameElement.textContent = user.displayName || user.email.split('@')[0];
         }
+        
+        // Update the profile display elements in the profile section
+        const profileNameDisplay = document.getElementById('profile-name-display');
+        const profileEmailDisplay = document.getElementById('profile-email-display');
+        
+        if (profileNameDisplay) {
+            profileNameDisplay.textContent = user.displayName || user.email.split('@')[0];
+        }
+        
+        if (profileEmailDisplay) {
+            profileEmailDisplay.textContent = user.email;
+        }
     },
-    
+
     /**
      * Sign out the current user
      */
@@ -2164,51 +2170,19 @@ const Dashboard = {
             return;
         }
         
-        // Set form fields to loading state
-        Dashboard.setFormLoading(true);
+        // Update profile display elements
+        const profileNameDisplay = document.getElementById('profile-name-display');
+        const profileEmailDisplay = document.getElementById('profile-email-display');
         
-        // Populate email from Firebase Auth (always up-to-date)
-        const profileEmail = document.getElementById('profile-email');
-        if (profileEmail) {
-            profileEmail.value = currentUser.email || '';
-            profileEmail.disabled = true; // Email should not be editable
+        if (profileNameDisplay) {
+            profileNameDisplay.textContent = currentUser.displayName || currentUser.email.split('@')[0];
         }
         
-        // Populate name from Firebase Auth
-        const profileName = document.getElementById('profile-name');
-        if (profileName) {
-            profileName.value = currentUser.displayName || '';
+        if (profileEmailDisplay) {
+            profileEmailDisplay.textContent = currentUser.email;
         }
-        
-        // Get additional profile data from Firestore
-        const db = firebase.firestore();
-        db.collection('users').doc(currentUser.uid).get()
-            .then(doc => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    
-                    // Populate company if field exists
-                    const profileCompany = document.getElementById('profile-company');
-                    if (profileCompany) {
-                        profileCompany.value = userData.company || '';
-                    }
-                    
-                    // Populate role if field exists
-                    const profileRole = document.getElementById('profile-role');
-                    if (profileRole) {
-                        profileRole.value = userData.role || '';
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error loading profile data:', error);
-                Dashboard.showToast('Failed to load profile data', 'error');
-            })
-            .finally(() => {
-                Dashboard.setFormLoading(false);
-            });
     },
-
+    
     /**
      * Populate profile form with user data
      */
