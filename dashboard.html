@@ -12,231 +12,183 @@
     <div id="verification-banner" class="verification-banner" style="display: none;">
         <div class="verification-content">
             <i class="fas fa-exclamation-circle"></i>
-            <span>Please verify your email address to access all features. Check your inbox for a verification email.</span>
-            <button id="resend-verification" class="btn btn-light">Resend Verification Email</button>
+            <span>Please verify your email address to access all features.</span>
+            <button id="resend-verification" class="btn btn-light">Resend Email</button>
         </div>
     </div>
 
     <!-- Main Dashboard Container -->
     <div class="dashboard-container">
-        <!-- Header -->
-        <header class="content-header">
-            <div class="header-title">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
                 <a href="/" class="logo">Yok<span class="logo-dot">AI</span></a>
             </div>
-            <div class="header-nav">
-                <nav class="main-nav">
-                    <button class="nav-link active" data-section="dashboard-section">Dashboard</button>
-                    <button class="nav-link" data-section="billing-section">Billing</button>
-                    <button class="nav-link" data-section="profile-section">Profile</button>
-                    <button class="nav-link" data-section="support-section">Support</button>
-                </nav>
-            </div>
-            <div class="header-actions">
-                <div class="user-menu">
-                    <button id="user-dropdown-toggle" class="user-dropdown-toggle">
-                        <div class="user-avatar">
-                            <span id="user-initials">JD</span>
-                        </div>
-                        <span id="user-name">John Doe</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div id="user-dropdown" class="user-dropdown">
-                        <ul>
-                            <li><button class="nav-link dropdown-link" data-section="profile-section"><i class="fas fa-user"></i> Profile</button></li>
-                            <li><button id="dropdown-sign-out" class="dropdown-link"><i class="fas fa-sign-out-alt"></i> Sign Out</button></li>
-                        </ul>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-link active" data-section="dashboard-section">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-link" data-section="billing-section">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Billing</span>
+                </button>
+                <button class="nav-link" data-section="profile-section">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </button>
+                <button class="nav-link" data-section="support-section">
+                    <i class="fas fa-headset"></i>
+                    <span>Support</span>
+                </button>
+            </nav>
+            
+            <!-- User Profile at Bottom -->
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <span id="user-initials">JD</span>
+                    </div>
+                    <div class="user-details">
+                        <div id="user-name" class="user-name">John Doe</div>
+                        <div class="user-plan">Pro Plan</div>
                     </div>
                 </div>
-            </div>
-        </header>
-
-        <!-- Email Verification Overlay (shown if email is not verified) -->
-        <div id="verification-overlay" class="verification-overlay" style="display: none;">
-            <div class="verification-overlay-content">
-                <i class="fas fa-envelope"></i>
-                <h2>Email Verification Required</h2>
-                <p>Please verify your email address to access the dashboard features.</p>
-                <button id="overlay-resend-verification" class="btn btn-primary">Resend Verification Email</button>
-            </div>
-        </div>
-
-        <!-- Dashboard Content Sections -->
-        <div class="content-sections">
-<!-- Dashboard Section -->
-<section id="dashboard-section" class="content-section active">
-    <div class="section-header">
-        <h2>Dashboard Overview</h2>
-    </div>
-    
-    <!-- This div will show either subscription status or available plans -->
-    <div id="subscription-container">
-        <!-- This will be filled dynamically based on subscription status -->
-        <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading subscription data...</div>
-    </div>
-    
-    <!-- License Key Card - Only shown when subscribed -->
-    <div id="license-key-card" class="card" style="display: none;">
-        <div class="card-header">
-            <h3>License Key</h3>
-        </div>
-        <div class="card-body">
-            <div class="license-key-container">
-                <div class="license-key" id="license-key">••••••••-••••-••••-••••-••••••••••••</div>
-                <button id="copy-license" class="btn btn-icon">
-                    <i class="fas fa-copy"></i>
+                <button id="sign-out" class="btn-icon">
+                    <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
-            <p class="license-note">Use this license key to activate your Yok-AI software</p>
-        </div>
-    </div>
-    
-    <!-- Downloads Section - Only shown when subscribed -->
-    <div id="downloads-container" style="display: none;">
-        <div class="section-subheader">
-            <h3>Downloads</h3>
-        </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <h3>Yok-AI Software</h3>
-            </div>
-            <div class="card-body">
-                <div class="download-item">
-                    <div class="download-info">
-                        <h4>Yok-AI Desktop App</h4>
-                        <p>Latest version: <span id="software-version">1.0.0</span></p>
-                        <p>Release date: <span id="release-date">May 1, 2025</span></p>
-                    </div>
-                    <div class="download-actions">
-                        <button id="download-windows" class="btn btn-outline">
-                            <i class="fab fa-windows"></i> Windows
-                        </button>
-                        <button id="download-mac" class="btn btn-outline">
-                            <i class="fab fa-apple"></i> Mac
-                        </button>
-                        <button id="download-linux" class="btn btn-outline">
-                            <i class="fab fa-linux"></i> Linux
-                        </button>
-                    </div>
-                </div>
-                <div class="download-license">
-                    <p>Your License Key: <span id="download-license-key">XXXX-XXXX-XXXX-XXXX</span></p>
-                    <button id="copy-download-license" class="btn btn-sm">
-                        <i class="fas fa-copy"></i> Copy
-                    </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Email Verification Overlay (shown if email is not verified) -->
+            <div id="verification-overlay" class="verification-overlay" style="display: none;">
+                <div class="verification-overlay-content">
+                    <i class="fas fa-envelope"></i>
+                    <h2>Email Verification Required</h2>
+                    <p>Please verify your email address to access the dashboard features.</p>
+                    <button id="overlay-resend-verification" class="btn btn-primary">Resend Verification Email</button>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
 
-            <!-- Billing Section -->
-            <section id="billing-section" class="content-section">
-                <div class="section-header">
-                    <h2>Billing & Invoices</h2>
-                </div>
-                
-                <!-- Transaction History Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Transaction History</h3>
+            <!-- Dashboard Content Sections -->
+            <div class="content-sections">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="content-section active">
+                    <div class="section-header">
+                        <h2>Dashboard</h2>
                     </div>
-                    <div class="card-body">
-                        <div class="transaction-filters">
-                            <div class="filter-group">
-                                <label for="transaction-type">Type</label>
-                                <select id="transaction-type" class="form-control">
-                                    <option value="all">All</option>
-                                    <option value="subscription">Subscription</option>
-                                    <option value="credit">Credit Purchase</option>
-                                </select>
+                    
+                    <!-- Subscription Container -->
+                    <div id="subscription-container">
+                        <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading subscription data...</div>
+                    </div>
+                    
+                    <!-- License Key Card - Only shown when subscribed -->
+                    <div id="license-key-card" class="card minimal" style="display: none;">
+                        <div class="card-content">
+                            <div class="card-icon">
+                                <i class="fas fa-key"></i>
                             </div>
-                            <div class="filter-group">
-                                <label for="transaction-period">Period</label>
-                                <select id="transaction-period" class="form-control">
-                                    <option value="all">All Time</option>
-                                    <option value="month">This Month</option>
-                                    <option value="3month">Last 3 Months</option>
-                                    <option value="year">This Year</option>
-                                </select>
+                            <div class="card-details">
+                                <h3>License Key</h3>
+                                <div class="license-key-wrapper">
+                                    <code class="license-key" id="license-key">••••••••-••••-••••-••••-••••••••••••</code>
+                                    <button id="copy-license" class="btn-icon">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table" id="transactions-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Description</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Invoice</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="transactions-body">
-                                    <!-- Will be dynamically populated -->
-                                    <tr>
-                                        <td colspan="5" class="text-center">
-                                            <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading transactions...</div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    </div>
+                    
+                    <!-- Downloads Section - Only shown when subscribed -->
+                    <div id="downloads-container" style="display: none;">
+                        <div class="card minimal">
+                            <div class="card-content">
+                                <div class="card-details">
+                                    <h3>Download Yok-AI</h3>
+                                    <p>Version 1.0.0 • Released May 1, 2025</p>
+                                    <button id="download-windows" class="btn btn-dark">
+                                        <i class="fab fa-windows"></i> Windows
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                    
+                    <!-- Support Notice -->
+                    <div class="info-notice">
+                        <i class="fas fa-info-circle"></i>
+                        <p>For subscription changes or cancellations, please contact <a href="mailto:support@yok-ai.com">support@yok-ai.com</a></p>
+                    </div>
+                </section>
 
-            <!-- Profile Section -->
-            <section id="profile-section" class="content-section">
-                <div class="section-header">
-                    <h2>Profile</h2>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Account Information</h3>
+                <!-- Billing Section -->
+                <section id="billing-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Billing History</h2>
                     </div>
-                    <div class="card-body">
-                        <form id="profile-form">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="profile-name">Full Name</label>
-                                    <input type="text" id="profile-name" class="form-control" placeholder="Your full name">
-                                </div>
-                                <div class="form-group">
-                                    <label for="profile-email">Email Address</label>
-                                    <input type="email" id="profile-email" class="form-control" placeholder="Your email address" disabled>
-                                </div>
+                    
+                    <div class="card minimal">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Description</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Invoice</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactions-body">
+                                        <tr>
+                                            <td colspan="5" class="text-center">
+                                                <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading transactions...</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="profile-company">Company</label>
-                                    <input type="text" id="profile-company" class="form-control" placeholder="Your company">
-                                </div>
-                                <div class="form-group">
-                                    <label for="profile-role">Role</label>
-                                    <input type="text" id="profile-role" class="form-control" placeholder="Your role">
-                                </div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Change Password</h3>
+                </section>
+
+                <!-- Profile Section -->
+                <section id="profile-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Profile</h2>
                     </div>
-                    <div class="card-body">
-                        <form id="password-form">
-                            <div class="form-group">
-                                <label for="current-password">Current Password</label>
-                                <input type="password" id="current-password" class="form-control" placeholder="Enter current password">
+                    
+                    <div class="card minimal">
+                        <div class="card-body">
+                            <h3>Account Information</h3>
+                            <div class="profile-info">
+                                <div class="info-item">
+                                    <label>Full Name</label>
+                                    <div class="info-value" id="profile-name-display">John Doe</div>
+                                </div>
+                                <div class="info-item">
+                                    <label>Email Address</label>
+                                    <div class="info-value" id="profile-email-display">john@example.com</div>
+                                </div>
                             </div>
-                            <div class="form-row">
+                            <p class="text-muted">To update your account information, contact <a href="mailto:support@yok-ai.com">support@yok-ai.com</a></p>
+                        </div>
+                    </div>
+                    
+                    <div class="card minimal">
+                        <div class="card-body">
+                            <h3><i class="fas fa-shield-alt"></i> Change Password</h3>
+                            <form id="password-form">
+                                <div class="form-group">
+                                    <label for="current-password">Current Password</label>
+                                    <input type="password" id="current-password" class="form-control" placeholder="Enter current password">
+                                </div>
                                 <div class="form-group">
                                     <label for="new-password">New Password</label>
                                     <input type="password" id="new-password" class="form-control" placeholder="Enter new password">
@@ -245,103 +197,95 @@
                                     <label for="confirm-password">Confirm New Password</label>
                                     <input type="password" id="confirm-password" class="form-control" placeholder="Confirm new password">
                                 </div>
-                            </div>
-                            <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">Update Password</button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- Support Section -->
-            <section id="support-section" class="content-section">
-                <div class="section-header">
-                    <h2>Support</h2>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Frequently Asked Questions</h3>
+                <!-- Support Section -->
+                <section id="support-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Support</h2>
                     </div>
-                    <div class="card-body">
-                        <div class="accordion" id="faq-accordion">
-                            <div class="accordion-item">
-                                <div class="accordion-header" data-toggle="collapse" data-target="#faq1">
-                                    <h4>How do I activate my software?</h4>
-                                    <i class="fas fa-chevron-down"></i>
-                                </div>
-                                <div id="faq1" class="accordion-collapse collapse">
-                                    <div class="accordion-body">
-                                        <p>To activate your Yok-AI software, download and install the application, then enter your license key when prompted during the first launch. Your license key can be found in the Downloads section of this dashboard.</p>
+                    
+                    <div class="card minimal">
+                        <div class="card-body">
+                            <h3>Frequently Asked Questions</h3>
+                            <div class="accordion" id="faq-accordion">
+                                <div class="accordion-item">
+                                    <div class="accordion-header" data-toggle="collapse" data-target="#faq1">
+                                        <h4>How do I activate my software?</h4>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                    <div id="faq1" class="accordion-collapse collapse">
+                                        <div class="accordion-body">
+                                            <p>Launch the Yok-AI desktop application and enter your license key when prompted. Your license key is available in the dashboard.</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="accordion-item">
-                                <div class="accordion-header" data-toggle="collapse" data-target="#faq2">
-                                    <h4>How do I upgrade my subscription?</h4>
-                                    <i class="fas fa-chevron-down"></i>
-                                </div>
-                                <div id="faq2" class="accordion-collapse collapse">
-                                    <div class="accordion-body">
-                                        <p>To upgrade your subscription, go to the Subscription section of the dashboard and select the "Upgrade Plan" option. You can review available plans and complete the upgrade process there.</p>
+                                <div class="accordion-item">
+                                    <div class="accordion-header" data-toggle="collapse" data-target="#faq2">
+                                        <h4>How do I upgrade my subscription?</h4>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                    <div id="faq2" class="accordion-collapse collapse">
+                                        <div class="accordion-body">
+                                            <p>To upgrade your subscription, please contact support@yok-ai.com</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="accordion-item">
-                                <div class="accordion-header" data-toggle="collapse" data-target="#faq3">
-                                    <h4>How do credits work?</h4>
-                                    <i class="fas fa-chevron-down"></i>
-                                </div>
-                                <div id="faq3" class="accordion-collapse collapse">
-                                    <div class="accordion-body">
-                                        <p>Credits are used each time you utilize specific features in the Yok-AI software. Your subscription includes a set number of credits that refresh with each billing cycle. You can purchase additional credits if needed from the Dashboard or Subscription section.</p>
+                                <div class="accordion-item">
+                                    <div class="accordion-header" data-toggle="collapse" data-target="#faq3">
+                                        <h4>How do credits work?</h4>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                    <div id="faq3" class="accordion-collapse collapse">
+                                        <div class="accordion-body">
+                                            <p>Credits are used for AI processing in the Yok-AI software. Each operation consumes credits based on complexity.</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="accordion-item">
-                                <div class="accordion-header" data-toggle="collapse" data-target="#faq4">
-                                    <h4>How do I cancel my subscription?</h4>
-                                    <i class="fas fa-chevron-down"></i>
-                                </div>
-                                <div id="faq4" class="accordion-collapse collapse">
-                                    <div class="accordion-body">
-                                        <p>To cancel your subscription, go to the Subscription section and click on the "Cancel Subscription" button. Your subscription will remain active until the end of your current billing period.</p>
+                                <div class="accordion-item">
+                                    <div class="accordion-header" data-toggle="collapse" data-target="#faq4">
+                                        <h4>How do I cancel my subscription?</h4>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                    <div id="faq4" class="accordion-collapse collapse">
+                                        <div class="accordion-body">
+                                            <p>To cancel your subscription, please contact support@yok-ai.com</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Contact Support</h3>
-                    </div>
-                    <div class="card-body">
-                        <form id="support-form">
-                            <div class="form-group">
-                                <label for="support-subject">Subject</label>
-                                <input type="text" id="support-subject" class="form-control" placeholder="What's your question about?">
-                            </div>
-                            <div class="form-group">
-                                <label for="support-message">Message</label>
-                                <textarea id="support-message" class="form-control" rows="5" placeholder="Describe your issue or question in detail"></textarea>
-                            </div>
-                            <div class="form-actions">
+                    
+                    <div class="card minimal">
+                        <div class="card-body">
+                            <h3>Contact Support</h3>
+                            <form id="support-form">
+                                <div class="form-group">
+                                    <label for="support-subject">Subject</label>
+                                    <input type="text" id="support-subject" class="form-control" placeholder="What's your question about?">
+                                </div>
+                                <div class="form-group">
+                                    <label for="support-message">Message</label>
+                                    <textarea id="support-message" class="form-control" rows="5" placeholder="Describe your issue or question in detail"></textarea>
+                                </div>
                                 <button type="submit" class="btn btn-primary">Send Message</button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            </section>
-        </div>
+                </section>
+            </div>
+        </main>
     </div>
 
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Modal Templates -->
+    <!-- Modal Container -->
     <div id="modal-container" class="modal-container">
         <!-- Buy Credits Modal -->
         <div id="buy-credits-modal" class="modal">
@@ -372,23 +316,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Cancel Subscription Modal -->
-        <div id="cancel-subscription-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Cancel Subscription</h3>
-                    <button class="modal-close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to cancel your subscription? Your subscription will remain active until the end of your current billing period.</p>
-                    <div class="modal-actions">
-                        <button class="btn btn-outline modal-close">No, Keep My Subscription</button>
-                        <button id="confirm-cancel" class="btn btn-danger">Yes, Cancel Subscription</button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     
     <!-- Firebase SDK -->
@@ -403,6 +330,5 @@
     <!-- Application Script -->
     <script src="./js/api-service.js"></script>
     <script src="./js/yok-ai-dashboard.js"></script>
-    
 </body>
 </html>
