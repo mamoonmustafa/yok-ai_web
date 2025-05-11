@@ -119,7 +119,7 @@ class handler(BaseHTTPRequestHandler):
                                 'customer': {'id': user_data_firestore.get('paddleCustomerId')},
                                 'subscriptions': [subscription_data],
                                 'license_keys': [{'key': license_key}] if license_key else [],
-                                'credit_usage': credit_usage
+                                'credit_usage': user_data_firestore.get('creditUsage', {'used': 0, 'total': 0})
                             }
 
                             # Convert timestamps to strings for JSON serialization
@@ -238,14 +238,22 @@ class handler(BaseHTTPRequestHandler):
                 print(f"Subscription ID: {sub.get('id')}, Status: {sub.get('status')}, Active: {sub.get('active')}")
             
             # Format the response
+            credit_usage_data = {'used': 0, 'total': total_credits}
+            if user_data and user_data.get('user_id'):
+                try:
+                    user_ref = db.collection('users').document(user_data.get('user_id'))
+                    user_doc = user_ref.get()
+                    if user_doc.exists:
+                        user_firestore_data = user_doc.to_dict()
+                        credit_usage_data = user_firestore_data.get('creditUsage', {'used': 0, 'total': total_credits})
+                except:
+                    pass
+
             dashboard_data = {
                 'customer': customer,
                 'subscriptions': processed_subscriptions,
                 'license_keys': license_keys,
-                'credit_usage': {
-                    'used': 0,  # You would get this from your database
-                    'total': total_credits
-                }
+                'credit_usage': credit_usage_data
             }
             
             # Return dashboard data
