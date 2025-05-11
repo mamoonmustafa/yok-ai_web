@@ -232,7 +232,7 @@ async function openCheckout(plan) {
             const creditAmount = plan.replace('credit-', '');
             console.log('Credit amount extracted:', creditAmount);
             console.log('Available credit prices:', CONFIG.prices.credits);
-            priceId = CONFIG.prices.credits[creditAmount];
+            priceId = CONFIG.prices.credits[String(creditAmount)];
             console.log('Credit price ID found:', priceId);
         } else {
             throw new Error(`Unknown plan type: ${plan}`);
@@ -611,6 +611,16 @@ const Dashboard = {
             // Update credit usage display
             Dashboard.updateCreditUsage(creditUsage.used, creditUsage.total);
             
+            // Add this setTimeout to ensure the button exists before binding events
+            setTimeout(() => {
+                const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
+                if (buyMoreCreditsBtn) {
+                    buyMoreCreditsBtn.addEventListener('click', () => {
+                        console.log('Buy More Credits clicked');
+                        Dashboard.openModal('buy-credits-modal');
+                    });
+                }
+            }, 0);
             // Bind event handlers
             const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
             if (buyMoreCreditsBtn) {
@@ -769,33 +779,6 @@ const Dashboard = {
         }
     },
     /**
-     * Initialize buy credits modal
-     */
-    initBuyCreditsModal: function() {
-        const buyMoreCreditsBtn = document.getElementById('buy-more-credits');
-        const buyCreditsModal = document.getElementById('buy-credits-modal');
-        const buyPackageButtons = document.querySelectorAll('.buy-credit-btn');
-        
-        if (buyMoreCreditsBtn && buyCreditsModal) {
-            buyMoreCreditsBtn.addEventListener('click', () => {
-                Dashboard.openModal('buy-credits-modal');
-            });
-            
-            // Buy credit package buttons
-            buyPackageButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const amount = button.getAttribute('data-amount');
-                    
-                    // Call openCheckout with credit- prefixed plan
-                    openCheckout(`credit-${amount}`);
-                    
-                    // Close modal
-                    Dashboard.closeAllModals();
-                });
-            });
-        }
-    },
-    /**
      * Setup event listeners
      */
     setupEventListeners: function() {
@@ -808,13 +791,12 @@ const Dashboard = {
             });
         }
         
-        // Close dropdown when clicking outside
+        // Add event delegation for dynamically created buy credits button
         document.addEventListener('click', function(e) {
-            if (domElements.userDropdown && 
-                domElements.userDropdownToggle && 
-                !domElements.userDropdownToggle.contains(e.target) && 
-                !domElements.userDropdown.contains(e.target)) {
-                domElements.userDropdown.classList.remove('active');
+            if (e.target && e.target.id === 'buy-more-credits') {
+                e.preventDefault();
+                console.log('Buy More Credits clicked (delegated)');
+                Dashboard.openModal('buy-credits-modal');
             }
         });
         
@@ -1424,7 +1406,8 @@ const Dashboard = {
         const buyPackageButtons = document.querySelectorAll('.buy-credit-btn');
         
         console.log('Buy credits modal initialized');
-        console.log('Found buttons:', buyPackageButtons.length);
+        console.log('Buy more credits button found:', !!buyMoreCreditsBtn);
+        console.log('Found package buttons:', buyPackageButtons.length);
         
         if (buyMoreCreditsBtn && buyCreditsModal) {
             buyMoreCreditsBtn.addEventListener('click', () => {
@@ -1435,12 +1418,10 @@ const Dashboard = {
             // Buy credit package buttons
             buyPackageButtons.forEach(button => {
                 button.addEventListener('click', () => {
-                    const amount = button.getAttribute('data-amount');
-                    const price = button.getAttribute('data-price');
-                    
-                    console.log('Credit button clicked - Amount:', amount, 'Price:', price);
-                    
-                    Dashboard.purchaseCredits(amount, price);
+                    console.log('Credit button clicked - Amount:', amount);
+                
+                    // Call openCheckout with credit- prefix
+                    openCheckout(`credit-${amount}`);
                     
                     // Close modal
                     Dashboard.closeAllModals();
