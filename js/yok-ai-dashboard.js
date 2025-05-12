@@ -696,11 +696,11 @@ const Dashboard = {
             <div class="plan-card">
                 <div class="plan-header">
                     <div class="plan-name">Stealth Assistant</div>
-                    <div class="plan-price">$49.99</div>
+                    <div class="plan-price">$25</div>
                     <div class="plan-billing">/mo</div>
                 </div>
                 <div class="plan-description">
-                    Invisible support for your critical moments with 500 monthly credits.
+                    Invisible support for your critical moments with 150 monthly credits.
                 </div>
                 <div class="plan-features">
                     <ul>
@@ -722,16 +722,16 @@ const Dashboard = {
             <div class="plan-card popular">
                 <div class="plan-popular">Most Popular</div>
                 <div class="plan-header">
-                    <div class="plan-name">Shadow Exec</div>
-                    <div class="plan-price">$89.99</div>
+                    <div class="plan-name">Shadow Executive</div>
+                    <div class="plan-price">$50</div>
                     <div class="plan-billing">/mo</div>
                 </div>
                 <div class="plan-description">
-                    Continuous intelligence that adapts to your workflow with 1,000 monthly credits.
+                    Continuous intelligence that adapts to your workflow with 500 monthly credits.
                 </div>
                 <div class="plan-features">
                     <ul>
-                        <li><i class="fas fa-check"></i> Up to 200 credits roll over monthly</li>
+                        <li><i class="fas fa-check"></i> Everything in Stealth Assistant</li>
                         <li><i class="fas fa-check"></i> Advanced anti-detection system</li>
                         <li><i class="fas fa-check"></i> <span class="mode ghost-mode">Ghost Mode</span> <span class="mode insight-mode">Insight Mode</span> Balanced performance</li>
                         <li><i class="fas fa-check"></i> Priority support (8-hour response)</li>
@@ -749,15 +749,15 @@ const Dashboard = {
             <div class="plan-card">
                 <div class="plan-header">
                     <div class="plan-name">Phantom Intelligence</div>
-                    <div class="plan-price">$199.99</div>
+                    <div class="plan-price">$100</div>
                     <div class="plan-billing">/mo</div>
                 </div>
                 <div class="plan-description">
-                    Strategic advantage without constraints. 2,500 credits valid for an entire year.
+                    Strategic advantage without constraints. 1,100 credits valid for an entire year.
                 </div>
                 <div class="plan-features">
                     <ul>
-                        <li><i class="fas fa-check"></i> Annual credit validity (use anytime)</li>
+                        <li><i class="fas fa-check"></i> Everything in Shadow Executive</li>
                         <li><i class="fas fa-check"></i> <span class="mode ghost-mode">Ghost Mode</span> <span class="mode insight-mode">Insight Mode</span> <span class="mode advantage-mode">Advantage Mode</span></li>
                         <li><i class="fas fa-check"></i> VIP emergency support (4-hour response)</li>
                         <li><i class="fas fa-check"></i> Priority processing during peak hours</li>

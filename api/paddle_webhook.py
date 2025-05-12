@@ -48,9 +48,9 @@ def determine_credit_allocation(price_id):
     """Determine how many credits to allocate based on the plan"""
     # Map price IDs to credit amounts
     credit_map = {
-        "pri_01jsw881b64y680g737k4dx7fm": 100,  # Starter plan
+        "pri_01jsw881b64y680g737k4dx7fm": 150,  # Starter plan
         "pri_01jsw8ab6sd8bw2h7epy8tcp14": 500,  # Pro plan
-        "pri_01jsw8dtn4araas7xez8e24mdh": 2000,  # Enterprise plan
+        "pri_01jsw8dtn4araas7xez8e24mdh": 1100,  # Enterprise plan
     }
     
     return credit_map.get(price_id, 0)
