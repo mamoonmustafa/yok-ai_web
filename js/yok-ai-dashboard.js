@@ -692,77 +692,85 @@ const Dashboard = {
             
             // Hard-coded plan HTML
             plansGrid.innerHTML = `
-                <!-- Starter Plan -->
-                <div class="plan-card">
-                    <div class="plan-header">
-                        <div class="plan-name">Starter</div>
-                        <div class="plan-price">$9.99</div>
-                        <div class="plan-billing">per month</div>
-                    </div>
-                    <div class="plan-features">
-                        <ul>
-                            <li><i class="fas fa-check"></i> 100 Credits per month</li>
-                            <li><i class="fas fa-check"></i> Basic support</li>
-                            <li><i class="fas fa-check"></i> Single device</li>
-                            <li><i class="fas fa-check"></i> 1GB storage</li>
-                        </ul>
-                    </div>
-                    <div class="plan-action">
-                        <button class="btn btn-primary subscribe-btn" data-plan="starter">
-                            Subscribe Now
-                        </button>
-                    </div>
+            <!-- Stealth Assistant Plan -->
+            <div class="plan-card">
+                <div class="plan-header">
+                    <div class="plan-name">Stealth Assistant</div>
+                    <div class="plan-price">$49.99</div>
+                    <div class="plan-billing">/mo</div>
                 </div>
-                
-                <!-- Pro Plan -->
-                <div class="plan-card popular">
-                    <div class="plan-popular">Most Popular</div>
-                    <div class="plan-header">
-                        <div class="plan-name">Professional</div>
-                        <div class="plan-price">$29.99</div>
-                        <div class="plan-billing">per month</div>
-                    </div>
-                    <div class="plan-features">
-                        <ul>
-                            <li><i class="fas fa-check"></i> 500 Credits per month</li>
-                            <li><i class="fas fa-check"></i> Priority support</li>
-                            <li><i class="fas fa-check"></i> Up to 3 devices</li>
-                            <li><i class="fas fa-check"></i> 10GB storage</li>
-                            <li><i class="fas fa-check"></i> Advanced analytics</li>
-                        </ul>
-                    </div>
-                    <div class="plan-action">
-                        <button class="btn btn-primary subscribe-btn" data-plan="pro">
-                            Subscribe Now
-                        </button>
-                    </div>
+                <div class="plan-description">
+                    Invisible support for your critical moments with 500 monthly credits.
                 </div>
-                
-                <!-- Enterprise Plan -->
-                <div class="plan-card">
-                    <div class="plan-header">
-                        <div class="plan-name">Enterprise</div>
-                        <div class="plan-price">$79.99</div>
-                        <div class="plan-billing">per month</div>
-                    </div>
-                    <div class="plan-features">
-                        <ul>
-                            <li><i class="fas fa-check"></i> 2000 Credits per month</li>
-                            <li><i class="fas fa-check"></i> 24/7 support</li>
-                            <li><i class="fas fa-check"></i> Unlimited devices</li>
-                            <li><i class="fas fa-check"></i> 50GB storage</li>
-                            <li><i class="fas fa-check"></i> Advanced analytics</li>
-                            <li><i class="fas fa-check"></i> Team management</li>
-                            <li><i class="fas fa-check"></i> API access</li>
-                        </ul>
-                    </div>
-                    <div class="plan-action">
-                        <button class="btn btn-primary subscribe-btn" data-plan="enterprise">
-                            Subscribe Now
-                        </button>
-                    </div>
+                <div class="plan-features">
+                    <ul>
+                        <li><i class="fas fa-check"></i> Discreet notification system</li>
+                        <li><i class="fas fa-check"></i> Unlimited screen captures</li>
+                        <li><i class="fas fa-check"></i> Basic keystroke protection</li>
+                        <li><i class="fas fa-check"></i> <span class="mode ghost-mode">Ghost Mode</span> Maximum privacy, minimal footprint</li>
+                        <li><i class="fas fa-check"></i> Standard support (24-hour response)</li>
+                    </ul>
                 </div>
-            `;
+                <div class="plan-action">
+                    <button class="btn btn-primary subscribe-btn" data-plan="stealth">
+                        Subscribe Now
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Shadow Exec Plan -->
+            <div class="plan-card popular">
+                <div class="plan-popular">Most Popular</div>
+                <div class="plan-header">
+                    <div class="plan-name">Shadow Exec</div>
+                    <div class="plan-price">$89.99</div>
+                    <div class="plan-billing">/mo</div>
+                </div>
+                <div class="plan-description">
+                    Continuous intelligence that adapts to your workflow with 1,000 monthly credits.
+                </div>
+                <div class="plan-features">
+                    <ul>
+                        <li><i class="fas fa-check"></i> Up to 200 credits roll over monthly</li>
+                        <li><i class="fas fa-check"></i> Advanced anti-detection system</li>
+                        <li><i class="fas fa-check"></i> <span class="mode ghost-mode">Ghost Mode</span> <span class="mode insight-mode">Insight Mode</span> Balanced performance</li>
+                        <li><i class="fas fa-check"></i> Priority support (8-hour response)</li>
+                        <li><i class="fas fa-check"></i> Enhanced capture capabilities</li>
+                    </ul>
+                </div>
+                <div class="plan-action">
+                    <button class="btn btn-primary subscribe-btn" data-plan="shadow">
+                        Subscribe Now
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Phantom Intelligence Plan -->
+            <div class="plan-card">
+                <div class="plan-header">
+                    <div class="plan-name">Phantom Intelligence</div>
+                    <div class="plan-price">$199.99</div>
+                    <div class="plan-billing">/mo</div>
+                </div>
+                <div class="plan-description">
+                    Strategic advantage without constraints. 2,500 credits valid for an entire year.
+                </div>
+                <div class="plan-features">
+                    <ul>
+                        <li><i class="fas fa-check"></i> Annual credit validity (use anytime)</li>
+                        <li><i class="fas fa-check"></i> <span class="mode ghost-mode">Ghost Mode</span> <span class="mode insight-mode">Insight Mode</span> <span class="mode advantage-mode">Advantage Mode</span></li>
+                        <li><i class="fas fa-check"></i> VIP emergency support (4-hour response)</li>
+                        <li><i class="fas fa-check"></i> Priority processing during peak hours</li>
+                        <li><i class="fas fa-check"></i> Dedicated account manager</li>
+                    </ul>
+                </div>
+                <div class="plan-action">
+                    <button class="btn btn-primary subscribe-btn" data-plan="phantom">
+                        Subscribe Now
+                    </button>
+                </div>
+            </div>
+        `;
             
             subscriptionContainer.appendChild(plansGrid);
             

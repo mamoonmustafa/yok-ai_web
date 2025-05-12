@@ -1282,3 +1282,37 @@ textarea.form-control {
     margin: 0;
     color: var(--text-secondary);
 }
+
+/* Mode Buttons */
+.mode {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.ghost-mode {
+    background-color: #333;
+    color: white;
+}
+
+.insight-mode {
+    background-color: var(--primary);
+    color: white;
+}
+
+.advantage-mode {
+    background-color: #ff4757;
+    color: white;
+}
+
+/* Plan description */
+.plan-description {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 1rem 0;
+    padding: 0 1rem;
+}
