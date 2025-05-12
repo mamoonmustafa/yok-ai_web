@@ -712,7 +712,7 @@ const Dashboard = {
                     </ul>
                 </div>
                 <div class="plan-action">
-                    <button class="btn btn-primary subscribe-btn" data-plan="stealth">
+                    <button class="btn btn-primary subscribe-btn" data-plan="starter">
                         Subscribe Now
                     </button>
                 </div>
@@ -739,7 +739,7 @@ const Dashboard = {
                     </ul>
                 </div>
                 <div class="plan-action">
-                    <button class="btn btn-primary subscribe-btn" data-plan="shadow">
+                    <button class="btn btn-primary subscribe-btn" data-plan="pro">
                         Subscribe Now
                     </button>
                 </div>
@@ -765,7 +765,7 @@ const Dashboard = {
                     </ul>
                 </div>
                 <div class="plan-action">
-                    <button class="btn btn-primary subscribe-btn" data-plan="phantom">
+                    <button class="btn btn-primary subscribe-btn" data-plan="enterprise">
                         Subscribe Now
                     </button>
                 </div>
