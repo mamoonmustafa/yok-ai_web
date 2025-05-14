@@ -1311,7 +1311,7 @@
             border-radius: 24px;
             padding: 40px 30px;
             /* Reduced horizontal padding */
-            flex-basis: 350px;
+            /* flex-basis: 350px;    */
             /* Fixed width */
             max-width: 350px;
             /* Control card width */
@@ -1704,7 +1704,7 @@
             }
 
             .globalnav-item {
-                width: 100%;
+                /* width: 100%; */
                 margin: 0;
             }
 
@@ -1728,6 +1728,7 @@
             }
 
             .get-started-btn {
+                padding: 8px 16px;
                 margin: 16px 0;
             }
 
@@ -2467,7 +2468,7 @@
             height: 300px;
             background: var(--web-highlight-1);
             bottom: -50px;
-            right: -50px;
+            right: 0;
         }
 
         .bg-circle-3 {
@@ -3608,12 +3609,12 @@
                     <a href="./contact" class="globalnav-link">Contact</a>
                 </li>
                 <li class="globalnav-item">
-                    <a href="./signin" class="get-started-btn"
+                    <a href="./signin" class="globalnav-link get-started-btn"
                         style="background: transparent; color: var(--primary); border: 1px solid var(--primary); margin-left: 0; margin-right: 0;">Sign
                         In</a>
                 </li>
                 <li class="globalnav-item">
-                    <a href="./signup" class="get-started-btn">Get Started</a>
+                    <a href="./signup" class="globalnav-link get-started-btn">Get Started</a>
                 </li>
             </ul>
 
@@ -4314,7 +4315,8 @@
                 </div>
 
                 <div class="pricing-card fade-in">
-                    <div class="pricing-badge" style="background: linear-gradient(135deg, #ff375f, #ff2d55); width:170px ;">Ultimate
+                    <div class="pricing-badge"
+                        style="background: linear-gradient(135deg, #ff375f, #ff2d55); width:170px ;">Ultimate
                         Freedom</div>
                     <div class="pricing-card-header">
                         <h3 class="pricing-title">Phantom Intelligence</h3>
