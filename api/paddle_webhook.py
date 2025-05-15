@@ -189,42 +189,6 @@ def find_user(customer_id):
     
     return None, None
 
-def update_customer_name(customer_id, display_name):
-    """Update the customer name in Paddle"""
-    try:
-        api_key = os.environ.get("PADDLE_API_KEY")
-        api_base_url = os.environ.get("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
-        
-        # Fix the double slash issue
-        api_base_url = api_base_url.rstrip('/')
-        
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
-        
-        # Prepare update data
-        update_data = {
-            "name": display_name
-        }
-        
-        # Update customer
-        url = f"{api_base_url}/customers/{customer_id}"
-        logger.info(f"Updating customer name for: {customer_id}")
-        
-        response = requests.patch(url, headers=headers, json=update_data)
-        
-        if response.status_code in [200, 201, 204]:
-            logger.info(f"Successfully updated customer name to '{display_name}'")
-            return True
-        
-        logger.error(f"Failed to update customer name: {response.status_code}, {response.text}")
-        return False
-    except Exception as e:
-        logger.error(f"Error updating customer name: {e}")
-        logger.error(traceback.format_exc())
-        return False
 
 def extract_price_info(event_data):
     """Extract price information from event data"""

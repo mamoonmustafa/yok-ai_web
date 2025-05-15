@@ -153,14 +153,28 @@ def update_customer_name(customer_id, name):
     """Update the customer's name in Paddle"""
     print(f"Updating name for customer {customer_id} to '{name}'")
     
-    url = f'{API_BASE_URL.rstrip("/")}/customers/{customer_id}'
-    
-    # Only send the name field in the request
-    data = {
-        "name": name
-    }
-    
     try:
+        api_key = os.environ.get("PADDLE_API_KEY")
+        api_base_url = os.environ.get("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
+        
+        # Fix the double slash issue
+        api_base_url = api_base_url.rstrip('/')
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Paddle-Version": "2023-01-01"  # Add this header
+        }
+        
+        # Only send the name field in the request
+        data = {
+            "name": name
+        }
+        
+        url = f'{api_base_url}/customers/{customer_id}'
+        print(f"Updating customer name at URL: {url}")
+        
         response = requests.patch(
             url,
             headers=headers,
@@ -169,7 +183,7 @@ def update_customer_name(customer_id, name):
         
         print(f"Update customer name response status: {response.status_code}")
         
-        if response.status_code in [200, 201, 202]:
+        if response.status_code in [200, 201, 202, 204]:
             print(f"Successfully updated customer name in Paddle")
             return True
         else:
