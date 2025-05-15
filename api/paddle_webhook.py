@@ -369,7 +369,7 @@ def handle_subscription_created(event_data, webhook_data):
                 user_data = user_doc.to_dict()
                 logger.info(f"[DEBUG] User data keys: {list(user_data.keys()) if user_data else None}")
     
-                display_name = user_data.get('displayName')
+                display_name = user_data.get('name') or user_data.get('displayName') or user_data.get('display_name')
                 logger.info(f"[DEBUG] Found display name: {display_name}")
 
                 if display_name:
@@ -541,7 +541,7 @@ def handle_subscription_updated(event_data, webhook_data):
                 try:
                     # Get the user's displayName from Firestore
                     user_data = user_doc.to_dict()
-                    display_name = user_data.get('displayName')
+                    display_name = user_data.get('name') or user_data.get('displayName') or user_data.get('display_name')
                     
                     if display_name:
                         # Update the customer name in Paddle
