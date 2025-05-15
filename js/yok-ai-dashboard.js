@@ -146,7 +146,7 @@ async function initializePaddle() {
                     // Force page reload after short delay
                     setTimeout(() => {
                         window.location.href = '/dashboard';
-                    }, 2000);
+                    }, 5000);
                 }
             }
         });
