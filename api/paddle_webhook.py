@@ -10,6 +10,7 @@ from firebase_admin import credentials, firestore
 import traceback
 import logging
 from http.server import BaseHTTPRequestHandler
+from .paddle_api import update_customer_name
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
