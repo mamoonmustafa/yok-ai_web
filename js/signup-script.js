@@ -300,10 +300,10 @@ function showAlert(message, type) {
     }
 }
 
-// Check if user is already signed in
-firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        // User is signed in, redirect to dashboard
-        window.location.href = '/dashboard';
-    }
-});
+// // Check if user is already signed in
+// firebase.auth().onAuthStateChanged((user) => {
+//     if (user) {
+//         // User is signed in, redirect to dashboard
+//         window.location.href = '/dashboard';
+//     }
+// });
