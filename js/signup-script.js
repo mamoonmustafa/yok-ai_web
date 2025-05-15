@@ -144,9 +144,7 @@ if (signupForm) {
                     // (sometimes sending immediately after creation can fail)
                     return new Promise(resolve => {
                         setTimeout(() => {
-                            user.sendEmailVerification({
-                                url: window.location.origin + '/signin'
-                            })
+                            user.sendEmailVerification()
                             .then(() => {
                                 console.log("Verification email sent successfully");
                                 resolve();

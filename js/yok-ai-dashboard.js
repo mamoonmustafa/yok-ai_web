@@ -143,22 +143,9 @@ async function initializePaddle() {
                     // Show a more informative message
                     Dashboard.showToast('Payment successful! Processing your subscription...', 'success');
                     
-                    // Wait longer for webhook to process before first attempt
+                    // Force page reload after short delay
                     setTimeout(() => {
-                        console.log("First attempt to reload dashboard data after checkout completion");
-                        Dashboard.loadDashboardData();
-                        
-                        // Try again after another delay for webhook processing
-                        setTimeout(() => {
-                            console.log("Second attempt to reload dashboard data after checkout completion");
-                            Dashboard.loadDashboardData();
-                            
-                            // One final attempt after a longer delay
-                            setTimeout(() => {
-                                console.log("Final attempt to reload dashboard data after checkout completion");
-                                Dashboard.loadDashboardData();
-                            }, 10000);
-                        }, 5000);
+                        window.location.reload();
                     }, 2000);
                 }
             }
@@ -506,20 +493,22 @@ const Dashboard = {
                 if (!isEmailVerified) {
                     Dashboard.startVerificationCheck();
                 }
-                
-                // Now that user is authenticated, initialize Paddle
-                initializePaddle().then(() => {
-                    console.log("Paddle initialized successfully after authentication");
-                }).catch(error => {
-                    console.error("Failed to initialize Paddle:", error);
-                    Dashboard.showToast('Payment system initialization failed', 'error');
-                });
+                else
+                {
+                    // Now that user is authenticated, initialize Paddle
+                    initializePaddle().then(() => {
+                        console.log("Paddle initialized successfully after authentication");
+                    }).catch(error => {
+                        console.error("Failed to initialize Paddle:", error);
+                        Dashboard.showToast('Payment system initialization failed', 'error');
+                    });
+                    // Load dashboard data
+                    Dashboard.loadDashboardData();
 
+                }
                 // Save user data if it's a new user
                 Dashboard.saveUserData(user);
                 
-                // Load dashboard data
-                Dashboard.loadDashboardData();
             } else {
                 // User is not signed in, redirect to sign in page
                 window.location.href = '/signin';
@@ -1052,21 +1041,30 @@ const Dashboard = {
      * Update UI based on verification status
      */
     updateUIForVerification: function(isVerified) {
-        if (domElements.verificationBanner && domElements.verificationOverlay) {
-            if (isVerified) {
-                domElements.verificationBanner.style.display = 'none';
-                domElements.verificationOverlay.style.display = 'none';
-                
-                // Enable all interactions
-                Dashboard.enableInteractions();
-            } else {
-                domElements.verificationBanner.style.display = 'block';
-                domElements.verificationOverlay.style.display = 'flex';
-                
-                // Disable all interactive elements except sign out
-                Dashboard.disableInteractions();
+    if (domElements.verificationBanner && domElements.verificationOverlay) {
+        if (isVerified) {
+            domElements.verificationBanner.style.display = 'none';
+            domElements.verificationOverlay.style.display = 'none';
+            
+            // Enable all interactions
+            Dashboard.enableInteractions();
+            
+            // Only load dashboard data if verified
+            Dashboard.loadDashboardData();
+        } else {
+            domElements.verificationBanner.style.display = 'block';
+            domElements.verificationOverlay.style.display = 'flex';
+            
+            // Disable all interactive elements except sign out
+            Dashboard.disableInteractions();
+            
+            // Clear any existing dashboard content
+            const subscriptionContainer = document.getElementById('subscription-container');
+            if (subscriptionContainer) {
+                subscriptionContainer.innerHTML = '';
             }
         }
+    }
     },
     
     /**
