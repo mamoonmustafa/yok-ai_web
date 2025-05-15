@@ -55,6 +55,27 @@ def determine_credit_allocation(price_id):
     
     return credit_map.get(price_id, 0)
 
+def determine_credit_purchase_amount(price_id):
+    """Determine the credit amount for credit purchase products"""
+    # Map credit product price IDs to credit amounts
+    credit_product_map = {
+        "pri_01jtz766cqbgr935jgfwd3ktcs": 150,  # 150 credits package
+        "pri_01jtz77rkb4m97m0nmtrn5ktcq": 350,  # 350 credits package 
+        "pri_01jtz797bh3j54dbyzgq96tcqt": 500   # 500 credits package
+    }
+    
+    return credit_product_map.get(price_id, 0)
+
+def is_credit_product(price_id):
+    """Check if the price ID belongs to a credit product"""
+    credit_product_ids = [
+        "pri_01jtz766cqbgr935jgfwd3ktcs",  # 150 credits
+        "pri_01jtz77rkb4m97m0nmtrn5ktcq",  # 350 credits
+        "pri_01jtz797bh3j54dbyzgq96tcqt"   # 500 credits
+    ]
+    
+    return price_id in credit_product_ids
+
 def get_customer_details(customer_id):
     """Get customer details from Paddle API using customer ID"""
     try:
@@ -338,15 +359,20 @@ class handler(BaseHTTPRequestHandler):
                     
                     print(f"Processing subscription.updated for {subscription_id}, status: {status}")
                     
-                    # Extract additional data from the event
+                    # Extract additional data for renewal detection
+                    previously_billed_at = event_data.get('previously_billed_at')
                     next_billing_date = event_data.get('next_billed_at')
                     
-                    # Extract price/product details
+                    # Determine if subscription is active
+                    is_active = status.lower() in ['active', 'trialing', 'past_due']
+                    
+                    # Extract price information
                     price_id = None
                     plan_name = None
                     price_amount = 0
                     price_interval = "month"
                     
+                    # Check if there are items
                     if event_data.get('items') and len(event_data.get('items')) > 0:
                         item = event_data.get('items')[0]
                         price = item.get('price', {})
@@ -362,9 +388,6 @@ class handler(BaseHTTPRequestHandler):
                         billing_cycle = price.get('billing_cycle', {})
                         if billing_cycle:
                             price_interval = billing_cycle.get('interval', 'month')
-                    
-                    # Determine if subscription is active
-                    is_active = status.lower() in ['active', 'trialing', 'past_due']
                     
                     # Find user by customer ID first
                     user_id = None
@@ -383,55 +406,141 @@ class handler(BaseHTTPRequestHandler):
                             user_id, user_doc = find_user_by_email(customer_email)
                     
                     if user_id:
-                        # Create a more comprehensive update
-                        update_data = {
-                            'subscription.status': status,
-                            'subscription.active': is_active,
-                            'subscription.updated_at': firestore.SERVER_TIMESTAMP
-                        }
-                        
-                        # Add conditional updates for fields that might have changed
-                        if next_billing_date:
-                            update_data['subscription.next_billing_date'] = next_billing_date
-                        
-                        if price_amount > 0:
-                            update_data['subscription.amount'] = price_amount
+                        # Check if this is a credit product purchase
+                        if is_credit_product(price_id):
+                            # Get credit amount
+                            credit_amount = determine_credit_purchase_amount(price_id)
                             
-                        if price_interval:
-                            update_data['subscription.interval'] = price_interval
-                            
-                        if price_id and plan_name:
-                            update_data['subscription.plan.id'] = price_id
-                            update_data['subscription.plan.name'] = plan_name
-                        
-                        # Update user with comprehensive subscription data
-                        user_ref = db.collection('users').document(user_id)
-                        user_ref.update(update_data)
-                        
-                        print(f"Updated subscription {subscription_id} details for user {user_id}")
-                        
-                        # Update customer name in Paddle
-                        try:
-                            # Get the user's displayName from Firestore
+                            # Get current credit values
                             user_data = user_doc.to_dict()
-                            display_name = user_data.get('displayName')
+                            current_credits = user_data.get('creditUsage', {}).get('total', 0)
+                            used_credits = user_data.get('creditUsage', {}).get('used', 0)
                             
-                            if display_name:
-                                # Import the update_customer_name function
-                                from .paddle_api import update_customer_name
+                            # Update user with additional credits
+                            user_ref = db.collection('users').document(user_id)
+                            
+                            update_data = {
+                                'creditUsage.total': current_credits + credit_amount
+                            }
+                            
+                            print(f"Adding {credit_amount} credits to user {user_id}. New total: {current_credits + credit_amount}")
+                            user_ref.update(update_data)
+                            
+                            # Create a transaction record for the credit purchase
+                            transaction_data = {
+                                'id': event_data.get('transaction_id', f"txn_credits_{uuid.uuid4()}"),
+                                'subscription_id': subscription_id,
+                                'customer_id': customer_id,
+                                'amount': price_amount,
+                                'currency': event_data.get('currency_code', 'USD'),
+                                'date': firestore.SERVER_TIMESTAMP,
+                                'status': 'completed',
+                                'type': 'credit_purchase',
+                                'description': f"Credit purchase: {credit_amount} credits",
+                                'created_at': firestore.SERVER_TIMESTAMP
+                            }
+                            
+                            db.collection('users').document(user_id).collection('transactions').add(transaction_data)
+                            print(f"Created transaction record for credit purchase for user {user_id}")
+                            
+                        else:
+                            # Regular subscription update
+                            
+                            # Check if this is a renewal by examining previously_billed_at
+                            is_renewal = False
+                            if previously_billed_at:
+                                # Check if the previous billing is recent (within the last hour)
+                                try:
+                                    # Parse the ISO timestamp
+                                    prev_billing_time = datetime.datetime.fromisoformat(previously_billed_at.replace('Z', '+00:00'))
+                                    current_time = datetime.datetime.now(datetime.timezone.utc)
+                                    time_diff = current_time - prev_billing_time
+                                    
+                                    # If previous billing was within the last hour, consider it a renewal
+                                    if time_diff.total_seconds() < 3600:  # 1 hour in seconds
+                                        is_renewal = True
+                                        print(f"Detected subscription renewal for user {user_id}")
+                                except Exception as e:
+                                    print(f"Error parsing billing dates: {e}")
+                            
+                            # Create update data dictionary
+                            update_data = {
+                                'subscription.status': status,
+                                'subscription.active': is_active,
+                                'subscription.updated_at': firestore.SERVER_TIMESTAMP
+                            }
+                            
+                            # Add conditional updates for fields that might have changed
+                            if next_billing_date:
+                                update_data['subscription.next_billing_date'] = next_billing_date
+                            
+                            if price_amount > 0:
+                                update_data['subscription.amount'] = price_amount
                                 
-                                # Update the customer name in Paddle
-                                update_result = update_customer_name(customer_id, display_name)
-                                if update_result:
-                                    print(f"Successfully updated Paddle customer name to '{display_name}'")
+                            if price_interval:
+                                update_data['subscription.interval'] = price_interval
+                                
+                            if price_id and plan_name:
+                                update_data['subscription.plan.id'] = price_id
+                                update_data['subscription.plan.name'] = plan_name
+                            
+                            # If this is a renewal, reset credits
+                            if is_renewal and price_id:
+                                # Calculate new credit allocation based on the plan
+                                credit_allocation = determine_credit_allocation(price_id)
+                                
+                                # Reset credits: set used to 0 and total to the plan allocation
+                                update_data['creditUsage.used'] = 0
+                                update_data['creditUsage.total'] = credit_allocation
+                                
+                                print(f"Resetting credits for user {user_id} on renewal. New total: {credit_allocation}")
+                            
+                            # Update user with subscription data
+                            user_ref = db.collection('users').document(user_id)
+                            user_ref.update(update_data)
+                            
+                            print(f"Updated subscription {subscription_id} details for user {user_id}")
+                            
+                            # Create a transaction record for the renewal if applicable
+                            if is_renewal:
+                                transaction_data = {
+                                    'id': event_data.get('transaction_id', f"txn_renewal_{uuid.uuid4()}"),
+                                    'subscription_id': subscription_id,
+                                    'customer_id': customer_id,
+                                    'amount': price_amount,
+                                    'currency': event_data.get('currency_code', 'USD'),
+                                    'date': firestore.SERVER_TIMESTAMP,
+                                    'status': 'completed',
+                                    'type': 'subscription_renewal',
+                                    'description': f"Subscription renewal for {plan_name}",
+                                    'created_at': firestore.SERVER_TIMESTAMP
+                                }
+                                
+                                db.collection('users').document(user_id).collection('transactions').add(transaction_data)
+                                print(f"Created transaction record for subscription renewal for user {user_id}")
+                            
+                            # Update customer name in Paddle
+                            try:
+                                # Get the user's displayName from Firestore
+                                user_data = user_doc.to_dict()
+                                display_name = user_data.get('displayName')
+                                
+                                if display_name:
+                                    # Import the update_customer_name function
+                                    from .paddle_api import update_customer_name
+                                    
+                                    # Update the customer name in Paddle
+                                    update_result = update_customer_name(customer_id, display_name)
+                                    if update_result:
+                                        print(f"Successfully updated Paddle customer name to '{display_name}'")
+                                    else:
+                                        print(f"Failed to update Paddle customer name")
                                 else:
-                                    print(f"Failed to update Paddle customer name")
-                            else:
-                                print(f"No displayName found in Firestore for user {user_id}")
-                        except Exception as e:
-                            print(f"Error updating customer name in Paddle: {str(e)}")
-                            import traceback
-                            print(traceback.format_exc())
+                                    print(f"No displayName found in Firestore for user {user_id}")
+                            except Exception as e:
+                                print(f"Error updating customer name in Paddle: {str(e)}")
+                                import traceback
+                                print(traceback.format_exc())
                     else:
                         print(f"ERROR: Could not find user for subscription update - customer_id: {customer_id}")
                 
@@ -471,6 +580,98 @@ class handler(BaseHTTPRequestHandler):
                     else:
                         print(f"ERROR: Could not find user for subscription cancellation - customer_id: {customer_id}")
 
+                elif event_type == 'transaction.created' or event_type == 'transaction.completed':
+                    try:
+                        # Check if this is potentially a credit purchase
+                        # Extract necessary data
+                        transaction_id = event_data.get('id')
+                        customer_id = event_data.get('customer_id')
+                        
+                        # Get the line items from the transaction
+                        line_items = event_data.get('line_items', [])
+                        
+                        for item in line_items:
+                            price = item.get('price', {})
+                            price_id = price.get('id')
+                            
+                            # Check if this is a credit product
+                            if is_credit_product(price_id):
+                                # This is a credit purchase, process it
+                                credit_amount = determine_credit_purchase_amount(price_id)
+                                
+                                # Get price amount
+                                unit_price = price.get('unit_price', {})
+                                price_amount = int(unit_price.get('amount', 0)) / 100 if unit_price else 0
+                                
+                                # Find the user
+                                user_id = None
+                                user_doc = None
+                                
+                                # Try to find user by customer ID
+                                users_ref = db.collection('users')
+                                query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
+                                user_docs = list(query.stream())
+                                
+                                if user_docs:
+                                    user_doc = user_docs[0]
+                                    user_id = user_doc.id
+                                else:
+                                    # Fallback to email lookup
+                                    customer_details = get_customer_details(customer_id)
+                                    if customer_details and customer_details.get('email'):
+                                        customer_email = customer_details.get('email')
+                                        user_id, user_doc = find_user_by_email(customer_email)
+                                
+                                if user_id and user_doc:
+                                    # Get current credit values
+                                    user_data = user_doc.to_dict()
+                                    current_credits = user_data.get('creditUsage', {}).get('total', 0)
+                                    
+                                    # Update user with additional credits
+                                    user_ref = db.collection('users').document(user_id)
+                                    
+                                    update_data = {
+                                        'creditUsage.total': current_credits + credit_amount
+                                    }
+                                    
+                                    print(f"Adding {credit_amount} credits to user {user_id}. New total: {current_credits + credit_amount}")
+                                    user_ref.update(update_data)
+                                    
+                                    # Create a transaction record for the credit purchase
+                                    transaction_data = {
+                                        'id': transaction_id,
+                                        'customer_id': customer_id,
+                                        'amount': price_amount,
+                                        'currency': event_data.get('currency_code', 'USD'),
+                                        'date': firestore.SERVER_TIMESTAMP,
+                                        'status': 'completed',
+                                        'type': 'credit_purchase',
+                                        'description': f"Credit purchase: {credit_amount} credits",
+                                        'created_at': firestore.SERVER_TIMESTAMP
+                                    }
+                                    
+                                    db.collection('users').document(user_id).collection('transactions').add(transaction_data)
+                                    print(f"Created transaction record for credit purchase for user {user_id}")
+                                else:
+                                    print(f"ERROR: Could not find user for credit purchase - customer_id: {customer_id}")
+                                    
+                                    # Create a debug document
+                                    debug_collection = db.collection('paddle_webhook_debug')
+                                    debug_doc = {
+                                        'event_type': event_type,
+                                        'customer_id': customer_id,
+                                        'price_id': price_id,
+                                        'credit_amount': credit_amount,
+                                        'webhook_data': json.dumps(webhook_data),
+                                        'timestamp': firestore.SERVER_TIMESTAMP,
+                                        'error': f'No user found for customer ID {customer_id}'
+                                    }
+                                    debug_collection.add(debug_doc)
+                    except Exception as e:
+                        print(f"Error processing transaction event: {str(e)}")
+                        import traceback
+                        print(traceback.format_exc())
+                        
                 # Return success response
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
