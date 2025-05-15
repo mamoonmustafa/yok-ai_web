@@ -230,7 +230,38 @@ class handler(BaseHTTPRequestHandler):
                             billing_cycle = price.get('billing_cycle', {})
                             if billing_cycle:
                                 price_interval = billing_cycle.get('interval', 'month')
-                        
+                            # Better renewal detection
+                            is_renewal = False
+                            if previously_billed_at:
+                                # Check if the previous billing is recent (within the last hour)
+                                try:
+                                    # Parse the ISO timestamp
+                                    prev_billing_time = datetime.datetime.fromisoformat(previously_billed_at.replace('Z', '+00:00'))
+                                    current_time = datetime.datetime.now(datetime.timezone.utc)
+                                    time_diff = current_time - prev_billing_time
+                                    
+                                    # If previous billing was within the last hour, consider it a renewal
+                                    if time_diff.total_seconds() < 3600:  # 1 hour in seconds
+                                        is_renewal = True
+                                        print(f"Detected subscription renewal for user {user_id}")
+                                except Exception as e:
+                                    print(f"Error parsing billing dates: {e}")
+
+                            # Additional check for plan changes which should reset credits
+                            is_plan_change = False
+                            if not is_renewal and price_id:
+                                # Get the old plan ID from the user's existing subscription
+                                user_data = user_doc.to_dict()
+                                old_price_id = None
+                                
+                                if user_data and 'subscription' in user_data and 'plan' in user_data['subscription']:
+                                    old_price_id = user_data['subscription']['plan'].get('id')
+                                
+                                # If price_id is different from old_price_id, it's a plan change
+                                if old_price_id and price_id != old_price_id:
+                                    is_plan_change = True
+                                    print(f"Detected plan change for user {user_id}: {old_price_id} -> {price_id}")
+                                    
                         # Generate a license key
                         license_key = generate_license_key()
                         
@@ -484,8 +515,8 @@ class handler(BaseHTTPRequestHandler):
                                 update_data['subscription.plan.id'] = price_id
                                 update_data['subscription.plan.name'] = plan_name
                             
-                            # If this is a renewal, reset credits
-                            if is_renewal and price_id:
+                            # If this is a renewal or plan change, reset credits
+                            if (is_renewal or is_plan_change) and price_id:
                                 # Calculate new credit allocation based on the plan
                                 credit_allocation = determine_credit_allocation(price_id)
                                 
@@ -493,8 +524,8 @@ class handler(BaseHTTPRequestHandler):
                                 update_data['creditUsage.used'] = 0
                                 update_data['creditUsage.total'] = credit_allocation
                                 
-                                print(f"Resetting credits for user {user_id} on renewal. New total: {credit_allocation}")
-                            
+                                print(f"Resetting credits for user {user_id} on {'renewal' if is_renewal else 'plan change'}. New total: {credit_allocation}")
+
                             # Update user with subscription data
                             user_ref = db.collection('users').document(user_id)
                             user_ref.update(update_data)
@@ -582,91 +613,128 @@ class handler(BaseHTTPRequestHandler):
 
                 elif event_type == 'transaction.created' or event_type == 'transaction.completed':
                     try:
-                        # Check if this is potentially a credit purchase
                         # Extract necessary data
                         transaction_id = event_data.get('id')
                         customer_id = event_data.get('customer_id')
+                        origin = event_data.get('origin')
                         
-                        # Get the line items from the transaction
-                        line_items = event_data.get('line_items', [])
+                        print(f"Processing {event_type} event with origin: {origin}")
+                        
+                        # Get items from the transaction
+                        line_items = []
+                        
+                        # Try different possible locations for items
+                        if event_data.get('line_items'):
+                            line_items = event_data.get('line_items')
+                        elif event_data.get('items'):
+                            line_items = event_data.get('items')
+                        elif event_data.get('details', {}).get('line_items'):
+                            line_items = event_data.get('details', {}).get('line_items')
+                            
+                        # Debug log the items found
+                        print(f"Found {len(line_items)} items in transaction")
+                        
+                        # Check each item for credit products
+                        found_credit_product = False
+                        credit_amount = 0
+                        price_amount = 0
+                        price_id = None
                         
                         for item in line_items:
-                            price = item.get('price', {})
-                            price_id = price.get('id')
+                            # Extract price ID from various possible locations
+                            if 'price' in item and 'id' in item['price']:
+                                price_id = item['price']['id']
+                            elif 'price_id' in item:
+                                price_id = item['price_id']
                             
-                            # Check if this is a credit product
-                            if is_credit_product(price_id):
-                                # This is a credit purchase, process it
+                            # If we have a price ID, check if it's a credit product
+                            if price_id and is_credit_product(price_id):
+                                found_credit_product = True
                                 credit_amount = determine_credit_purchase_amount(price_id)
                                 
-                                # Get price amount
-                                unit_price = price.get('unit_price', {})
-                                price_amount = int(unit_price.get('amount', 0)) / 100 if unit_price else 0
+                                # Try to get price amount from various possible locations
+                                if 'price' in item and 'unit_price' in item['price']:
+                                    unit_price = item['price']['unit_price']
+                                    if isinstance(unit_price, dict) and 'amount' in unit_price:
+                                        price_amount = int(unit_price['amount']) / 100
+                                    elif isinstance(unit_price, (int, str)):
+                                        price_amount = int(unit_price) / 100
+                                elif 'unit_price' in item:
+                                    unit_price = item['unit_price']
+                                    if isinstance(unit_price, dict) and 'amount' in unit_price:
+                                        price_amount = int(unit_price['amount']) / 100
+                                    elif isinstance(unit_price, (int, str)):
+                                        price_amount = int(unit_price) / 100
                                 
-                                # Find the user
-                                user_id = None
-                                user_doc = None
+                                print(f"Found credit product: {price_id}, credit amount: {credit_amount}, price: {price_amount}")
+                                break
+                        
+                        # Process credit product if found
+                        if found_credit_product:
+                            # Find the user
+                            user_id = None
+                            user_doc = None
+                            
+                            # Try to find user by customer ID
+                            users_ref = db.collection('users')
+                            query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
+                            user_docs = list(query.stream())
+                            
+                            if user_docs:
+                                user_doc = user_docs[0]
+                                user_id = user_doc.id
+                            else:
+                                # Fallback to email lookup
+                                customer_details = get_customer_details(customer_id)
+                                if customer_details and customer_details.get('email'):
+                                    customer_email = customer_details.get('email')
+                                    user_id, user_doc = find_user_by_email(customer_email)
+                            
+                            if user_id and user_doc:
+                                # Get current credit values
+                                user_data = user_doc.to_dict()
+                                current_credits = user_data.get('creditUsage', {}).get('total', 0)
                                 
-                                # Try to find user by customer ID
-                                users_ref = db.collection('users')
-                                query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
-                                user_docs = list(query.stream())
+                                # Update user with additional credits
+                                user_ref = db.collection('users').document(user_id)
                                 
-                                if user_docs:
-                                    user_doc = user_docs[0]
-                                    user_id = user_doc.id
-                                else:
-                                    # Fallback to email lookup
-                                    customer_details = get_customer_details(customer_id)
-                                    if customer_details and customer_details.get('email'):
-                                        customer_email = customer_details.get('email')
-                                        user_id, user_doc = find_user_by_email(customer_email)
+                                update_data = {
+                                    'creditUsage.total': current_credits + credit_amount
+                                }
                                 
-                                if user_id and user_doc:
-                                    # Get current credit values
-                                    user_data = user_doc.to_dict()
-                                    current_credits = user_data.get('creditUsage', {}).get('total', 0)
-                                    
-                                    # Update user with additional credits
-                                    user_ref = db.collection('users').document(user_id)
-                                    
-                                    update_data = {
-                                        'creditUsage.total': current_credits + credit_amount
-                                    }
-                                    
-                                    print(f"Adding {credit_amount} credits to user {user_id}. New total: {current_credits + credit_amount}")
-                                    user_ref.update(update_data)
-                                    
-                                    # Create a transaction record for the credit purchase
-                                    transaction_data = {
-                                        'id': transaction_id,
-                                        'customer_id': customer_id,
-                                        'amount': price_amount,
-                                        'currency': event_data.get('currency_code', 'USD'),
-                                        'date': firestore.SERVER_TIMESTAMP,
-                                        'status': 'completed',
-                                        'type': 'credit_purchase',
-                                        'description': f"Credit purchase: {credit_amount} credits",
-                                        'created_at': firestore.SERVER_TIMESTAMP
-                                    }
-                                    
-                                    db.collection('users').document(user_id).collection('transactions').add(transaction_data)
-                                    print(f"Created transaction record for credit purchase for user {user_id}")
-                                else:
-                                    print(f"ERROR: Could not find user for credit purchase - customer_id: {customer_id}")
-                                    
-                                    # Create a debug document
-                                    debug_collection = db.collection('paddle_webhook_debug')
-                                    debug_doc = {
-                                        'event_type': event_type,
-                                        'customer_id': customer_id,
-                                        'price_id': price_id,
-                                        'credit_amount': credit_amount,
-                                        'webhook_data': json.dumps(webhook_data),
-                                        'timestamp': firestore.SERVER_TIMESTAMP,
-                                        'error': f'No user found for customer ID {customer_id}'
-                                    }
-                                    debug_collection.add(debug_doc)
+                                print(f"Adding {credit_amount} credits to user {user_id}. New total: {current_credits + credit_amount}")
+                                user_ref.update(update_data)
+                                
+                                # Create a transaction record for the credit purchase
+                                transaction_data = {
+                                    'id': transaction_id or f"txn_credits_{uuid.uuid4()}",
+                                    'customer_id': customer_id,
+                                    'amount': price_amount,
+                                    'currency': event_data.get('currency_code', 'USD'),
+                                    'date': firestore.SERVER_TIMESTAMP,
+                                    'status': 'completed',
+                                    'type': 'credit_purchase',
+                                    'description': f"Credit purchase: {credit_amount} credits",
+                                    'created_at': firestore.SERVER_TIMESTAMP
+                                }
+                                
+                                db.collection('users').document(user_id).collection('transactions').add(transaction_data)
+                                print(f"Created transaction record for credit purchase for user {user_id}")
+                            else:
+                                print(f"ERROR: Could not find user for credit purchase - customer_id: {customer_id}")
+                                
+                                # Create a debug document
+                                debug_collection = db.collection('paddle_webhook_debug')
+                                debug_doc = {
+                                    'event_type': event_type,
+                                    'customer_id': customer_id,
+                                    'price_id': price_id,
+                                    'credit_amount': credit_amount,
+                                    'webhook_data': json.dumps(webhook_data),
+                                    'timestamp': firestore.SERVER_TIMESTAMP,
+                                    'error': f'No user found for customer ID {customer_id}'
+                                }
+                                debug_collection.add(debug_doc)
                     except Exception as e:
                         print(f"Error processing transaction event: {str(e)}")
                         import traceback
