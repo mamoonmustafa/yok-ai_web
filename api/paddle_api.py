@@ -163,7 +163,6 @@ def update_customer_name(customer_id, name):
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "Paddle-Version": "2023-01-10"  # Correct version from documentation
         }
         
         # Only send the name field in the request
