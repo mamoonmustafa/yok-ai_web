@@ -382,7 +382,7 @@ def handle_subscription_created(event_data, webhook_data):
                 else:
                     logger.info(f"No displayName found in Firestore for user {user_id}")
             except Exception as e:
-                logger.error(f"Error updating customer name in Paddle: {str(e)}")
+                logger.error(f"Error updatings customer name in Paddle: {str(e)}")
                 logger.error(traceback.format_exc())
 
             # Create transaction record
