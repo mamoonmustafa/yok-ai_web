@@ -155,27 +155,24 @@ def update_customer_name(customer_id, name):
     
     try:
         api_key = os.environ.get("PADDLE_API_KEY")
-        print(f"[DEBUG] API key present: {bool(api_key)}")
-        api_base_url = os.environ.get("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
-        print(f"[DEBUG] Using API base URL: {api_base_url}")
+        api_base_url = os.environ.get("PADDLE_API_BASE_URL", "https://api.paddle.com")
+        
         # Fix the double slash issue
         api_base_url = api_base_url.rstrip('/')
         
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Paddle-Version": "2023-01-01"  # Add this header
+            "Paddle-Version": "2023-01-10"  # Correct version from documentation
         }
-        print(f"[DEBUG] Headers prepared: {headers}")
+        
         # Only send the name field in the request
         data = {
             "name": name
         }
         
         url = f'{api_base_url}/customers/{customer_id}'
-        print(f"[DEBUG] Making PATCH request to URL: {url}")
-        print(f"[DEBUG] Request payload: {data}")
+        print(f"Making request to: {url}")
         
         response = requests.patch(
             url,
@@ -183,18 +180,17 @@ def update_customer_name(customer_id, name):
             json=data
         )
         
-        print(f"[DEBUG] Response status code: {response.status_code}")
-        print(f"[DEBUG] Response body: {response.text}")
+        print(f"Response status code: {response.status_code}")
+        if response.status_code >= 400:
+            print(f"Response body: {response.text}")
 
         if response.status_code in [200, 201, 202, 204]:
-            print(f"[DEBUG] Successfully updated customer name in Paddle")
+            print(f"Successfully updated customer name in Paddle")
             return True
         else:
             print(f"Failed to update customer name: {response.status_code} - {response.text}")
             return False
             
     except Exception as e:
-        print(f"[DEBUG] Exception in update_customer_name: {str(e)}")
-        import traceback
-        print(f"[DEBUG] Traceback: {traceback.format_exc()}")
+        print(f"Exception updating customer name: {str(e)}")
         return False
