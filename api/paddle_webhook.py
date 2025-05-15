@@ -367,11 +367,16 @@ def handle_subscription_created(event_data, webhook_data):
             try:
                 # Get the user's displayName from the Firestore document
                 user_data = user_doc.to_dict()
+                logger.info(f"[DEBUG] User data keys: {list(user_data.keys()) if user_data else None}")
+    
                 display_name = user_data.get('displayName')
-                
+                logger.info(f"[DEBUG] Found display name: {display_name}")
+
                 if display_name:
                     # Update the customer name in Paddle
+                    logger.info(f"[DEBUG] Calling update_customer_name with {customer_id} and {display_name}")
                     update_result = update_customer_name(customer_id, display_name)
+                    logger.info(f"[DEBUG] update_customer_name result: {update_result}")
                     if not update_result:
                         logger.error(f"Failed to update Paddle customer name")
                 else:
