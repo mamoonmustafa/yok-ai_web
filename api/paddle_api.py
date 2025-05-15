@@ -148,3 +148,36 @@ def validate_license(license_key, device_id):
         "features": ["feature1", "feature2", "feature3"],
         "message": "License validated successfully"
     }
+
+def update_customer_name(customer_id, name):
+    """Update the customer's name in Paddle"""
+    print(f"Updating name for customer {customer_id} to '{name}'")
+    
+    url = f'{API_BASE_URL.rstrip("/")}/customers/{customer_id}'
+    
+    # Only send the name field in the request
+    data = {
+        "name": name
+    }
+    
+    try:
+        response = requests.patch(
+            url,
+            headers=headers,
+            json=data
+        )
+        
+        print(f"Update customer name response status: {response.status_code}")
+        
+        if response.status_code in [200, 201, 202]:
+            print(f"Successfully updated customer name in Paddle")
+            return True
+        else:
+            print(f"Failed to update customer name: {response.status_code} - {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"Exception updating customer name: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return False

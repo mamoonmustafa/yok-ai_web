@@ -271,6 +271,28 @@ class handler(BaseHTTPRequestHandler):
                             user_ref.update(update_data)
                             print(f"Successfully updated user {user_id} with subscription data")
                             
+                            try:
+                                # Get the user's displayName from the Firestore document
+                                user_data = user_doc.to_dict()
+                                display_name = user_data.get('displayName')
+                                
+                                if display_name:
+                                    # Import the update_customer_name function
+                                    from .paddle_api import update_customer_name
+                                    
+                                    # Update the customer name in Paddle
+                                    update_result = update_customer_name(customer_id, display_name)
+                                    if update_result:
+                                        print(f"Successfully updated Paddle customer name to '{display_name}'")
+                                    else:
+                                        print(f"Failed to update Paddle customer name")
+                                else:
+                                    print(f"No displayName found in Firestore for user {user_id}")
+                            except Exception as e:
+                                print(f"Error updating customer name in Paddle: {str(e)}")
+                                import traceback
+                                print(traceback.format_exc())
+
                             # Create transaction record
                             transaction_data = {
                                 'id': event_data.get('transaction_id', f"txn_{subscription_id}"),
@@ -316,10 +338,35 @@ class handler(BaseHTTPRequestHandler):
                     
                     print(f"Processing subscription.updated for {subscription_id}, status: {status}")
                     
+                    # Extract additional data from the event
+                    next_billing_date = event_data.get('next_billed_at')
+                    
+                    # Extract price/product details
+                    price_id = None
+                    plan_name = None
+                    price_amount = 0
+                    price_interval = "month"
+                    
+                    if event_data.get('items') and len(event_data.get('items')) > 0:
+                        item = event_data.get('items')[0]
+                        price = item.get('price', {})
+                        price_id = price.get('id')
+                        plan_name = price.get('description') or price.get('name', "Unknown Plan")
+                        
+                        # Extract price amount
+                        unit_price = price.get('unit_price', {})
+                        if unit_price:
+                            price_amount = int(unit_price.get('amount', 0)) / 100  # Convert from cents
+                        
+                        # Extract billing interval
+                        billing_cycle = price.get('billing_cycle', {})
+                        if billing_cycle:
+                            price_interval = billing_cycle.get('interval', 'month')
+                    
                     # Determine if subscription is active
                     is_active = status.lower() in ['active', 'trialing', 'past_due']
                     
-                    # Find user by customer ID first (since they should already have it after subscription.created)
+                    # Find user by customer ID first
                     user_id = None
                     users_ref = db.collection('users')
                     query = users_ref.where('paddleCustomerId', '==', customer_id).limit(1)
@@ -336,18 +383,58 @@ class handler(BaseHTTPRequestHandler):
                             user_id, user_doc = find_user_by_email(customer_email)
                     
                     if user_id:
-                        # Update subscription status
-                        user_ref = db.collection('users').document(user_id)
-                        user_ref.update({
+                        # Create a more comprehensive update
+                        update_data = {
                             'subscription.status': status,
                             'subscription.active': is_active,
                             'subscription.updated_at': firestore.SERVER_TIMESTAMP
-                        })
+                        }
                         
-                        print(f"Updated subscription {subscription_id} status to {status} for user {user_id}")
+                        # Add conditional updates for fields that might have changed
+                        if next_billing_date:
+                            update_data['subscription.next_billing_date'] = next_billing_date
+                        
+                        if price_amount > 0:
+                            update_data['subscription.amount'] = price_amount
+                            
+                        if price_interval:
+                            update_data['subscription.interval'] = price_interval
+                            
+                        if price_id and plan_name:
+                            update_data['subscription.plan.id'] = price_id
+                            update_data['subscription.plan.name'] = plan_name
+                        
+                        # Update user with comprehensive subscription data
+                        user_ref = db.collection('users').document(user_id)
+                        user_ref.update(update_data)
+                        
+                        print(f"Updated subscription {subscription_id} details for user {user_id}")
+                        
+                        # Update customer name in Paddle
+                        try:
+                            # Get the user's displayName from Firestore
+                            user_data = user_doc.to_dict()
+                            display_name = user_data.get('displayName')
+                            
+                            if display_name:
+                                # Import the update_customer_name function
+                                from .paddle_api import update_customer_name
+                                
+                                # Update the customer name in Paddle
+                                update_result = update_customer_name(customer_id, display_name)
+                                if update_result:
+                                    print(f"Successfully updated Paddle customer name to '{display_name}'")
+                                else:
+                                    print(f"Failed to update Paddle customer name")
+                            else:
+                                print(f"No displayName found in Firestore for user {user_id}")
+                        except Exception as e:
+                            print(f"Error updating customer name in Paddle: {str(e)}")
+                            import traceback
+                            print(traceback.format_exc())
                     else:
                         print(f"ERROR: Could not find user for subscription update - customer_id: {customer_id}")
-
+                
                 elif event_type == 'subscription.cancelled':
                     # Extract data
                     subscription_id = event_data.get('id')
