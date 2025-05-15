@@ -145,16 +145,17 @@ if (signupForm) {
                     return new Promise(resolve => {
                         setTimeout(() => {
                             user.sendEmailVerification()
-                            .then(() => {
-                                console.log("Verification email sent successfully");
-                                resolve();
-                            })
-                            .catch(error => {
-                                console.error("Error sending verification email:", error);
-                                // We'll continue even if this fails
-                                resolve();
-                            });
-                        }, 1000);
+                                .then(() => {
+                                    console.log("Verification email sent successfully");
+                                    resolve();
+                                })
+                                .catch(error => {
+                                    console.error("Error sending verification email:", error);
+                                    showAlert('Note: We had trouble sending the verification email. You can request it again from the dashboard.', 'warning');
+                                    // We'll continue even if this fails
+                                    resolve();
+                                });
+                        }, 2000); // Increased timeout for better reliability
                     });
                 }
                 return Promise.resolve();

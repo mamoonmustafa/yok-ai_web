@@ -145,7 +145,7 @@ async function initializePaddle() {
                     
                     // Force page reload after short delay
                     setTimeout(() => {
-                        window.location.reload();
+                        window.location.href = '/dashboard';
                     }, 2000);
                 }
             }
