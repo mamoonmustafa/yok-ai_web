@@ -232,6 +232,20 @@ class handler(BaseHTTPRequestHandler):
                                 price_interval = billing_cycle.get('interval', 'month')
                             # Better renewal detection
                             is_renewal = False
+                            is_plan_change = False
+                            if price_id:
+                                # Get the old plan ID from the user's existing subscription
+                                user_data = user_doc.to_dict()
+                                old_price_id = None
+                                
+                                if user_data and 'subscription' in user_data and 'plan' in user_data['subscription']:
+                                    old_price_id = user_data['subscription']['plan'].get('id')
+                                
+                                # If price_id is different from old_price_id, it's a plan change
+                                if old_price_id and price_id != old_price_id:
+                                    is_plan_change = True
+                                    print(f"Detected plan change for user {user_id}: {old_price_id} -> {price_id}")
+                            
                             if previously_billed_at:
                                 # Check if the previous billing is recent (within the last hour)
                                 try:
