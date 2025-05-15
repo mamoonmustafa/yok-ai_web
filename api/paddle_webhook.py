@@ -548,57 +548,6 @@ def handle_subscription_updated(event_data, webhook_data):
                 user_ref = db.collection('users').document(user_id)
                 user_ref.update(update_data)
                 
-                logger.info(f"Updated subscription {subscription_id} details for user {user_id}")
-                
-                # Create a transaction record for the renewal if applicable
-                if is_renewal:
-                    transaction_data = {
-                        'id': event_data.get('transaction_id', f"txn_renewal_{uuid.uuid4()}"),
-                        'subscription_id': subscription_id,
-                        'customer_id': customer_id,
-                        'amount': price_amount,
-                        'currency': event_data.get('currency_code', 'USD'),
-                        'date': firestore.SERVER_TIMESTAMP,
-                        'status': 'completed',
-                        'type': 'subscription_renewal',
-                        'description': f"Subscription renewal for {plan_name}",
-                        'created_at': firestore.SERVER_TIMESTAMP
-                    }
-                    
-                    create_transaction_record(user_id, transaction_data)
-                
-                # Update customer name in Paddle
-                try:
-                    # Get the user's displayName from Firestore
-                    user_data = user_doc.to_dict()
-                    display_name = user_data.get('displayName')
-                    
-                    if display_name:
-                        # Update the customer name in Paddle
-                        update_result = update_customer_name(customer_id, display_name)
-                        if not update_result:
-                            logger.error(f"Failed to update Paddle customer name")
-                    else:
-                        logger.info(f"No displayName found in Firestore for user {user_id}")
-                except Exception as e:
-                    logger.error(f"Error updating customer name in Paddle: {str(e)}")
-                    logger.error(traceback.format_exc())
-        else:
-            logger.error(f"Could not find user for subscription update - customer_id: {customer_id}")
-            create_debug_document(
-                'subscription.updated',
-                f"No user found for customer ID {customer_id}",
-                webhook_data,
-                {'customer_id': customer_id}
-            )
-        
-        return True
-    except Exception as e:
-        logger.error(f"Error in subscription.updated handler: {str(e)}")
-        logger.error(traceback.format_exc())
-        create_debug_document('subscription.updated', e, webhook_data)
-        return False
-
 def handle_subscription_cancelled(event_data, webhook_data):
     """Handle subscription.cancelled event"""
     try:
