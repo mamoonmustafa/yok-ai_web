@@ -7,6 +7,8 @@
   { "src": "api/*.js", "use": "@vercel/node" },
   { "src": "*.html", "use": "@vercel/static" },
   { "src": "css/*.css", "use": "@vercel/static" },
+  { "src": "sitemap.xml", "use": "@vercel/static" },
+  { "src": "robots.txt", "use": "@vercel/static" },
   { "src": "js/*.js", "use": "@vercel/static" },
   { "src": "public/**", "use": "@vercel/static" }
 ],
@@ -30,6 +32,9 @@
 
     { "source": "/", "destination": "/index.html" },
     { "source": "/hero_image.png", "destination": "/public/hero_image.png" },
+    
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
     
     { "source": "/price", "destination": "/pricing.html" },
     { "source": "/signin", "destination": "/signin.html" },
