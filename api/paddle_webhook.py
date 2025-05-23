@@ -22,15 +22,15 @@ db = None
 
 # Credit allocation maps
 SUBSCRIPTION_CREDIT_MAP = {
-    "pri_01jsw881b64y680g737k4dx7fm": 150,  # Starter plan
-    "pri_01jsw8ab6sd8bw2h7epy8tcp14": 500,  # Pro plan
-    "pri_01jsw8dtn4araas7xez8e24mdh": 1100,  # Enterprise plan
+    "pri_01jvqf8n2z970he15x74jxzrrg": 150,  # Starter plan
+    "pri_01jvqfaetphajzay0jca4t05q0": 500,  # Pro plan
+    "pri_01jvqfcdjcta2j3r8c4zkb87sw": 1100,  # Enterprise plan
 }
 
 CREDIT_PURCHASE_MAP = {
-    "pri_01jtz766cqbgr935jgfwd3ktcs": 150,  # 150 credits package
-    "pri_01jtz77rkb4m97m0nmtrn5ktcq": 350,  # 350 credits package 
-    "pri_01jtz797bh3j54dbyzgq96tcqt": 500   # 500 credits package
+    "pri_01jvqffjrvv1hq7tj5vf2ajh72": 150,  # 150 credits package
+    "pri_01jvqfgayxghr4cr4ht8r8p55r": 350,  # 350 credits package 
+    "pri_01jvqfh51yvbsqkae86gqxfwjz": 500   # 500 credits package
 }
 
 CREDIT_PRODUCT_IDS = list(CREDIT_PURCHASE_MAP.keys())

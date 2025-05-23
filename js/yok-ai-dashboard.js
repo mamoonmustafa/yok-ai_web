@@ -18,7 +18,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 // Paddle configuration
-const PADDLE_VENDOR_ID = 30514;
+const PADDLE_VENDOR_ID = 224827;
 
 
 // Configuration
@@ -26,18 +26,18 @@ const PADDLE_VENDOR_ID = 30514;
 const CONFIG = {
     prices: {
       starter: {
-        month: "pri_01jsw881b64y680g737k4dx7fm" // Replace with your price ID
+        month: "pri_01jvqf8n2z970he15x74jxzrrg" // Replace with your price ID
       },
       pro: {
-        month: "pri_01jsw8ab6sd8bw2h7epy8tcp14" // Replace with your price ID
+        month: "pri_01jvqfaetphajzay0jca4t05q0" // Replace with your price ID
       },
       enterprise: {
-        month: "pri_01jsw8dtn4araas7xez8e24mdh", // Replace with your price ID
+        month: "pri_01jvqfcdjcta2j3r8c4zkb87sw", // Replace with your price ID
       },
       credits: {
-        '100': "pri_01jtz766cqbgr935jgfwd3ktcs",  // Replace with your 100 credits price ID
-        '500': "pri_01jtz77rkb4m97m0nmtrn5ktcq",  // Replace with your 500 credits price ID
-        '1000': "pri_01jtz797bh3j54dbyzgq96tcqt"  // Replace with your 1000 credits price ID
+        '100': "pri_01jvqffjrvv1hq7tj5vf2ajh72",  // Replace with your 100 credits price ID
+        '500': "pri_01jvqfgayxghr4cr4ht8r8p55r",  // Replace with your 500 credits price ID
+        '1000': "pri_01jvqfh51yvbsqkae86gqxfwjz"  // Replace with your 1000 credits price ID
       }
     }
 };
