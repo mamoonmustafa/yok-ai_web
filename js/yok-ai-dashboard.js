@@ -750,7 +750,7 @@ const Dashboard = {
                         <li><i class="fas fa-check"></i> <span class="mode ghost-mode">Ghost Mode</span> <span class="mode insight-mode">Insight Mode</span> <span class="mode advantage-mode">Advantage Mode</span></li>
                         <li><i class="fas fa-check"></i> VIP emergency support (4-hour response)</li>
                         <li><i class="fas fa-check"></i> Priority processing during peak hours</li>
-                        <li><i class="fas fa-check"></i> Dedicated account manager</li>
+                        <li><i class="fas fa-check"></i> Enhanced API limits for VIP experience</li>
                     </ul>
                 </div>
                 <div class="plan-action">
