@@ -13,8 +13,6 @@
   { "src": "public/**", "use": "@vercel/static" }
 ],
   "rewrites": [
-        { "source": "/auth-scripts", "destination": "/api/auth_scripts.py" },
-
     { "source": "/api/dashboard", "destination": "/api/dashboard.py" },
     { "source": "/api/license", "destination": "/api/license.py" },
     { "source": "/api/subscription", "destination": "/api/subscription.py" },
