@@ -84,7 +84,7 @@ def get_customer_details(customer_id):
     """Get customer details from Paddle API using customer ID"""
     try:
         api_key = os.environ.get("PADDLE_API_KEY")
-        api_base_url = os.environ.get("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
+        api_base_url = os.environ.get("PADDLE_API_BASE_URL", "https://api.paddle.com")
         
         # Fix the double slash issue
         api_base_url = api_base_url.rstrip('/')

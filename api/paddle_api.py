@@ -7,7 +7,7 @@ load_dotenv()
 
 # Paddle API configuration from environment variables (secure)
 API_KEY = os.getenv("PADDLE_API_KEY")
-API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
+API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://api.paddle.com")
 
 # Headers for authentication
 headers = {

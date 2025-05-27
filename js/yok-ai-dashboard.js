@@ -132,7 +132,7 @@ async function initializePaddle() {
         clientToken = await fetchClientToken();
         
         // Initialize Paddle with the token
-        Paddle.Environment.set("sandbox"); // Change to "production" for live environment
+        Paddle.Environment.set("production"); // Change to "production" for live environment
         Paddle.Initialize({
             token: clientToken,
             eventCallback: function(event) {

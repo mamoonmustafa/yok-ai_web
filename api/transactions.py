@@ -14,7 +14,7 @@ db = None
 
 # Add these global variables
 API_KEY = os.getenv("PADDLE_API_KEY")
-API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com").rstrip('/')
+API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://api.paddle.com").rstrip('/')
 
 def initialize_firebase():
     global firebase_initialized, db
@@ -82,7 +82,7 @@ class handler(BaseHTTPRequestHandler):
                         
                         # Get transactions directly using customer ID
                         API_KEY = os.getenv("PADDLE_API_KEY")
-                        API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com")
+                        API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://api.paddle.com")
                         
                         headers = {
                             "Authorization": f"Bearer {API_KEY}",
@@ -220,7 +220,7 @@ class handler(BaseHTTPRequestHandler):
             
             # Get Paddle API credentials
             API_KEY = os.getenv("PADDLE_API_KEY")
-            API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://sandbox-api.paddle.com").rstrip('/')
+            API_BASE_URL = os.getenv("PADDLE_API_BASE_URL", "https://api.paddle.com").rstrip('/')
             
             # Get the transaction to find the invoice ID
             headers = {
