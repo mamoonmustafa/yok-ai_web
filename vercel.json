@@ -20,6 +20,8 @@
     { "source": "/api/paddle_webhook", "destination": "/api/paddle_webhook.py" },
     { "source": "/api/paddle_token", "destination": "/api/paddle_token.py" },
     
+    { "source": "/auth-scripts", "destination": "/api/auth_scripts" },
+    
     { "source": "/privacypolicy", "destination": "/api/policy_docs.js" },
     { "source": "/refundpolicy", "destination": "/api/policy_docs.js" },
     { "source": "/termsofservice", "destination": "/api/policy_docs.js" },
