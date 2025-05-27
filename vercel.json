@@ -13,6 +13,8 @@
   { "src": "public/**", "use": "@vercel/static" }
 ],
   "rewrites": [
+        { "source": "/auth-scripts", "destination": "/api/auth_scripts.py" },
+
     { "source": "/api/dashboard", "destination": "/api/dashboard.py" },
     { "source": "/api/license", "destination": "/api/license.py" },
     { "source": "/api/subscription", "destination": "/api/subscription.py" },
@@ -20,7 +22,6 @@
     { "source": "/api/paddle_webhook", "destination": "/api/paddle_webhook.py" },
     { "source": "/api/paddle_token", "destination": "/api/paddle_token.py" },
     
-    { "source": "/auth-scripts", "destination": "/api/auth_scripts" },
     
     { "source": "/privacypolicy", "destination": "/api/policy_docs.js" },
     { "source": "/refundpolicy", "destination": "/api/policy_docs.js" },
