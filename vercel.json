@@ -40,7 +40,7 @@
     { "source": "/signin", "destination": "/signin.html" },
     { "source": "/signup", "destination": "/signup.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/oops", "destination": "/forgot-password.html" },
+    { "source": "/forgot-password", "destination": "/forgot-password.html" },
     { "source": "/account", "destination": "/newpwd.html" },
     { "source": "/about", "destination": "/about.html" },
     { "source": "/contact", "destination": "/contact.html" },
