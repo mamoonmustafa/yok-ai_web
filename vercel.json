@@ -3,15 +3,15 @@
   "outputDirectory": ".",
   "buildCommand": "",
   "builds": [
-  { "src": "api/*.py", "use": "@vercel/python" },
-  { "src": "api/*.js", "use": "@vercel/node" },
-  { "src": "*.html", "use": "@vercel/static" },
-  { "src": "css/*.css", "use": "@vercel/static" },
-  { "src": "sitemap.xml", "use": "@vercel/static" },
-  { "src": "robots.txt", "use": "@vercel/static" },
-  { "src": "js/*.js", "use": "@vercel/static" },
-  { "src": "public/**", "use": "@vercel/static" }
-],
+    { "src": "api/*.py", "use": "@vercel/python" },
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "css/*.css", "use": "@vercel/static" },
+    { "src": "sitemap.xml", "use": "@vercel/static" },
+    { "src": "robots.txt", "use": "@vercel/static" },
+    { "src": "js/*.js", "use": "@vercel/static" },
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
   "rewrites": [
     { "source": "/api/dashboard", "destination": "/api/dashboard.py" },
     { "source": "/api/license", "destination": "/api/license.py" },
@@ -19,7 +19,6 @@
     { "source": "/api/transactions", "destination": "/api/transactions.py" },
     { "source": "/api/paddle_webhook", "destination": "/api/paddle_webhook.py" },
     { "source": "/api/paddle_token", "destination": "/api/paddle_token.py" },
-    
     
     { "source": "/privacypolicy", "destination": "/api/policy_docs.js" },
     { "source": "/refundpolicy", "destination": "/api/policy_docs.js" },
@@ -46,17 +45,6 @@
     { "source": "/about", "destination": "/about.html" },
     { "source": "/contact", "destination": "/contact.html" },
     { "source": "/faq", "destination": "/faq.html" }
-  ],
-  "redirects": [
-    { "source": "/pricing.html", "destination": "/price", "permanent": true },
-    { "source": "/signin.html", "destination": "/signin", "permanent": true },
-    { "source": "/signup.html", "destination": "/signup", "permanent": true },
-    { "source": "/dashboard.html", "destination": "/dashboard", "permanent": true },
-    { "source": "/forgot-password.html", "destination": "/oops", "permanent": true },
-    { "source": "/newpwd.html", "destination": "/account", "permanent": true },
-    { "source": "/about.html", "destination": "/about", "permanent": true },
-    { "source": "/contact.html", "destination": "/contact", "permanent": true },
-    { "source": "/faq.html", "destination": "/faq", "permanent": true }
   ],
   "headers": [
     {
